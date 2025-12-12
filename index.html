@@ -161,80 +161,11 @@
     .linkBtn{padding:8px 12px;border-radius:999px}
     footer{margin-top:26px;text-align:center;color:var(--muted);font-size:11px;line-height:1.6}
 
-    /* Paliers badge */
-    .tiersWrap{
-      display:grid;grid-template-columns:1fr;gap:12px;
-    }
-    .tiers{
-      border:1px solid rgba(31,41,55,.9);
-      background:rgba(2,6,23,.45);
-      border-radius:18px;
-      padding:14px;
-      position:relative;
-      overflow:hidden;
-    }
-    .tiers::before{
-      content:"";
-      position:absolute;inset:-120px -120px auto auto;
-      width:260px;height:260px;
-      background:radial-gradient(circle at 30% 30%, rgba(168,85,247,.45), transparent 55%);
-      transform:rotate(20deg);
-      pointer-events:none;
-    }
-    .tiersHead{
-      display:flex;align-items:center;justify-content:space-between;gap:10px;
-      margin-bottom:10px;
-    }
-    .tiersHead b{font-size:14px}
-    .tiersHead span{font-size:12px;color:var(--muted)}
-    .tierRow{display:flex;flex-direction:column;gap:10px;margin-top:10px}
-    .tier{
-      display:flex;align-items:center;justify-content:space-between;gap:12px;
-      padding:10px 12px;border-radius:16px;
-      border:1px solid rgba(31,41,55,.9);
-      background:rgba(2,6,23,.55);
-    }
-    .tierL{display:flex;align-items:center;gap:10px}
-    .tierI{
-      width:34px;height:34px;border-radius:14px;
-      display:flex;align-items:center;justify-content:center;
-      background:linear-gradient(135deg, rgba(168,85,247,.25), rgba(236,72,153,.18));
-      border:1px solid rgba(168,85,247,.25);
-      font-size:18px;
-    }
-    .tierName{font-weight:900;font-size:13px}
-    .tierSub{font-size:12px;color:var(--muted);margin-top:2px}
-    .tierR{
-      font-weight:900;
-      font-size:12px;
-      padding:7px 10px;
-      border-radius:999px;
-      border:1px solid rgba(31,41,55,.9);
-      background:rgba(2,6,23,.55);
-      color:var(--text);
-      white-space:nowrap;
-    }
-    .brandBadge{
-      display:flex;align-items:center;gap:10px;
-      border:1px solid rgba(31,41,55,.9);
-      background:rgba(2,6,23,.45);
-      border-radius:18px;
-      padding:14px;
-    }
-    .badgeSvg{
-      width:66px;height:66px;border-radius:18px;overflow:hidden;
-      border:1px solid rgba(168,85,247,.25);
-      background:rgba(2,6,23,.55);
-      display:flex;align-items:center;justify-content:center;
-    }
-    .badgeText b{display:block;font-size:14px}
-    .badgeText span{display:block;color:var(--muted);font-size:12px;margin-top:4px;line-height:1.4}
-
     /* Token modal */
     #tokenModal{display:none; position:fixed; inset:0; z-index:9999;}
     #tmBackdrop{position:absolute; inset:0; background:rgba(0,0,0,.65);}
     .tmBox{
-      position:relative; max-width:560px; margin:6vh auto;
+      position:relative; max-width:520px; margin:6vh auto;
       background:rgba(15,23,42,.96);
       border:1px solid rgba(31,41,55,.9);
       border-radius:18px; box-shadow:0 18px 45px rgba(0,0,0,.55);
@@ -248,37 +179,16 @@
     }
     .tmList{margin-top:10px; max-height:420px; overflow:auto; padding-right:6px;}
     .tmRow{
-      display:grid; grid-template-columns:1fr auto; align-items:center; gap:10px;
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
       padding:12px; border-radius:16px; margin-bottom:10px;
       border:1px solid rgba(31,41,55,.9); background:rgba(2,6,23,.45);
       cursor:pointer;
     }
     .tmRow small{color:var(--muted)}
-    .tmRight{display:flex; align-items:center; gap:10px; justify-content:flex-end}
-    .tmBal{
-      min-width:110px;
-      text-align:right;
-      font-weight:900;
-      font-size:12px;
-      color:#e5e7eb;
-      opacity:.95;
-    }
-    .tmBalMuted{color:var(--muted); font-weight:800;}
     .tmActions{display:flex; gap:8px; align-items:center;}
     .tmIconBtn{
       border:1px solid rgba(31,41,55,.9); background:rgba(2,6,23,.55);
       color:#e5e7eb; border-radius:12px; padding:8px 10px; cursor:pointer;
-    }
-    .tmMeta{display:flex; justify-content:space-between; align-items:center; gap:10px; margin-top:10px; color:#9ca3af; font-size:12px;}
-    .tmMiniBtn{
-      border:1px solid rgba(31,41,55,.9);
-      background:rgba(2,6,23,.55);
-      color:#e5e7eb;
-      border-radius:999px;
-      padding:7px 10px;
-      cursor:pointer;
-      font-weight:900;
-      font-size:12px;
     }
   </style>
 </head>
@@ -308,7 +218,6 @@
         <div class="chip"><span class="okdot"></span>Quotes live</div>
         <div class="chip"><span class="okdot"></span>Approve auto</div>
         <div class="chip"><span class="okdot"></span>MAX + balances</div>
-        <div class="chip"><span class="okdot"></span>Modal tokens + search</div>
       </div>
 
       <div class="ctaRow">
@@ -322,139 +231,32 @@
       <div class="warnbox">⚠️ Teste avec de petits montants. TRINITY ne garde pas tes fonds : c’est ton wallet qui signe.</div>
     </div>
 
-    <div class="card tiersWrap">
+    <div class="card">
+      <div style="font-weight:900;font-size:14px">Réglages</div>
+      <p class="sub">Slippage + deadline pour calculer le minOut sur chaque swap.</p>
 
-      <!-- bloc logo / dessin visible avant connexion -->
-      <div class="brandBadge">
-        <div class="badgeSvg" aria-hidden="true">
-          <!-- SVG inline (pas besoin d’uploader un fichier) -->
-          <svg width="66" height="66" viewBox="0 0 66 66" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-              <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0" stop-color="#a855f7"/>
-                <stop offset="1" stop-color="#ec4899"/>
-              </linearGradient>
-              <radialGradient id="rg" cx="30%" cy="30%" r="80%">
-                <stop offset="0" stop-color="rgba(34,197,94,.45)"/>
-                <stop offset="1" stop-color="rgba(2,6,23,0)"/>
-              </radialGradient>
-            </defs>
-            <rect x="3" y="3" width="60" height="60" rx="18" fill="rgba(2,6,23,.65)" stroke="rgba(168,85,247,.35)"/>
-            <circle cx="22" cy="18" r="18" fill="url(#rg)"/>
-            <path d="M14 36c8-14 30-14 38 0-8 14-30 14-38 0z" fill="url(#g)" opacity=".95"/>
-            <circle cx="26" cy="35" r="2.2" fill="#050816"/>
-            <path d="M44 30c4 2 6 4 8 6-2 2-4 4-8 6" fill="none" stroke="rgba(229,231,235,.8)" stroke-width="2.2" stroke-linecap="round"/>
-            <path d="M18 40c6 6 24 6 30 0" fill="none" stroke="rgba(229,231,235,.28)" stroke-width="2" stroke-linecap="round"/>
-          </svg>
+      <div class="hr"></div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div>
+          <label>Slippage (%)</label>
+          <input id="slippage" type="number" min="0" step="0.1" value="2.0" />
         </div>
-        <div class="badgeText">
-          <b>TRINITY • MultiSwap</b>
-          <span>Interface PulseX-like. 3 swaps séparés. Non-custodial.<br/>Le logo est visible avant connexion.</span>
+        <div>
+          <label>Deadline (minutes)</label>
+          <input id="deadlineM" type="number" min="1" step="1" value="10" />
         </div>
       </div>
 
-      <!-- paliers -->
-      <div class="tiers">
-        <div class="tiersHead">
-          <b>Paliers (style PulseChain)</b>
-          <span>🎯 objectifs “progression”</span>
-        </div>
+      <div class="hr"></div>
 
-        <div class="tierRow">
-          <div class="tier">
-            <div class="tierL">
-              <div class="tierI">🦐</div>
-              <div>
-                <div class="tierName">Crevette</div>
-                <div class="tierSub">Découverte / premiers swaps</div>
-              </div>
-            </div>
-            <div class="tierR">Starter</div>
-          </div>
-
-          <div class="tier">
-            <div class="tierL">
-              <div class="tierI">🦀</div>
-              <div>
-                <div class="tierName">Crabe</div>
-                <div class="tierSub">Habitudes + discipline</div>
-              </div>
-            </div>
-            <div class="tierR">Builder</div>
-          </div>
-
-          <div class="tier">
-            <div class="tierL">
-              <div class="tierI">🐬</div>
-              <div>
-                <div class="tierName">Dauphin</div>
-                <div class="tierSub">Optimisation / routing</div>
-              </div>
-            </div>
-            <div class="tierR">Pro</div>
-          </div>
-
-          <div class="tier">
-            <div class="tierL">
-              <div class="tierI">🦈</div>
-              <div>
-                <div class="tierName">Requin</div>
-                <div class="tierSub">Exécution rapide / opportunités</div>
-              </div>
-            </div>
-            <div class="tierR">Alpha</div>
-          </div>
-
-          <div class="tier">
-            <div class="tierL">
-              <div class="tierI">🐋</div>
-              <div>
-                <div class="tierName">Baleine</div>
-                <div class="tierSub">Scale / automatisations</div>
-              </div>
-            </div>
-            <div class="tierR">Ultimate</div>
-          </div>
-        </div>
-
-        <div class="hr"></div>
-
-        <div class="warnbox">
-          💡 Tu peux renommer les paliers et changer les emojis quand tu veux.
-        </div>
+      <div class="warnbox">
+        Explorer : <a class="txlink" target="_blank" rel="noreferrer" href="https://otter.pulsechain.com/">otter.pulsechain.com</a>
       </div>
 
-      <!-- tes réglages -->
-      <div class="card" style="padding:0;background:transparent;border:none;box-shadow:none">
-        <div class="card" style="margin-top:0">
-          <div style="font-weight:900;font-size:14px">Réglages</div>
-          <p class="sub">Slippage + deadline pour calculer le minOut sur chaque swap.</p>
-
-          <div class="hr"></div>
-
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-            <div>
-              <label>Slippage (%)</label>
-              <input id="slippage" type="number" min="0" step="0.1" value="2.0" />
-            </div>
-            <div>
-              <label>Deadline (minutes)</label>
-              <input id="deadlineM" type="number" min="1" step="1" value="10" />
-            </div>
-          </div>
-
-          <div class="hr"></div>
-
-          <div class="warnbox">
-            Explorer : <a class="txlink" target="_blank" rel="noreferrer" href="https://otter.pulsechain.com/">otter.pulsechain.com</a>
-          </div>
-
-          <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap">
-            <button class="btn2" id="refreshBtn">↻ Refresh balances/quotes</button>
-          </div>
-        </div>
+      <div style="margin-top:12px">
+        <button class="btn2" id="refreshBtn">↻ Refresh balances/quotes</button>
       </div>
-
     </div>
   </section>
 
@@ -473,7 +275,7 @@
         Si une quote échoue, c’est souvent un manque de liquidité sur la paire.
       </p>
       <div class="hr"></div>
-      <div class="warnbox">✅ 3 TX séparées. ✅ Sécurité PulseX-like. ✅ Zéro fee TRINITY.</div>
+      <div class="warnbox">Astuce : partage TRINITY sur X, c’est “différent” et ça ramène des users qualifiés vers tes bots.</div>
     </div>
 
     <div class="card">
@@ -518,11 +320,6 @@
     </div>
     <input class="tmSearch" id="tmSearch" placeholder="Search name or paste address" />
     <div class="tmList" id="tmList"></div>
-
-    <div class="tmMeta">
-      <div>💡 Balance visible après connexion (sinon “—”).</div>
-      <button class="tmMiniBtn" id="tmRefresh">↻ Refresh balances</button>
-    </div>
     <div style="margin-top:10px; color:#9ca3af; font-size:12px;">
       Clique sur un token pour le sélectionner. 📋 copie l’adresse. 🦊 ajoute à MetaMask.
     </div>
@@ -536,7 +333,6 @@ const PULSECHAIN_HEX = "0x171"; // 369
 const PULSEX_ROUTER = "0x98bf93ebf5c380C0e6Ae8e192A7e2AE08edAcc02";
 const WPLS = "0xA1077a294dDE1B09bB078844df40758a5D0f9a27";
 const PLS_GAS_RESERVE = ethers.parseUnits("0.05", 18);
-const MODAL_SORT_BY_BALANCE = true;
 
 const TOKENS = {
   PLS:    { symbol:"PLS",   address:null, decimals:18 },
@@ -562,6 +358,7 @@ const ROUTER_ABI = [
 /* ================= HELPERS ================= */
 const $ = (id) => document.getElementById(id);
 function shortAddr(a){ return a ? (a.slice(0,6)+"…"+a.slice(-4)) : ""; }
+
 function setStatus(card, txt, cls=""){
   const el = card.querySelector(".status");
   el.className = "status" + (cls ? " "+cls : "");
@@ -755,6 +552,7 @@ async function connectWallet(){
   $("walletPill").textContent = "Wallet : " + shortAddr(userAddress);
   $("netPill").textContent = "Réseau : " + (ok ? "PulseChain ✅" : "Mauvais réseau ❌");
 
+  // ✅ bouton devient adresse + copie
   const btn = $("connectBtn");
   btn.textContent = shortAddr(userAddress);
   btn.onclick = async () => {
@@ -770,7 +568,6 @@ async function connectWallet(){
   }
 
   await refreshAll();
-  await refreshModalBalances().catch(()=>{});
 
   window.ethereum.on?.("accountsChanged", ()=> location.reload());
   window.ethereum.on?.("chainChanged", ()=> location.reload());
@@ -977,7 +774,6 @@ async function executeSwap(card){
 
     setStatus(card, "Success ✅", "good");
     await refreshAll();
-    await refreshModalBalances().catch(()=>{});
 
   }catch(e){
     console.error(e);
@@ -1022,18 +818,10 @@ $("execTrinityBtn").addEventListener("click", async ()=>{
 
 /* =============== Token modal PulseX-like =============== */
 let tokenModalTarget = null;
-const modalBalances = new Map();
-let modalBalancesLoadedAt = 0;
-
 function openTokenModal(card, side){
   tokenModalTarget = { card, side };
   $("tokenModal").style.display = "block";
   $("tmSearch").value = "";
-
-  if(networkOk && userAddress){
-    const stale = (Date.now() - modalBalancesLoadedAt) > 20_000;
-    if(stale){ refreshModalBalances().catch(()=>{}); }
-  }
   renderTokenList("");
   setTimeout(()=>$("tmSearch").focus(), 50);
 }
@@ -1044,10 +832,6 @@ function closeTokenModal(){
 $("tmClose").onclick = closeTokenModal;
 $("tmBackdrop").onclick = closeTokenModal;
 $("tmSearch").addEventListener("input", (e)=> renderTokenList((e.target.value||"").trim()));
-$("tmRefresh").addEventListener("click", async ()=>{
-  await refreshModalBalances().catch(()=>{});
-  renderTokenList(($("tmSearch").value||"").trim());
-});
 
 function isAddr(x){ return /^0x[a-fA-F0-9]{40}$/.test(x); }
 function norm(x){ return (x||"").toLowerCase(); }
@@ -1066,13 +850,25 @@ async function addTokenToMetaMask(sym){
   const t = TOKENS[sym];
   if(!window.ethereum) return alert("MetaMask requis");
   if(!t.address) return alert("PLS = token natif (pas ERC20)");
+
   try{
     const wasAdded = await window.ethereum.request({
       method: "wallet_watchAsset",
-      params: { type: "ERC20", options: { address: t.address, symbol: sym, decimals: t.decimals } }
+      params: {
+        type: "ERC20",
+        options: {
+          address: t.address,
+          symbol: sym,
+          decimals: t.decimals
+        }
+      }
     });
-    if(wasAdded) alert("Token ajouté ✅");
-    else alert("Ajout refusé (cancel)");
+
+    if(wasAdded){
+      alert("Token ajouté ✅");
+    }else{
+      alert("Ajout refusé (cancel)");
+    }
   }catch(e){
     console.error(e);
     try{ await copyText(t.address); }catch(_){}
@@ -1081,66 +877,33 @@ async function addTokenToMetaMask(sym){
   }
 }
 
-async function refreshModalBalances(){
-  modalBalances.clear();
-  modalBalancesLoadedAt = Date.now();
-  if(!networkOk || !userAddress || !provider) return;
-
-  const syms = Object.keys(TOKENS);
-  await Promise.all(syms.map(async (sym)=>{
-    try{
-      let raw;
-      if(sym === "PLS") raw = await provider.getBalance(userAddress);
-      else raw = await getErc20(TOKENS[sym].address, true).balanceOf(userAddress);
-      modalBalances.set(sym, { raw, fmt: formatAmount(sym, raw) });
-    }catch(_){}
-  }));
-}
-
 function renderTokenList(q){
   const list = $("tmList");
   const keys = Object.keys(TOKENS);
   const nq = norm(q);
 
-  let filtered = keys.filter(sym=>{
+  const filtered = keys.filter(sym=>{
     if(!q) return true;
     const t = TOKENS[sym];
     if(isAddr(q)) return t.address && norm(t.address) === nq;
     return norm(sym).includes(nq);
   });
 
-  if(MODAL_SORT_BY_BALANCE && networkOk && userAddress){
-    filtered = filtered.slice().sort((a,b)=>{
-      const aa = modalBalances.get(a)?.raw ?? 0n;
-      const bb = modalBalances.get(b)?.raw ?? 0n;
-      if(aa === bb) return a.localeCompare(b);
-      return (bb > aa) ? 1 : -1;
-    });
-  }
-
   list.innerHTML = filtered.map(sym=>{
     const t = TOKENS[sym];
     const addr = t.address ? shortAddr(t.address) : "Native";
     const showBtns = !!t.address;
-
-    const balObj = modalBalances.get(sym);
-    const balTxt = (networkOk && userAddress && balObj) ? balObj.fmt : "—";
-
     return `
       <div class="tmRow" data-sym="${sym}">
         <div>
           <div style="font-weight:900">${sym}</div>
           <small>${addr}</small>
         </div>
-
-        <div class="tmRight">
-          <div class="tmBal ${balTxt==="—" ? "tmBalMuted" : ""}">${balTxt}</div>
-          <div class="tmActions">
-            ${showBtns ? `
-              <button class="tmIconBtn tmCopy" title="Copy address">📋</button>
-              <button class="tmIconBtn tmAdd" title="Add to MetaMask">🦊</button>
-            ` : `<small class="tmBalMuted">—</small>`}
-          </div>
+        <div class="tmActions">
+          ${showBtns ? `
+            <button class="tmIconBtn tmCopy" title="Copy address">📋</button>
+            <button class="tmIconBtn tmAdd" title="Add to MetaMask">🦊</button>
+          ` : `<small>—</small>`}
         </div>
       </div>
     `;
@@ -1179,7 +942,7 @@ function renderTokenList(q){
   });
 }
 
-// Hook : ouvrir modal au clic sur les selects
+// Hook : ouvrir modal au clic sur les selects (PulseX-like)
 document.querySelectorAll(".swapbox").forEach(card=>{
   const fromSel = card.querySelector(".from");
   const toSel   = card.querySelector(".to");
