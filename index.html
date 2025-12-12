@@ -24,35 +24,34 @@
       --shadow:0 18px 45px rgba(0,0,0,.55);
     }
     *{box-sizing:border-box;margin:0;padding:0}
-    html, body{height:100%; background:#020617;}
+    html,body{height:100%}
     body{
       font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
       color:var(--text);
-      min-height:100vh;
+      background:
+        radial-gradient(1200px 700px at 20% 0%, rgba(11,16,42,.82) 0%, rgba(5,8,22,.92) 55%, rgba(2,6,23,.98) 100%);
       overflow-x:hidden;
-      position:relative;
     }
 
-    /* ✅ FOND BG VISIBLE (pas “mangé” par un overlay trop opaque) */
+    /* ✅ watermark image visible partout */
     body::before{
       content:"";
-      position:fixed; inset:0;
-      background:
-        radial-gradient(1200px 700px at 20% 0%, rgba(11,16,42,.55) 0%, rgba(5,8,22,.55) 55%, rgba(2,6,23,.65) 100%),
-        url("./bg.png");
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
-      filter: saturate(1.12) contrast(1.05);
-      opacity:.62; /* ← rend l’image VRAIMENT visible */
+      position:fixed;
+      inset:0;
+      background:url("./bg.png") center / cover no-repeat;
+      opacity:.20;
+      filter:saturate(1.05) contrast(1.05);
       pointer-events:none;
       z-index:-2;
     }
-    /* léger voile (mais faible) pour garder lisible */
+    /* ✅ vignette overlay pour rendre lisible */
     body::after{
       content:"";
-      position:fixed; inset:0;
-      background: linear-gradient(180deg, rgba(0,0,0,.15), rgba(0,0,0,.35));
+      position:fixed;
+      inset:0;
+      background:
+        radial-gradient(900px 600px at 50% 25%, rgba(0,0,0,.30), rgba(0,0,0,.78)),
+        linear-gradient(180deg, rgba(0,0,0,.10), rgba(0,0,0,.55));
       pointer-events:none;
       z-index:-1;
     }
@@ -63,8 +62,8 @@
     header{
       display:flex;align-items:center;justify-content:space-between;gap:12px;
       position:sticky;top:0;z-index:50;
-      backdrop-filter: blur(12px);
-      background:linear-gradient(180deg, rgba(5,8,22,.72), rgba(5,8,22,.35));
+      backdrop-filter: blur(10px);
+      background:linear-gradient(180deg, rgba(5,8,22,.78), rgba(5,8,22,.35));
       border-bottom:1px solid rgba(31,41,55,.55);
       padding:14px 10px;margin:-22px -14px 18px;
     }
@@ -77,10 +76,9 @@
     .top-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}
     .pill{
       font-size:12px;color:var(--muted);
-      border:1px solid rgba(31,41,55,.75);
-      background:rgba(2,6,23,.40);
+      border:1px solid rgba(31,41,55,.9);
+      background:rgba(2,6,23,.55);
       padding:8px 10px;border-radius:999px;
-      backdrop-filter: blur(10px);
     }
     .btn{
       cursor:pointer;border:none;
@@ -88,46 +86,44 @@
       background:linear-gradient(120deg,var(--accent),var(--accent2));
       color:#fff;font-weight:900;
       box-shadow:0 12px 30px rgba(236,72,153,.15);
+      white-space:nowrap;
     }
     .btn:disabled{opacity:.55;cursor:not-allowed}
     .btn2{
-      cursor:pointer;border:1px solid rgba(31,41,55,.75);
+      cursor:pointer;border:1px solid rgba(31,41,55,.9);
       padding:10px 14px;border-radius:999px;
-      background:rgba(2,6,23,.40);
+      background:rgba(2,6,23,.55);
       color:var(--text);font-weight:900;
-      backdrop-filter: blur(10px);
+      white-space:nowrap;
     }
 
     .grid2{display:grid;grid-template-columns:1.25fr .75fr;gap:14px;align-items:stretch}
     @media(max-width:980px){.grid2{grid-template-columns:1fr}}
 
     .card{
-      background:linear-gradient(180deg, rgba(15,23,42,.82), rgba(15,23,42,.55));
-      border:1px solid rgba(31,41,55,.70);
+      background:linear-gradient(180deg, rgba(15,23,42,.90), rgba(15,23,42,.68));
+      border:1px solid rgba(31,41,55,.85);
       border-radius:var(--radius);
       box-shadow:var(--shadow);
       padding:16px;
-      backdrop-filter: blur(14px);
     }
     h1{font-size:34px;line-height:1.05}
     .sub{margin-top:10px;color:var(--muted);font-size:13px;line-height:1.55}
-    .hr{height:1px;background:rgba(31,41,55,.55);margin:14px 0}
+    .hr{height:1px;background:rgba(31,41,55,.7);margin:14px 0}
     .chips{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
     .chip{
       font-size:12px;color:var(--text);
-      border:1px solid rgba(31,41,55,.70);
-      background:rgba(2,6,23,.35);
+      border:1px solid rgba(31,41,55,.9);
+      background:rgba(2,6,23,.55);
       padding:7px 10px;border-radius:999px;
       display:flex;align-items:center;gap:8px;
-      backdrop-filter: blur(10px);
     }
     .okdot{width:10px;height:10px;border-radius:999px;background:var(--good);box-shadow:0 0 0 3px rgba(34,197,94,.15)}
     .warnbox{
-      border:1px solid rgba(245,158,11,.30);
-      background:rgba(245,158,11,.06);
+      border:1px solid rgba(245,158,11,.35);
+      background:rgba(245,158,11,.08);
       padding:10px 12px;border-radius:14px;
       font-size:12px;color:var(--muted);
-      backdrop-filter: blur(10px);
     }
     .ctaRow{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
     .ctaRow .btn2, .ctaRow .btn{display:inline-flex;align-items:center;gap:8px}
@@ -145,10 +141,9 @@
     input,select{
       width:100%;margin-top:6px;
       padding:10px 11px;border-radius:14px;
-      background:rgba(2,6,23,.45);
-      border:1px solid rgba(31,41,55,.70);
+      background:rgba(2,6,23,.65);
+      border:1px solid rgba(31,41,55,.9);
       color:var(--text);outline:none;
-      backdrop-filter: blur(10px);
     }
     .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
     .swap-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
@@ -156,24 +151,24 @@
     .swap-title span{font-size:12px;color:var(--muted)}
     .switch{display:flex;justify-content:center;margin:10px 0;}
     .switch button{
-      border:1px solid rgba(31,41,55,.70);
-      background:rgba(2,6,23,.40);
+      border:1px solid rgba(31,41,55,.9);
+      background:rgba(2,6,23,.55);
       color:var(--text);border-radius:12px;
       padding:7px 10px;cursor:pointer;
-      backdrop-filter: blur(10px);
     }
+
     .balRow{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:8px}
     .balText{font-size:12px;color:var(--muted)}
+    .balText b{color:var(--text)}
     .maxBtn,.pctBtn{
-      border:1px solid rgba(31,41,55,.70);
-      background:rgba(2,6,23,.40);
+      border:1px solid rgba(31,41,55,.9);
+      background:rgba(2,6,23,.55);
       color:var(--text);
       border-radius:999px;
       padding:6px 10px;
       cursor:pointer;
       font-weight:900;
       font-size:12px;
-      backdrop-filter: blur(10px);
     }
     .maxBtn:disabled,.pctBtn:disabled{opacity:.55;cursor:not-allowed}
     .pctRow{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
@@ -189,80 +184,82 @@
     .linkItem{
       display:flex;align-items:center;justify-content:space-between;gap:10px;
       padding:12px;border-radius:16px;
-      border:1px solid rgba(31,41,55,.70);
-      background:rgba(2,6,23,.32);
+      border:1px solid rgba(31,41,55,.9);
+      background:rgba(2,6,23,.45);
       margin-top:10px;
-      backdrop-filter: blur(12px);
     }
     .linkItem b{font-size:13px}
     .linkItem span{display:block;color:var(--muted);font-size:12px;margin-top:2px}
     .linkBtn{padding:8px 12px;border-radius:999px}
     footer{margin-top:26px;text-align:center;color:var(--muted);font-size:11px;line-height:1.6}
 
-    /* ================= TOKEN MODAL ================= */
+    /* Token modal */
     #tokenModal{display:none; position:fixed; inset:0; z-index:9999;}
-    #tmBackdrop{position:absolute; inset:0; background:rgba(0,0,0,.62);}
+    #tmBackdrop{position:absolute; inset:0; background:rgba(0,0,0,.65);}
     .tmBox{
       position:relative; max-width:760px; margin:5vh auto;
-      background:linear-gradient(180deg, rgba(15,23,42,.92), rgba(15,23,42,.70));
-      border:1px solid rgba(31,41,55,.75);
-      border-radius:20px; box-shadow:0 18px 45px rgba(0,0,0,.60);
+      background:rgba(15,23,42,.96);
+      border:1px solid rgba(31,41,55,.9);
+      border-radius:18px; box-shadow:0 18px 45px rgba(0,0,0,.55);
       padding:14px;
-      backdrop-filter: blur(18px);
     }
+    @media(max-width:820px){ .tmBox{ margin:0; max-width:none; height:100vh; border-radius:0; } }
+
     .tmTop{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px;}
-    .tmClose{cursor:pointer; border:none; background:transparent; color:#22c55e; font-size:26px; font-weight:900; line-height:1;}
+    .tmClose{cursor:pointer; border:none; background:transparent; color:#22c55e; font-size:28px; font-weight:900;}
     .tmSearch{
       width:100%; padding:12px 12px; border-radius:14px; outline:none;
-      background:rgba(2,6,23,.45); border:1px solid rgba(34,197,94,.45); color:#e5e7eb;
-      backdrop-filter: blur(12px);
+      background:rgba(2,6,23,.65); border:1px solid rgba(34,197,94,.45); color:#e5e7eb;
     }
+    .tmList{margin-top:10px; max-height:62vh; overflow:auto; padding-right:6px;}
+    @media(max-width:820px){ .tmList{max-height:72vh;} }
 
-    .tmList{margin-top:10px; max-height:58vh; overflow:auto; padding-right:6px;}
     .tmRow{
-      display:flex; align-items:center; justify-content:space-between; gap:12px;
-      padding:12px; border-radius:16px; margin-bottom:10px;
-      border:1px solid rgba(31,41,55,.70); background:rgba(2,6,23,.30);
+      display:grid;
+      grid-template-columns:42px 1fr auto auto;
+      align-items:center;
+      gap:12px;
+      padding:12px;
+      border-radius:16px;
+      margin-bottom:10px;
+      border:1px solid rgba(31,41,55,.9);
+      background:rgba(2,6,23,.45);
       cursor:pointer;
-      backdrop-filter: blur(14px);
     }
-    .tmLeft{display:flex; align-items:center; gap:12px; min-width:260px;}
-    .tmLogo{
-      width:34px; height:34px; border-radius:12px;
-      background:rgba(255,255,255,.06);
-      border:1px solid rgba(255,255,255,.10);
-      display:grid; place-items:center;
-      overflow:hidden;
-      flex:0 0 auto;
+    .tmName{display:flex; flex-direction:column; gap:4px;}
+    .tmName b{font-size:15px}
+    .tmName small{color:var(--muted)}
+    .tmBal{
+      text-align:right;
+      min-width:130px;
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.2;
     }
-    .tmLogo img{width:100%; height:100%; object-fit:cover; display:block;}
-    .tmSym{font-weight:950; font-size:15px}
-    .tmAddr{color:var(--muted); font-size:12px; margin-top:2px}
-    .tmMid{display:flex; flex-direction:column; align-items:flex-end; gap:2px; min-width:140px;}
-    .tmBalLabel{color:var(--muted); font-size:11px}
-    .tmBalVal{font-weight:900; font-size:13px}
+    .tmBal b{display:block; color:var(--text); font-size:13px}
     .tmActions{display:flex; gap:8px; align-items:center;}
     .tmIconBtn{
-      border:1px solid rgba(31,41,55,.70); background:rgba(2,6,23,.35);
+      border:1px solid rgba(31,41,55,.9); background:rgba(2,6,23,.55);
       color:#e5e7eb; border-radius:12px; padding:8px 10px; cursor:pointer;
-      backdrop-filter: blur(10px);
     }
+    .tmLogo{
+      width:38px;height:38px;border-radius:999px;
+      background:rgba(255,255,255,.06);
+      border:1px solid rgba(255,255,255,.08);
+      display:flex;align-items:center;justify-content:center;
+      overflow:hidden;
+    }
+    .tmLogo img{width:100%;height:100%;object-fit:cover;display:block}
     .tmFoot{
-      margin-top:10px; display:flex; align-items:center; justify-content:space-between; gap:10px;
-      color:#9ca3af; font-size:12px;
-      flex-wrap:wrap;
+      margin-top:10px;
+      display:flex;gap:10px;align-items:center;justify-content:space-between;
+      color:#9ca3af;font-size:12px;flex-wrap:wrap;
     }
     .tmRefresh{
-      border:1px solid rgba(31,41,55,.70);
-      background:rgba(2,6,23,.35);
-      border-radius:999px;
-      padding:10px 14px;
-      color:#e5e7eb;
-      cursor:pointer;
-      font-weight:900;
-      backdrop-filter: blur(10px);
+      display:inline-flex;align-items:center;gap:8px;
+      border:1px solid rgba(31,41,55,.9); background:rgba(2,6,23,.55);
+      color:#e5e7eb;border-radius:999px;padding:9px 12px;cursor:pointer;font-weight:900;
     }
-    .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;}
   </style>
 </head>
 
@@ -290,7 +287,7 @@
         <div class="chip"><span class="okdot"></span>3 swaps indépendants</div>
         <div class="chip"><span class="okdot"></span>Quotes live</div>
         <div class="chip"><span class="okdot"></span>Approve auto</div>
-        <div class="chip"><span class="okdot"></span>MAX + balances</div>
+        <div class="chip"><span class="okdot"></span>Balances partout</div>
       </div>
 
       <div class="ctaRow">
@@ -327,10 +324,12 @@
         Explorer : <a class="txlink" target="_blank" rel="noreferrer" href="https://otter.pulsechain.com/">otter.pulsechain.com</a>
       </div>
 
-      <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
+      <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap">
         <button class="btn2" id="refreshBtn">↻ Refresh balances/quotes</button>
-        <button class="btn2" id="openTokenListBtn">🪙 Liste tokens</button>
+        <button class="btn2" id="openTokenListBtn">🪙 Ouvrir la liste tokens</button>
       </div>
+
+      <div class="status" id="tokenListStatus" style="margin-top:10px">Tokenlist : chargement…</div>
     </div>
   </section>
 
@@ -346,11 +345,10 @@
       <div style="font-weight:900;font-size:14px">Notes</div>
       <p class="sub">
         Mode 1 = pas de fee TRINITY, pas de smart contract maison, chaque swap = 1 transaction.
-        Si une quote échoue, c’est souvent un manque de liquidité sur la paire.
+        Si une quote échoue : souvent liquidité / route / token non listé.
       </p>
       <div class="hr"></div>
-      <!-- (Astuce supprimée comme demandé) -->
-      <div class="warnbox">💡 Si un token n’affiche pas de balance, vérifie que son adresse est bien celle de PulseChain (bridgé).</div>
+      <div class="warnbox">Astuce : si la route directe échoue, TRINITY tente une route via WPLS automatiquement.</div>
     </div>
 
     <div class="card">
@@ -390,17 +388,15 @@
   <div id="tmBackdrop"></div>
   <div class="tmBox">
     <div class="tmTop">
-      <div style="font-weight:950;font-size:22px;">Select a token</div>
+      <div style="font-weight:900;font-size:22px;">Select a token</div>
       <button class="tmClose" id="tmClose">✕</button>
     </div>
-
     <input class="tmSearch" id="tmSearch" placeholder="Search name or paste address" />
-
     <div class="tmList" id="tmList"></div>
 
     <div class="tmFoot">
+      <div>Cliquer sur un token pour le sélectionner. 📋 copie l’adresse. 🦊 ajoute à MetaMask. <span style="opacity:.75">Balance = ton solde</span></div>
       <button class="tmRefresh" id="tmRefresh">↻ Refresh</button>
-      <div>📋 copie l’adresse • 🦊 ajoute à MetaMask • <span class="mono">Balance</span> = ton solde</div>
     </div>
   </div>
 </div>
@@ -409,69 +405,81 @@
 /* ================= CONFIG ================= */
 const PULSECHAIN_ID = 369;
 const PULSECHAIN_HEX = "0x171"; // 369
+const TOKENLIST_URL = "https://tokens.app.pulsex.com/pulsex-extended-v0.1.2.tokenlist.json";
+
+// Router PulseX
 const PULSEX_ROUTER = "0x98bf93ebf5c380C0e6Ae8e192A7e2AE08edAcc02";
-const WPLS = "0xA1077a294dDE1B09bB078844df40758a5D0f9a27";
+
+// WPLS (officiel PulseChain)
+const WPLS_ADDR = "0xA1077a294dDE1B09bB078844df40758a5D0f9a27";
+
+// réserve gas
 const PLS_GAS_RESERVE = ethers.parseUnits("0.05", 18);
 
-/* =========================================================
-   TOKENS (tes 2 blocs ajoutés)
-   - Mets decimals si tu veux être ultra précis.
-   - logo: optionnel (url). Sinon fallback propre.
-========================================================= */
-const TOKENS = {
-  // Natifs / base
-  PLS:    { symbol:"PLS",   address:null, decimals:18, chain:"pulse" },
-  WPLS:   { symbol:"WPLS",  address:WPLS, decimals:18, chain:"pulse" },
-  PLSX:   { symbol:"PLSX",  address:"0x95B303987A60C71504D99Aa1b13B4DA07b0790ab", decimals:18, chain:"pulse" },
-  PHEX:   { symbol:"PHEX",  address:"0x2b591e99afE9f32eAA6214f7B7629768c40Eeb39", decimals:8,  chain:"pulse" },
-  EHEX:   { symbol:"EHEX",  address:"0x57fde0a71132198BBeC939B98976993d8D89D225", decimals:8,  chain:"pulse" },
-  ATROPA: { symbol:"ATROPA",address:"0xCc78A0acDF847A2C1714D2A925bB4477df5d48a6", decimals:18, chain:"pulse" },
+/* ================= TOKENS (seed) =================
+   On va charger la tokenlist PulseX pour avoir logos/decimals, puis on "merge" tes tokens.
+*/
+const CUSTOM_TOKENS = [
+  // base utiles (PulseChain)
+  { symbol:"PLS",  address:null, decimals:18, name:"PulseChain (Native)" },
+  { symbol:"WPLS", address:WPLS_ADDR, decimals:18, name:"Wrapped PLS" },
 
-  // Bloc 1 (tes adresses)
-  INC:    { symbol:"INC",   address:"0x2fa878Ab3F87CC1C9737Fc071108F904c0B0C95d", decimals:18, chain:"pulse" },
-  DAI:    { symbol:"DAI",   address:"0xefD766cCb38EaF1dfd701853BFCe31359239F305", decimals:18, chain:"pulse" },
-  USDC:   { symbol:"USDC",  address:"0x15D38573d2feeb82e7ad5187aB8c1D52810B1f07", decimals:6,  chain:"pulse" },
-  WETH:   { symbol:"WETH",  address:"0x02DcdD04e3F455D838cd1249292C58f3B79e3C3C", decimals:18, chain:"pulse" },
+  // existants projet
+  { symbol:"PHEX", address:"0x2b591e99afE9f32eAA6214f7B7629768c40Eeb39", decimals:8,  name:"HEX (PulseChain)" },
+  { symbol:"PLSX", address:"0x95B303987A60C71504D99Aa1b13B4DA07b0790ab", decimals:18, name:"PulseX" },
+  { symbol:"ATROPA", address:"0xCc78A0acDF847A2C1714D2A925bB4477df5d48a6", decimals:18, name:"ATROPA" },
 
-  AXIS:   { symbol:"AXIS",  address:"0x8BDB63033b02C15f113De51EA1C3a96Af9e8ecb5", decimals:18, chain:"pulse" },
-  BANANAS:{ symbol:"BANANAS",address:"0xC6B28B2E3Bf9fF26299D540a4D654F7ade4dFdB0", decimals:18, chain:"pulse" },
-  CST:    { symbol:"CST",   address:"0x600136dA8cc6D1Ea07449514604dc4ab7098dB82", decimals:18, chain:"pulse" },
-  EARN:   { symbol:"EARN",  address:"0xb513038BbFdF9D40B676F41606f4F61D4b02c4A2", decimals:18, chain:"pulse" },
-  ELIXIR: { symbol:"ELIXIR",address:"0xeCd465A15fac825B0Fe69416A4c7BfE03A50c12E", decimals:18, chain:"pulse" },
-  HDRN:   { symbol:"HDRN",  address:"0x3819f64f282bf135d62168C1e513280dAF905e06", decimals:9,  chain:"pulse" },
-  HELGO:  { symbol:"HELGO", address:"0x0567CA0dE35606E9C260CC2358404B11DE21DB44", decimals:18, chain:"pulse" },
-  IM:     { symbol:"IM",    address:"0xBBcF895BFCb57d0f457D050bb806d1499436c0CE", decimals:18, chain:"pulse" },
-  LINK:   { symbol:"LINK",  address:"0x514910771AF9Ca656af840dff83E8264EcF986CA", decimals:18, chain:"eth"  },
-  pBSKR:  { symbol:"pBSKR", address:"0x1DcbF345bC44696BbBed402367f7C62e524Fe8B5", decimals:18, chain:"pulse" },
-  PEPE:   { symbol:"PEPE",  address:"0x6982508145454Ce325dDbE47a25d4ec3d2311933", decimals:18, chain:"eth"  },
+  // bloc 1 (comme tu as donné)
+  { symbol:"EHEX", address:"0x57fde0a71132198BBeC939B98976993d8D89D225", decimals:8,  name:"eHEX" },
+  { symbol:"INC",  address:"0x2fa878Ab3F87CC1C9737Fc071108F904c0B0C95d", decimals:18, name:"Incentive" },
 
-  // Bloc 2 (tes adresses)
-  LOAN:   { symbol:"LOAN",  address:"0x9159f1D2a9f51998Fc9Ab03fbd8f265ab14A1b3B", decimals:18, chain:"pulse" },
-  PHUX:   { symbol:"PHUX",  address:"0x9663c2d75ffd5F4017310405fCe61720aF45B829", decimals:18, chain:"pulse" },
-  PRS:    { symbol:"PRS",   address:"0xb6B57227150a7097723e0C013752001AaD01248F", decimals:18, chain:"pulse" },
-  pTGC:   { symbol:"pTGC",  address:"0x94534EeEe131840b1c0F61847c572228bdfDDE93", decimals:18, chain:"pulse" },
-  PTS:    { symbol:"PTS",   address:"0x2A06a971fE6ffa002fd242d437E3db2b5cC5B433", decimals:18, chain:"pulse" },
-  PXDC:   { symbol:"PXDC",  address:"0xeB6b7932Da20c6D7B3a899D5887d86dfB09A6408", decimals:18, chain:"pulse" },
-  RFX:    { symbol:"RFX",   address:"0xF876BDf9D6403AA7D5bF7F523E8f440A841CC596", decimals:18, chain:"pulse" },
-  SHIB:   { symbol:"SHIB",  address:"0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE", decimals:18, chain:"eth"  },
-  SOUNDX: { symbol:"SOUNDX",address:"0xA301c1871Dbf414261946281C7F62213fae22CfE", decimals:18, chain:"pulse" },
-  TETRAp: { symbol:"TETRAp",address:"0xAeC4C07537B03E3E62fc066EC62401Aed5Fdd361", decimals:18, chain:"pulse" },
-  TEXAN:  { symbol:"TEXAN", address:"0xcFCFfE432A48dB53F59c301422d2EdD77B2A88d7", decimals:18, chain:"pulse" },
-  TIME:   { symbol:"TIME",  address:"0xCA35638A3fdDD02fEC597D8c1681198C06b23F58", decimals:18, chain:"pulse" },
-  UFO:    { symbol:"UFO",   address:"0x456548A9B56eFBbD89Ca0309edd17a9E20b04018", decimals:18, chain:"pulse" },
-  UNI:    { symbol:"UNI",   address:"0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984", decimals:18, chain:"eth"  },
-  USDL:   { symbol:"USDL",  address:"0x0dEEd1486bc52aA0d3E6f8849cEC5adD6598A162", decimals:18, chain:"pulse" },
-  USDT:   { symbol:"USDT",  address:"0xdAC17F958D2ee523a2206206994597C13D831ec7", decimals:6,  chain:"eth"  },
-  VORTEX: { symbol:"VORTEX",address:"0x73d8a4D01d658E565cF83068397FD39Baf386C48", decimals:18, chain:"pulse" },
-  WATT:   { symbol:"WATT",  address:"0xDfdc2836FD2E63Bba9f0eE07901aD465Bff4DE71", decimals:18, chain:"pulse" },
-  WBTC:   { symbol:"WBTC",  address:"0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599", decimals:8,  chain:"eth"  },
-};
+  // ⚠️ ici tu as donné des adresses PulseChain (DAI/USDC/WETH) => on met celles-là
+  { symbol:"DAI",  address:"0xefD766cCb38EaF1dfd701853BFCe31359239F305", decimals:18, name:"DAI (PulseChain)" },
+  { symbol:"USDC", address:"0x15D38573d2feeb82e7ad5187aB8c1D52810B1f07", decimals:6,  name:"USDC (PulseChain)" },
+  { symbol:"WETH", address:"0x02DcdD04e3F455D838cd1249292C58f3B79e3C3C", decimals:18, name:"WETH (PulseChain)" },
 
+  { symbol:"AXIS",    address:"0x8BDB63033b02C15f113De51EA1C3a96Af9e8ecb5", decimals:18, name:"AXIS" },
+  { symbol:"BANANAS", address:"0xC6B28B2E3Bf9fF26299D540a4D654F7ade4dFdB0", decimals:18, name:"BANANAS" },
+  { symbol:"CST",     address:"0x600136dA8cc6D1Ea07449514604dc4ab7098dB82", decimals:18, name:"CST" },
+  { symbol:"EARN",    address:"0xb513038BbFdF9D40B676F41606f4F61D4b02c4A2", decimals:18, name:"EARN" },
+  { symbol:"ELIXIR",  address:"0xeCd465A15fac825B0Fe69416A4c7BfE03A50c12E", decimals:18, name:"ELIXIR" },
+  { symbol:"HDRN",    address:"0x3819f64f282bf135d62168C1e513280dAF905e06", decimals:9,  name:"HDRN" },
+  { symbol:"HELGO",   address:"0x0567CA0dE35606E9C260CC2358404B11DE21DB44", decimals:18, name:"HELGO" },
+  { symbol:"IM",      address:"0xBBcF895BFCb57d0f457D050bb806d1499436c0CE", decimals:18, name:"IM" },
+  { symbol:"LINK",    address:"0x514910771AF9Ca656af840dff83E8264EcF986CA", decimals:18, name:"LINK" },
+  { symbol:"pBSKR",   address:"0x1DcbF345bC44696BbBed402367f7C62e524Fe8B5", decimals:18, name:"pBSKR" },
+  { symbol:"PEPE",    address:"0x6982508145454Ce325dDbE47a25d4ec3d2311933", decimals:18, name:"PEPE" },
+
+  // bloc 2
+  { symbol:"LOAN",   address:"0x9159f1D2a9f51998Fc9Ab03fbd8f265ab14A1b3B", decimals:18, name:"LOAN" },
+  { symbol:"PHUX",   address:"0x9663c2d75ffd5F4017310405fCe61720aF45B829", decimals:18, name:"PHUX" },
+  { symbol:"PRS",    address:"0xb6B57227150a7097723e0C013752001AaD01248F", decimals:18, name:"PRS" },
+  { symbol:"pTGC",   address:"0x94534EeEe131840b1c0F61847c572228bdfDDE93", decimals:18, name:"pTGC" },
+  { symbol:"PTS",    address:"0x2A06a971fE6ffa002fd242d437E3db2b5cC5B433", decimals:18, name:"PTS" },
+  { symbol:"PXDC",   address:"0xeB6b7932Da20c6D7B3a899D5887d86dfB09A6408", decimals:18, name:"PXDC" },
+  { symbol:"RFX",    address:"0xF876BDf9D6403AA7D5bF7F523E8f440A841CC596", decimals:18, name:"RFX" },
+  { symbol:"SHIB",   address:"0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE", decimals:18, name:"SHIB" },
+  { symbol:"SOUNDX", address:"0xA301c1871Dbf414261946281C7F62213fae22CfE", decimals:18, name:"SOUNDX" },
+  { symbol:"TETRAp", address:"0xAeC4C07537B03E3E62fc066EC62401Aed5Fdd361", decimals:18, name:"TETRAp" },
+  { symbol:"TEXAN",  address:"0xcFCFfE432A48dB53F59c301422d2EdD77B2A88d7", decimals:18, name:"TEXAN" },
+  { symbol:"TIME",   address:"0xCA35638A3fdDD02fEC597D8c1681198C06b23F58", decimals:18, name:"TIME" },
+  { symbol:"UFO",    address:"0x456548A9B56eFBbD89Ca0309edd17a9E20b04018", decimals:18, name:"UFO" },
+  { symbol:"UNI",    address:"0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984", decimals:18, name:"UNI" },
+  { symbol:"USDL",   address:"0x0dEEd1486bc52aA0d3E6f8849cEC5adD6598A162", decimals:18, name:"USDL" },
+  { symbol:"USDT",   address:"0xdAC17F958D2ee523a2206206994597C13D831ec7", decimals:6,  name:"USDT" },
+  { symbol:"VORTEX", address:"0x73d8a4D01d658E565cF83068397FD39Baf386C48", decimals:18, name:"VORTEX" },
+  { symbol:"WATT",   address:"0xDfdc2836FD2E63Bba9f0eE07901aD465Bff4DE71", decimals:18, name:"WATT" },
+  { symbol:"WBTC",   address:"0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599", decimals:8,  name:"WBTC" },
+];
+
+/* ================= ABIs ================= */
 const ERC20_ABI = [
   "function approve(address spender,uint256 amount) external returns (bool)",
   "function allowance(address owner,address spender) external view returns (uint256)",
   "function balanceOf(address owner) external view returns (uint256)",
   "function decimals() external view returns (uint8)",
+  "function symbol() external view returns (string)",
+  "function name() external view returns (string)",
 ];
 const ROUTER_ABI = [
   "function getAmountsOut(uint256 amountIn, address[] calldata path) external view returns (uint256[] memory amounts)",
@@ -483,8 +491,8 @@ const ROUTER_ABI = [
 /* ================= HELPERS ================= */
 const $ = (id) => document.getElementById(id);
 function shortAddr(a){ return a ? (a.slice(0,6)+"…"+a.slice(-4)) : ""; }
-function isAddr(x){ return /^0x[a-fA-F0-9]{40}$/.test(x); }
 function norm(x){ return (x||"").toLowerCase(); }
+function isAddr(x){ return /^0x[a-fA-F0-9]{40}$/.test(x); }
 function txUrl(hash){ return `https://otter.pulsechain.com/tx/${hash}`; }
 
 function setStatus(card, txt, cls=""){
@@ -497,18 +505,7 @@ function getSettings(){
   const dl = parseInt($("deadlineM").value || "10", 10);
   return { slippage: Math.max(0, sl), deadlineMin: Math.max(1, dl) };
 }
-
-function buildPath(symIn, symOut){
-  if(symIn === symOut) return null;
-  const inT = TOKENS[symIn];
-  const outT = TOKENS[symOut];
-  if(symIn === "PLS") return [WPLS, ethers.getAddress(outT.address)];
-  if(symOut === "PLS") return [ethers.getAddress(inT.address), WPLS];
-  return [ethers.getAddress(inT.address), ethers.getAddress(outT.address)];
-}
-
-function formatAmount(sym, raw){
-  const dec = TOKENS[sym].decimals ?? 18;
+function formatUnits(dec, raw){
   const s = ethers.formatUnits(raw, dec);
   const num = Number(s);
   if(!isFinite(num)) return s;
@@ -516,24 +513,213 @@ function formatAmount(sym, raw){
   if(num < 0.0001) return num.toExponential(3);
   return num.toLocaleString(undefined, { maximumFractionDigits: 6 });
 }
-function parseAmount(sym, human){
-  return ethers.parseUnits(human, TOKENS[sym].decimals ?? 18);
-}
-function validatePair(card){
-  const from = card.querySelector(".from").value;
-  const to = card.querySelector(".to").value;
-  if(from === to){
-    setStatus(card, "Paire invalide (tokens identiques)", "bad");
-    return false;
-  }
-  return true;
-}
 
 /* ================= STATE ================= */
 let provider, signer, userAddress, networkOk = false;
+let TOKEN_LIST = [];              // array tokens for UI
+let TOKEN_BY_ADDR = new Map();    // addrLower -> token
+let BAL_CACHE = new Map();        // addrLower or "PLS" -> {raw, ts}
 
-/* ================= UI BUILD (Swap cards) ================= */
+/* ================= WEB3 HELPERS ================= */
+function getRouter(readOnly=true){
+  return new ethers.Contract(PULSEX_ROUTER, ROUTER_ABI, readOnly ? provider : signer);
+}
+function getErc20(tokenAddr, readOnly=true){
+  return new ethers.Contract(ethers.getAddress(tokenAddr), ERC20_ABI, readOnly ? provider : signer);
+}
+
+/* ================= TOKENLIST LOAD ================= */
+async function loadTokenList(){
+  try{
+    $("tokenListStatus").textContent = "Tokenlist : chargement…";
+    const r = await fetch(TOKENLIST_URL, { cache:"no-store" });
+    const j = await r.json();
+    const tokens = (j.tokens || []).filter(t => Number(t.chainId) === PULSECHAIN_ID);
+
+    // Map by address
+    const byAddr = new Map();
+    for(const t of tokens){
+      if(!t.address) continue;
+      byAddr.set(norm(t.address), {
+        symbol: t.symbol || "???",
+        name: t.name || t.symbol || "Token",
+        address: ethers.getAddress(t.address),
+        decimals: Number(t.decimals ?? 18),
+        logoURI: t.logoURI || "",
+        chainId: Number(t.chainId)
+      });
+    }
+
+    // merge custom tokens (keep tokenlist logo/decimals if found)
+    const merged = [];
+    const pushToken = (tk) => {
+      if(tk.address){
+        const key = norm(tk.address);
+        const fromList = byAddr.get(key);
+        if(fromList){
+          merged.push(fromList);
+          return;
+        }
+        merged.push({
+          symbol: tk.symbol,
+          name: tk.name || tk.symbol,
+          address: ethers.getAddress(tk.address),
+          decimals: Number(tk.decimals ?? 18),
+          logoURI: "",
+          chainId: PULSECHAIN_ID
+        });
+      }else{
+        // Native PLS
+        merged.push({
+          symbol:"PLS",
+          name:"PulseChain (Native)",
+          address:null,
+          decimals:18,
+          logoURI:"",
+          chainId:PULSECHAIN_ID
+        });
+      }
+    };
+
+    // start with "custom important first"
+    for(const tk of CUSTOM_TOKENS) pushToken(tk);
+
+    // then add the rest tokenlist (avoid duplicates)
+    const seen = new Set(merged.filter(x=>x.address).map(x=>norm(x.address)));
+    for(const t of tokens){
+      const key = norm(t.address);
+      if(seen.has(key)) continue;
+      merged.push({
+        symbol: t.symbol || "???",
+        name: t.name || t.symbol || "Token",
+        address: ethers.getAddress(t.address),
+        decimals: Number(t.decimals ?? 18),
+        logoURI: t.logoURI || "",
+        chainId: Number(t.chainId)
+      });
+    }
+
+    // build globals
+    TOKEN_LIST = merged;
+    TOKEN_BY_ADDR = new Map();
+    for(const t of TOKEN_LIST){
+      if(t.address) TOKEN_BY_ADDR.set(norm(t.address), t);
+    }
+
+    $("tokenListStatus").textContent = `Tokenlist : OK ✅ (${TOKEN_LIST.length} tokens)`;
+  }catch(e){
+    console.error(e);
+    $("tokenListStatus").textContent = "Tokenlist : erreur ❌";
+  }
+}
+
+/* ================= BALANCES ================= */
+async function getBalanceToken(token){
+  if(!networkOk || !userAddress) return null;
+
+  const now = Date.now();
+  const key = token.address ? norm(token.address) : "PLS";
+  const cached = BAL_CACHE.get(key);
+  if(cached && (now - cached.ts) < 12000) return cached.raw;
+
+  let raw;
+  if(!token.address){
+    raw = await provider.getBalance(userAddress);
+  }else{
+    raw = await getErc20(token.address, true).balanceOf(userAddress);
+  }
+
+  BAL_CACHE.set(key, { raw, ts: now });
+  return raw;
+}
+
+async function refreshCardBalances(card){
+  if(!networkOk || !userAddress){
+    card.querySelector(".balIn").textContent = "Connect wallet";
+    card.querySelector(".balOut").textContent = "Connect wallet";
+    return;
+  }
+  const fromAddr = card.querySelector(".from").value;
+  const toAddr   = card.querySelector(".to").value;
+
+  const tFrom = fromAddr === "PLS" ? TOKEN_LIST.find(t=>t.symbol==="PLS" && !t.address) : TOKEN_BY_ADDR.get(norm(fromAddr));
+  const tTo   = toAddr === "PLS"   ? TOKEN_LIST.find(t=>t.symbol==="PLS" && !t.address) : TOKEN_BY_ADDR.get(norm(toAddr));
+
+  if(tFrom){
+    const b = await getBalanceToken(tFrom);
+    card.querySelector(".balIn").textContent = b==null ? "—" : `${formatUnits(tFrom.decimals, b)} ${tFrom.symbol}`;
+  }else{
+    card.querySelector(".balIn").textContent = "—";
+  }
+
+  if(tTo){
+    const b2 = await getBalanceToken(tTo);
+    card.querySelector(".balOut").textContent = b2==null ? "—" : `${formatUnits(tTo.decimals, b2)} ${tTo.symbol}`;
+  }else{
+    card.querySelector(".balOut").textContent = "—";
+  }
+}
+
+async function refreshAll(){
+  if(!networkOk) return;
+  const cards = document.querySelectorAll(".swapbox");
+  for(const card of cards){
+    await refreshCardBalances(card);
+    await updateQuote(card);
+  }
+  // modal (si ouverte)
+  if($("tokenModal").style.display === "block"){
+    await renderTokenList(($("tmSearch").value||"").trim());
+  }
+}
+
+/* ================= ROUTING ================= */
+function buildPath(tokenIn, tokenOut){
+  // tokenIn/out: token objects (PLS => address null)
+  if(!tokenIn || !tokenOut) return null;
+  if(tokenIn.symbol === tokenOut.symbol && tokenIn.address === tokenOut.address) return null;
+
+  // Native PLS via WPLS
+  if(!tokenIn.address && tokenOut.address){
+    return [WPLS_ADDR, ethers.getAddress(tokenOut.address)];
+  }
+  if(tokenIn.address && !tokenOut.address){
+    return [ethers.getAddress(tokenIn.address), WPLS_ADDR];
+  }
+  if(tokenIn.address && tokenOut.address){
+    return [ethers.getAddress(tokenIn.address), ethers.getAddress(tokenOut.address)];
+  }
+  return null;
+}
+
+// fallback route via WPLS for token-token
+function buildPathViaWPLS(tokenIn, tokenOut){
+  if(!tokenIn.address || !tokenOut.address) return null;
+  const a = ethers.getAddress(tokenIn.address);
+  const b = ethers.getAddress(tokenOut.address);
+  const w = ethers.getAddress(WPLS_ADDR);
+  if(a === w || b === w) return null;
+  return [a, w, b];
+}
+
+/* ================= ALLOWANCE / APPROVE ================= */
+async function checkAllowance(tokenIn, amountRaw){
+  if(!tokenIn.address) return true;
+  const allowance = await getErc20(tokenIn.address, true).allowance(userAddress, PULSEX_ROUTER);
+  return allowance >= amountRaw;
+}
+async function doApprove(tokenIn, card){
+  const erc = getErc20(tokenIn.address, false);
+  setStatus(card, "Approving… (MetaMask)", "warn");
+  const tx = await erc.approve(PULSEX_ROUTER, ethers.MaxUint256);
+  setStatus(card, "Approve pending…", "warn");
+  await tx.wait();
+  setStatus(card, "Approve OK ✅", "good");
+}
+
+/* ================= UI BUILD ================= */
 const swapsEl = $("swaps");
+
 function swapCardTemplate(i, label){
   return `
     <div class="card swapbox" id="swap${i}">
@@ -549,7 +735,7 @@ function swapCardTemplate(i, label){
       </div>
 
       <div class="balRow">
-        <div class="balText">Balance: <span class="balIn">Connect wallet</span></div>
+        <div class="balText">Solde: <b class="balIn">Connect wallet</b></div>
         <button class="maxBtn" type="button" disabled>MAX</button>
       </div>
 
@@ -565,6 +751,11 @@ function swapCardTemplate(i, label){
       <div class="row2">
         <select class="to"></select>
         <input class="out" placeholder="Estimation" readonly />
+      </div>
+
+      <div class="balRow">
+        <div class="balText">Solde: <b class="balOut">Connect wallet</b></div>
+        <span></span>
       </div>
 
       <div class="quoteLine">
@@ -584,51 +775,11 @@ function swapCardTemplate(i, label){
     </div>
   `;
 }
+
 swapsEl.insertAdjacentHTML("beforeend", swapCardTemplate(1,"Swap A"));
 swapsEl.insertAdjacentHTML("beforeend", swapCardTemplate(2,"Swap B"));
 swapsEl.insertAdjacentHTML("beforeend", swapCardTemplate(3,"Swap C"));
 
-function fillSelect(sel, selected){
-  sel.innerHTML = "";
-  for(const k of Object.keys(TOKENS)){
-    const opt = document.createElement("option");
-    opt.value = k;
-    opt.textContent = k;
-    sel.appendChild(opt);
-  }
-  sel.value = selected;
-}
-function initCardsDefaults(){
-  const defaults = [
-    {from:"PLS",  to:"PHEX"},
-    {from:"PLS",  to:"ATROPA"},
-    {from:"PHEX", to:"PLSX"},
-  ];
-  document.querySelectorAll(".swapbox").forEach((card, idx)=>{
-    const fromSel = card.querySelector(".from");
-    const toSel   = card.querySelector(".to");
-    fillSelect(fromSel, defaults[idx].from);
-    fillSelect(toSel, defaults[idx].to);
-
-    card.querySelector(".invert").addEventListener("click", ()=>{
-      const a = fromSel.value;
-      fromSel.value = toSel.value;
-      toSel.value = a;
-      triggerQuote(card);
-      refreshCardBalance(card).catch(()=>{});
-    });
-
-    fromSel.addEventListener("change", ()=>{
-      triggerQuote(card);
-      refreshCardBalance(card).catch(()=>{});
-    });
-    toSel.addEventListener("change", ()=> triggerQuote(card));
-    card.querySelector(".amount").addEventListener("input", ()=> triggerQuote(card));
-  });
-}
-initCardsDefaults();
-
-/* ================= CONNECT UI ================= */
 function setConnectedUI(isOk){
   document.querySelectorAll(".swapBtn").forEach(b => b.disabled = !isOk);
   document.querySelectorAll(".approveBtn").forEach(b => b.disabled = !isOk);
@@ -637,9 +788,68 @@ function setConnectedUI(isOk){
   $("execTrinityBtn").disabled = !isOk;
 
   document.querySelectorAll(".swapbox").forEach(card => {
-    const bal = card.querySelector(".balIn");
-    bal.textContent = isOk ? "—" : "Connect wallet";
+    card.querySelector(".balIn").textContent = isOk ? "—" : "Connect wallet";
+    card.querySelector(".balOut").textContent = isOk ? "—" : "Connect wallet";
     if(!isOk) setStatus(card, "Ready (connect wallet)", "");
+  });
+}
+
+function fillSelectByTokens(sel, selectedValue){
+  // value = "PLS" for native, else address
+  sel.innerHTML = "";
+  // native first
+  const optPLS = document.createElement("option");
+  optPLS.value = "PLS";
+  optPLS.textContent = "PLS";
+  sel.appendChild(optPLS);
+
+  for(const t of TOKEN_LIST){
+    if(!t.address) continue;
+    const opt = document.createElement("option");
+    opt.value = t.address;
+    opt.textContent = t.symbol;
+    sel.appendChild(opt);
+  }
+
+  sel.value = selectedValue;
+}
+
+function getTokenFromSelectValue(v){
+  if(v === "PLS") return TOKEN_LIST.find(t=>t.symbol==="PLS" && !t.address) || {symbol:"PLS",address:null,decimals:18,name:"PulseChain"};
+  return TOKEN_BY_ADDR.get(norm(v));
+}
+
+function initCardsDefaults(){
+  const defaults = [
+    {from:"PLS",   to:"0x2b591e99afE9f32eAA6214f7B7629768c40Eeb39"}, // PHEX
+    {from:"PLS",   to:"0xCc78A0acDF847A2C1714D2A925bB4477df5d48a6"}, // ATROPA
+    {from:"0x2b591e99afE9f32eAA6214f7B7629768c40Eeb39", to:"0x95B303987A60C71504D99Aa1b13B4DA07b0790ab"}, // PHEX->PLSX
+  ];
+
+  document.querySelectorAll(".swapbox").forEach((card, idx)=>{
+    const fromSel = card.querySelector(".from");
+    const toSel   = card.querySelector(".to");
+
+    fillSelectByTokens(fromSel, defaults[idx].from);
+    fillSelectByTokens(toSel, defaults[idx].to);
+
+    card.querySelector(".invert").addEventListener("click", async ()=>{
+      const a = fromSel.value;
+      fromSel.value = toSel.value;
+      toSel.value = a;
+      await refreshCardBalances(card).catch(()=>{});
+      triggerQuote(card);
+    });
+
+    fromSel.addEventListener("change", async ()=>{
+      await refreshCardBalances(card).catch(()=>{});
+      triggerQuote(card);
+    });
+    toSel.addEventListener("change", async ()=>{
+      await refreshCardBalances(card).catch(()=>{});
+      triggerQuote(card);
+    });
+    card.querySelector(".amount").addEventListener("input", ()=> triggerQuote(card));
   });
 }
 
@@ -649,7 +859,7 @@ $("openMultiBtn").addEventListener("click", ()=>{
   window.scrollBy(0, -90);
 });
 
-/* ================= WEB3 CONNECT ================= */
+/* ================= CONNECT ================= */
 async function connectWallet(){
   if(!window.ethereum){
     alert("Wallet requis : MetaMask");
@@ -696,66 +906,28 @@ async function connectWallet(){
     return;
   }
 
+  BAL_CACHE.clear();
   await refreshAll();
-  await refreshTokenModalBalances().catch(()=>{});
 
   window.ethereum.on?.("accountsChanged", ()=> location.reload());
   window.ethereum.on?.("chainChanged", ()=> location.reload());
 }
 $("connectBtn").addEventListener("click", connectWallet);
-$("refreshBtn").addEventListener("click", ()=> refreshAll());
-
-/* ================= CONTRACT HELPERS ================= */
-function getRouter(readOnly=true){
-  return new ethers.Contract(PULSEX_ROUTER, ROUTER_ABI, readOnly ? provider : signer);
-}
-function getErc20(tokenAddr, readOnly=true){
-  return new ethers.Contract(ethers.getAddress(tokenAddr), ERC20_ABI, readOnly ? provider : signer);
-}
-
-/* ================= BALANCES ================= */
-async function getBalance(sym){
-  if(sym === "PLS") return await provider.getBalance(userAddress);
-  return await getErc20(TOKENS[sym].address, true).balanceOf(userAddress);
-}
-
-async function refreshCardBalance(card){
-  const balEl = card.querySelector(".balIn");
-  if(!networkOk || !userAddress){
-    balEl.textContent = "Connect wallet";
-    return;
-  }
-  const from = card.querySelector(".from").value;
-  try{
-    const bal = await getBalance(from);
-    balEl.textContent = formatAmount(from, bal);
-  }catch(e){
-    console.error(e);
-    balEl.textContent = "—";
-  }
-}
-
-async function refreshAll(){
-  const cards = document.querySelectorAll(".swapbox");
-  for(const card of cards){
-    await refreshCardBalance(card);
-    await updateQuote(card);
-  }
-  // si modal ouverte, update aussi
-  if($("tokenModal").style.display === "block"){
-    await refreshTokenModalBalances().catch(()=>{});
-  }
-}
+$("refreshBtn").addEventListener("click", ()=> { BAL_CACHE.clear(); refreshAll(); });
 
 /* ================= MAX + % ================= */
 async function setAmountFromPercent(card, pct){
   if(!networkOk) return alert("Connecte ton wallet d’abord");
-  if(!validatePair(card)) return;
 
-  const from = card.querySelector(".from").value;
-  let bal = await getBalance(from);
+  const fromVal = card.querySelector(".from").value;
+  const tFrom = getTokenFromSelectValue(fromVal);
+  if(!tFrom) return;
 
-  if(from === "PLS"){
+  let bal = await getBalanceToken(tFrom);
+  if(bal == null) return;
+
+  // réserve gas si PLS
+  if(!tFrom.address){
     if(bal <= PLS_GAS_RESERVE){
       alert("Balance PLS insuffisante pour le gas");
       return;
@@ -764,9 +936,10 @@ async function setAmountFromPercent(card, pct){
   }
 
   const amount = bal * BigInt(pct) / 100n;
-  card.querySelector(".amount").value = ethers.formatUnits(amount, TOKENS[from].decimals ?? 18);
+  card.querySelector(".amount").value = ethers.formatUnits(amount, tFrom.decimals);
   await updateQuote(card);
 }
+
 document.querySelectorAll(".swapbox").forEach(card=>{
   card.querySelector(".maxBtn").addEventListener("click", ()=> setAmountFromPercent(card, 100).catch(console.error));
   card.querySelectorAll(".pctBtn").forEach(b=>{
@@ -774,21 +947,7 @@ document.querySelectorAll(".swapbox").forEach(card=>{
   });
 });
 
-/* ================= QUOTES + APPROVE ================= */
-async function checkAllowance(symIn, amountRaw){
-  if(symIn === "PLS") return true;
-  const allowance = await getErc20(TOKENS[symIn].address, true).allowance(userAddress, PULSEX_ROUTER);
-  return allowance >= amountRaw;
-}
-async function doApprove(symIn, card){
-  const erc = getErc20(TOKENS[symIn].address, false);
-  setStatus(card, "Approving… (MetaMask)", "warn");
-  const tx = await erc.approve(PULSEX_ROUTER, ethers.MaxUint256);
-  setStatus(card, "Approve pending…", "warn");
-  await tx.wait();
-  setStatus(card, "Approve OK ✅", "good");
-}
-
+/* ================= QUOTES ================= */
 let quoteTimer = null;
 function triggerQuote(card){
   if(quoteTimer) clearTimeout(quoteTimer);
@@ -796,9 +955,9 @@ function triggerQuote(card){
 }
 
 async function updateQuote(card){
-  const from = card.querySelector(".from").value;
-  const to = card.querySelector(".to").value;
-  const amt = (card.querySelector(".amount").value || "").trim();
+  const fromVal = card.querySelector(".from").value;
+  const toVal   = card.querySelector(".to").value;
+  const amtStr  = (card.querySelector(".amount").value || "").trim();
 
   const outInp = card.querySelector(".out");
   const quoteText = card.querySelector(".quoteText");
@@ -812,34 +971,58 @@ async function updateQuote(card){
     setStatus(card, "Ready (connect wallet)", "");
     return;
   }
-  if(!amt || Number(amt) <= 0){
+
+  const tFrom = getTokenFromSelectValue(fromVal);
+  const tTo   = getTokenFromSelectValue(toVal);
+
+  if(!tFrom || !tTo){
+    setStatus(card, "Token invalide", "bad");
+    return;
+  }
+
+  if(!amtStr || Number(amtStr) <= 0){
     setStatus(card, "Ready ✅", "good");
     return;
   }
-  if(!validatePair(card)) return;
+
+  if((tFrom.address || "PLS") === (tTo.address || "PLS")){
+    setStatus(card, "Paire invalide (tokens identiques)", "bad");
+    return;
+  }
 
   try{
     setStatus(card, "Quoting…", "warn");
-    const amountIn = parseAmount(from, amt);
-    const path = buildPath(from, to);
+    const amountIn = ethers.parseUnits(amtStr, tFrom.decimals);
+    const router = getRouter(true);
+
+    let path = buildPath(tFrom, tTo);
     if(!path) throw new Error("Invalid path");
 
-    const router = getRouter(true);
-    const amounts = await router.getAmountsOut(amountIn, path);
+    let amounts;
+    try{
+      amounts = await router.getAmountsOut(amountIn, path);
+    }catch(_){
+      // fallback via WPLS for token-token
+      const alt = buildPathViaWPLS(tFrom, tTo);
+      if(!alt) throw _;
+      path = alt;
+      amounts = await router.getAmountsOut(amountIn, path);
+    }
+
     const outRaw = amounts[amounts.length - 1];
 
-    outInp.value = formatAmount(to, outRaw);
-    quoteText.textContent = `${amt} ${from} → ~${formatAmount(to, outRaw)} ${to}`;
+    outInp.value = formatUnits(tTo.decimals, outRaw);
+    quoteText.textContent = `${amtStr} ${tFrom.symbol} → ~${formatUnits(tTo.decimals, outRaw)} ${tTo.symbol}`;
 
-    if(from !== "PLS"){
-      const ok = await checkAllowance(from, amountIn);
+    if(tFrom.address){
+      const ok = await checkAllowance(tFrom, amountIn);
       if(!ok){
         approveBtn.style.display = "inline-flex";
         approveBtn.disabled = false;
-        approveBtn.textContent = "Approve " + from;
+        approveBtn.textContent = "Approve " + tFrom.symbol;
         approveBtn.onclick = async ()=>{
           try{
-            await doApprove(from, card);
+            await doApprove(tFrom, card);
             await updateQuote(card);
           }catch(e){
             console.error(e);
@@ -854,7 +1037,7 @@ async function updateQuote(card){
     setStatus(card, "Ready ✅", "good");
   }catch(e){
     console.error(e);
-    setStatus(card, "Quote error (liquidité/pair ?)", "bad");
+    setStatus(card, "Quote error (liquidité/route/token)", "bad");
   }
 }
 
@@ -862,47 +1045,64 @@ async function updateQuote(card){
 async function executeSwap(card){
   if(!networkOk || !userAddress) return alert("Connecte ton wallet sur PulseChain");
 
-  const from = card.querySelector(".from").value;
-  const to   = card.querySelector(".to").value;
-  const amt  = (card.querySelector(".amount").value || "").trim();
+  const fromVal = card.querySelector(".from").value;
+  const toVal   = card.querySelector(".to").value;
+  const amtStr  = (card.querySelector(".amount").value || "").trim();
+
   const txLink = card.querySelector(".txA");
   txLink.style.display = "none";
 
-  if(!validatePair(card)) return;
-  if(!amt || Number(amt) <= 0){
-    setStatus(card, "Montant manquant", "bad");
-    return;
-  }
+  const tFrom = getTokenFromSelectValue(fromVal);
+  const tTo   = getTokenFromSelectValue(toVal);
+
+  if(!tFrom || !tTo) return setStatus(card, "Token invalide", "bad");
+  if(!amtStr || Number(amtStr) <= 0) return setStatus(card, "Montant manquant", "bad");
+  if((tFrom.address || "PLS") === (tTo.address || "PLS")) return setStatus(card, "Paire invalide", "bad");
 
   const { slippage, deadlineMin } = getSettings();
 
   try{
     const routerWrite = getRouter(false);
     const routerRead  = getRouter(true);
-    const amountIn = parseAmount(from, amt);
-    const path = buildPath(from, to);
+    const amountIn = ethers.parseUnits(amtStr, tFrom.decimals);
 
-    if(from !== "PLS"){
-      const ok = await checkAllowance(from, amountIn);
-      if(!ok) await doApprove(from, card);
+    // approve si besoin
+    if(tFrom.address){
+      const ok = await checkAllowance(tFrom, amountIn);
+      if(!ok) await doApprove(tFrom, card);
     }
 
     setStatus(card, "Calcul minOut…", "warn");
-    const amounts = await routerRead.getAmountsOut(amountIn, path);
-    const outRaw  = amounts[amounts.length - 1];
 
-    const bps = Math.round(slippage * 100);
+    let path = buildPath(tFrom, tTo);
+    if(!path) throw new Error("Invalid path");
+
+    let amounts;
+    try{
+      amounts = await routerRead.getAmountsOut(amountIn, path);
+    }catch(_){
+      const alt = buildPathViaWPLS(tFrom, tTo);
+      if(!alt) throw _;
+      path = alt;
+      amounts = await routerRead.getAmountsOut(amountIn, path);
+    }
+
+    const outRaw  = amounts[amounts.length - 1];
+    const bps = Math.round(slippage * 100); // 2.0% => 200 bps
     const minOut = outRaw * BigInt(10000 - bps) / 10000n;
     const deadline = Math.floor(Date.now()/1000) + (deadlineMin * 60);
 
     let tx;
     setStatus(card, "Signature (MetaMask)…", "warn");
 
-    if(from === "PLS"){
+    if(!tFrom.address){
+      // PLS -> token
       tx = await routerWrite.swapExactETHForTokens(minOut, path, userAddress, deadline, { value: amountIn });
-    }else if(to === "PLS"){
+    }else if(!tTo.address){
+      // token -> PLS
       tx = await routerWrite.swapExactTokensForETH(amountIn, minOut, path, userAddress, deadline);
     }else{
+      // token -> token
       tx = await routerWrite.swapExactTokensForTokens(amountIn, minOut, path, userAddress, deadline);
     }
 
@@ -914,13 +1114,15 @@ async function executeSwap(card){
     await tx.wait();
 
     setStatus(card, "Success ✅", "good");
+    BAL_CACHE.clear();
     await refreshAll();
 
   }catch(e){
     console.error(e);
-    setStatus(card, "Swap error (cancel ? liquidité ?)", "bad");
+    setStatus(card, "Swap error (cancel/liquidité/route)", "bad");
   }
 }
+
 document.querySelectorAll(".swapbox").forEach(card=>{
   card.querySelector(".swapBtn").addEventListener("click", ()=> executeSwap(card));
 });
@@ -935,14 +1137,13 @@ $("execTrinityBtn").addEventListener("click", async ()=>{
 
   for(const card of cards){
     const amt = (card.querySelector(".amount").value || "").trim();
-    const from = card.querySelector(".from").value;
-    const to = card.querySelector(".to").value;
-
+    const fromVal = card.querySelector(".from").value;
+    const toVal = card.querySelector(".to").value;
     if(!amt || Number(amt) <= 0){
       setStatus(card, "Skip (montant vide)", "");
       continue;
     }
-    if(from === to){
+    if(fromVal === toVal){
       setStatus(card, "Skip (tokens identiques)", "bad");
       continue;
     }
@@ -950,26 +1151,22 @@ $("execTrinityBtn").addEventListener("click", async ()=>{
     await executeSwap(card);
 
     const st = (card.querySelector(".status").textContent || "").toLowerCase();
-    if(st.includes("error")){
+    if(st.includes("error") || st.includes("cancel")){
       alert("TRINITY stoppé (erreur sur un swap).");
       break;
     }
   }
 });
 
-/* ================= TOKEN MODAL (PulseX-like) ================= */
+/* ================= Token modal ================= */
 let tokenModalTarget = null;
-let tokenBalancesCache = {}; // sym -> string
 
 function openTokenModal(card, side){
   tokenModalTarget = { card, side };
   $("tokenModal").style.display = "block";
   $("tmSearch").value = "";
-  renderTokenList("");
-  setTimeout(()=>$("tmSearch").focus(), 50);
-
-  // charge balances si connecté
-  refreshTokenModalBalances().catch(()=>{});
+  renderTokenList("").catch(()=>{});
+  setTimeout(()=>$("tmSearch").focus(), 30);
 }
 function closeTokenModal(){
   $("tokenModal").style.display = "none";
@@ -977,9 +1174,8 @@ function closeTokenModal(){
 }
 $("tmClose").onclick = closeTokenModal;
 $("tmBackdrop").onclick = closeTokenModal;
-$("openTokenListBtn").onclick = () => openTokenModal($("swap1"), "from"); // ouvre “juste la liste”
 $("tmSearch").addEventListener("input", (e)=> renderTokenList((e.target.value||"").trim()));
-$("tmRefresh").addEventListener("click", ()=> refreshTokenModalBalances(true).catch(()=>{}));
+$("tmRefresh").addEventListener("click", ()=>{ BAL_CACHE.clear(); renderTokenList(($("tmSearch").value||"").trim()); });
 
 async function copyText(txt){
   try{ await navigator.clipboard.writeText(txt); }
@@ -991,10 +1187,9 @@ async function copyText(txt){
   }
 }
 
-async function addTokenToMetaMask(sym){
-  const t = TOKENS[sym];
+async function addTokenToMetaMask(token){
   if(!window.ethereum) return alert("MetaMask requis");
-  if(!t.address) return alert("PLS = token natif (pas ERC20)");
+  if(!token.address) return alert("PLS = token natif (pas ERC20)");
 
   try{
     const wasAdded = await window.ethereum.request({
@@ -1002,184 +1197,175 @@ async function addTokenToMetaMask(sym){
       params: {
         type: "ERC20",
         options: {
-          address: t.address,
-          symbol: sym,
-          decimals: t.decimals ?? 18
+          address: token.address,
+          symbol: token.symbol,
+          decimals: token.decimals,
+          image: token.logoURI || undefined
         }
       }
     });
 
-    if(wasAdded){
-      alert("Token ajouté ✅");
-    }else{
-      alert("Ajout refusé (cancel)");
-    }
+    if(wasAdded) alert("Token ajouté ✅");
+    else alert("Ajout refusé (cancel)");
   }catch(e){
     console.error(e);
-    try{ await copyText(t.address); }catch(_){}
+    try{ await copyText(token.address); }catch(_){}
     alert("Impossible d’ajouter automatiquement.\n✅ Adresse copiée.\n➡️ Ajoute-la via Import token dans MetaMask.");
-    window.open("https://otter.pulsechain.com/address/" + t.address, "_blank");
+    window.open("https://otter.pulsechain.com/address/" + token.address, "_blank");
   }
 }
 
-/* --------- LOGOS : stratégie clean ----------
-   1) Si TOKENS[sym].logo existe => on affiche.
-   2) Sinon, si token “eth” connu => TrustWallet logo auto.
-   3) Sinon fallback : “icône” avec initiales.
--------------------------------------------- */
-function checksum(addr){
-  try{ return ethers.getAddress(addr); }catch{return addr;}
-}
-function trustWalletLogo(addr){
-  // Ethereum (si dispo dans trustwallet)
-  // URL raw GitHub trustwallet
-  const cs = checksum(addr);
-  return "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/" + cs + "/logo.png";
-}
-function makeFallbackSVG(sym){
-  const initials = (sym||"?").slice(0,3);
-  const bg = "rgba(255,255,255,.06)";
-  const stroke = "rgba(255,255,255,.12)";
-  const grad1 = "#a855f7", grad2="#ec4899";
-  const svg =
-    `<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64">
-      <defs>
-        <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stop-color="${grad1}"/>
-          <stop offset="1" stop-color="${grad2}"/>
-        </linearGradient>
-      </defs>
-      <rect x="1" y="1" width="62" height="62" rx="18" fill="${bg}" stroke="${stroke}"/>
-      <circle cx="32" cy="32" r="18" fill="url(#g)" opacity=".22"/>
-      <text x="32" y="38" font-family="system-ui,Segoe UI,Roboto,Arial" font-size="18" font-weight="900"
-        fill="#e5e7eb" text-anchor="middle">${initials}</text>
-    </svg>`;
-  return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
-}
-function getLogoUrl(sym){
-  const t = TOKENS[sym];
-  if(!t) return makeFallbackSVG(sym);
-  if(t.logo) return t.logo;
-  if(t.address && t.chain === "eth") return trustWalletLogo(t.address);
-  return makeFallbackSVG(sym);
-}
-
-async function refreshTokenModalBalances(force=false){
-  if(!networkOk || !userAddress || !provider){
-    // not connected
-    tokenBalancesCache = {};
-    renderTokenList(($("tmSearch").value||"").trim());
-    return;
+function logoHtml(token){
+  // si on a logoURI => <img>, sinon fallback lettre
+  if(token.logoURI){
+    const safe = token.logoURI.replaceAll('"','');
+    return `<div class="tmLogo"><img src="${safe}" alt="${token.symbol}" onerror="this.style.display='none'; this.parentElement.textContent='${token.symbol[0] || "?"}'; this.parentElement.style.fontWeight='900';"></div>`;
   }
-
-  // petit cache (évite spam RPC)
-  if(!force && Object.keys(tokenBalancesCache).length > 0){
-    renderTokenList(($("tmSearch").value||"").trim());
-    return;
-  }
-
-  const keys = Object.keys(TOKENS);
-  const next = {};
-  for(const sym of keys){
-    try{
-      const bal = await getBalance(sym);
-      next[sym] = formatAmount(sym, bal);
-    }catch(e){
-      next[sym] = "—";
-    }
-  }
-  tokenBalancesCache = next;
-  renderTokenList(($("tmSearch").value||"").trim());
+  return `<div class="tmLogo" style="font-weight:900">${(token.symbol||"?")[0]}</div>`;
 }
 
-function renderTokenList(q){
+async function renderTokenList(q){
   const list = $("tmList");
-  const keys = Object.keys(TOKENS);
   const nq = norm(q);
 
-  const filtered = keys.filter(sym=>{
+  // filtre
+  let filtered = TOKEN_LIST.filter(t=>{
     if(!q) return true;
-    const t = TOKENS[sym];
     if(isAddr(q)) return t.address && norm(t.address) === nq;
-    return norm(sym).includes(nq);
+    return norm(t.symbol).includes(nq) || norm(t.name).includes(nq);
   });
 
-  list.innerHTML = filtered.map(sym=>{
-    const t = TOKENS[sym];
-    const addr = t.address ? shortAddr(t.address) : "Native";
-    const showBtns = !!t.address;
-    const bal = tokenBalancesCache[sym] ?? "—";
-    const logo = getLogoUrl(sym);
+  // option: si l'user colle une address inconnue, on la propose
+  if(isAddr(q) && !filtered.length){
+    filtered = [{
+      symbol:"CUSTOM",
+      name:"Token (custom)",
+      address: ethers.getAddress(q),
+      decimals:18,
+      logoURI:"",
+      chainId:PULSECHAIN_ID
+    }];
+  }
+
+  // balances (si connecté)
+  const balMap = new Map();
+  if(networkOk && userAddress){
+    for(const t of filtered.slice(0, 60)){ // limite pour éviter spam réseau
+      try{
+        const b = await getBalanceToken(t);
+        balMap.set(t.address ? norm(t.address) : "PLS", b);
+      }catch(_){}
+    }
+  }
+
+  list.innerHTML = filtered.map(t=>{
+    const addrShort = t.address ? shortAddr(t.address) : "Native";
+    const key = t.address ? norm(t.address) : "PLS";
+    const b = balMap.get(key);
+    const balTxt = (b==null || !networkOk) ? "—" : formatUnits(t.decimals, b);
+
     return `
-      <div class="tmRow" data-sym="${sym}">
-        <div class="tmLeft">
-          <div class="tmLogo"><img src="${logo}" alt="${sym}" onerror="this.src='${makeFallbackSVG(sym)}'"></div>
-          <div>
-            <div class="tmSym">${sym}</div>
-            <div class="tmAddr">${addr}</div>
-          </div>
+      <div class="tmRow" data-addr="${t.address || "PLS"}">
+        ${logoHtml(t)}
+        <div class="tmName">
+          <b>${t.symbol}</b>
+          <small>${addrShort}</small>
         </div>
-
-        <div class="tmMid">
-          <div class="tmBalLabel">Balance</div>
-          <div class="tmBalVal">${bal}</div>
+        <div class="tmBal">
+          <small>Balance</small>
+          <b>${balTxt}</b>
         </div>
-
         <div class="tmActions">
-          ${showBtns ? `
+          ${t.address ? `
             <button class="tmIconBtn tmCopy" title="Copy address">📋</button>
             <button class="tmIconBtn tmAdd" title="Add to MetaMask">🦊</button>
-          ` : `<span class="mono" style="color:#9ca3af;">—</span>`}
+          ` : `<small style="color:var(--muted)">—</small>`}
         </div>
       </div>
     `;
   }).join("");
 
+  // select
   list.querySelectorAll(".tmRow").forEach(row=>{
     row.addEventListener("click", async (e)=>{
-      const sym = row.dataset.sym;
+      const addr = row.dataset.addr;
       if(e.target.classList.contains("tmCopy") || e.target.classList.contains("tmAdd")) return;
       if(!tokenModalTarget) return;
 
       const { card, side } = tokenModalTarget;
       const sel = card.querySelector(side === "from" ? ".from" : ".to");
-      sel.value = sym;
+
+      if(addr === "PLS"){
+        sel.value = "PLS";
+      }else{
+        sel.value = ethers.getAddress(addr);
+      }
 
       closeTokenModal();
-      await refreshCardBalance(card).catch(()=>{});
+      await refreshCardBalances(card).catch(()=>{});
       await updateQuote(card).catch(()=>{});
     });
   });
 
+  // copy
   list.querySelectorAll(".tmCopy").forEach(btn=>{
     btn.addEventListener("click", async (e)=>{
       e.stopPropagation();
-      const sym = btn.closest(".tmRow").dataset.sym;
-      await copyText(TOKENS[sym].address);
+      const addr = btn.closest(".tmRow").dataset.addr;
+      await copyText(addr);
       btn.textContent="✅";
       setTimeout(()=>btn.textContent="📋", 700);
     });
   });
 
+  // add MM
   list.querySelectorAll(".tmAdd").forEach(btn=>{
     btn.addEventListener("click", async (e)=>{
       e.stopPropagation();
-      const sym = btn.closest(".tmRow").dataset.sym;
-      await addTokenToMetaMask(sym);
+      const addr = btn.closest(".tmRow").dataset.addr;
+      const token = (addr === "PLS")
+        ? TOKEN_LIST.find(t=>t.symbol==="PLS" && !t.address)
+        : TOKEN_BY_ADDR.get(norm(addr)) || {symbol:"CUSTOM", address:ethers.getAddress(addr), decimals:18, name:"Token", logoURI:""};
+      await addTokenToMetaMask(token);
     });
   });
 }
 
-/* Hook : ouvrir modal au clic sur les selects (PulseX-like) */
-document.querySelectorAll(".swapbox").forEach(card=>{
-  const fromSel = card.querySelector(".from");
-  const toSel   = card.querySelector(".to");
-  fromSel.addEventListener("mousedown", (e)=>{ e.preventDefault(); openTokenModal(card,"from"); });
-  toSel.addEventListener("mousedown", (e)=>{ e.preventDefault(); openTokenModal(card,"to"); });
+// hook selects => modal
+function hookSelectsToModal(){
+  document.querySelectorAll(".swapbox").forEach(card=>{
+    const fromSel = card.querySelector(".from");
+    const toSel   = card.querySelector(".to");
+    fromSel.addEventListener("mousedown", (e)=>{ e.preventDefault(); openTokenModal(card,"from"); });
+    toSel.addEventListener("mousedown", (e)=>{ e.preventDefault(); openTokenModal(card,"to"); });
+  });
+}
+
+/* ================= token list button ================= */
+$("openTokenListBtn").addEventListener("click", ()=>{
+  // ouvre modal "libre" (sans cibler un swap)
+  // on cible swap1/from par défaut
+  openTokenModal($("swap1"), "from");
 });
 
 /* ================= INIT ================= */
-setConnectedUI(false);
+(async function init(){
+  setConnectedUI(false);
+  await loadTokenList();
+  initCardsDefaults();
+  hookSelectsToModal();
+
+  // Quand tokenlist est prête, refresh select content
+  // (on remplit déjà, mais ici on force au cas où)
+  document.querySelectorAll(".swapbox").forEach((card, idx)=>{
+    const fromSel = card.querySelector(".from");
+    const toSel   = card.querySelector(".to");
+    const curFrom = fromSel.value || "PLS";
+    const curTo = toSel.value || "PLS";
+    fillSelectByTokens(fromSel, curFrom);
+    fillSelectByTokens(toSel, curTo);
+  });
+})();
 </script>
 </body>
 </html>
