@@ -1,266 +1,659 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>TRINITY Swap — PulseChain</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>TRINITY Swap — PulseChain</title>
 
-<script src="https://cdn.jsdelivr.net/npm/ethers@6.13.2/dist/ethers.umd.min.js"></script>
+  <!-- Ethers v6 -->
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.2/dist/ethers.umd.min.js"></script>
 
-<style>
-:root{
-  --bg:#020617;
-  --card:#0f172a;
-  --border:#1f2937;
-  --text:#e5e7eb;
-  --muted:#9ca3af;
-  --accent:#a855f7;
-  --success:#22c55e;
-  --error:#ef4444;
-  --radius:16px;
-}
-*{box-sizing:border-box;margin:0;padding:0}
-body{
-  font-family:system-ui,Segoe UI,Roboto,sans-serif;
-  background:var(--bg);
-  color:var(--text);
-}
-.page{
-  max-width:1100px;
-  margin:auto;
-  padding:24px 16px 60px;
-}
-header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:20px;
-}
-.brand{font-size:20px;font-weight:700}
-button{
-  cursor:pointer;
-  border:none;
-}
-.btn{
-  padding:10px 16px;
-  border-radius:999px;
-  background:linear-gradient(120deg,#a855f7,#ec4899);
-  color:white;
-  font-weight:600;
-}
-.hero h1{font-size:28px;margin-bottom:6px}
-.hero p{color:var(--muted);font-size:14px}
-
-.swaps{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:16px;
-  margin-top:24px;
-}
-@media(max-width:900px){.swaps{grid-template-columns:1fr}}
-
-.swap{
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:var(--radius);
-  padding:16px;
-}
-.swap h3{margin-bottom:10px;font-size:14px}
-label{font-size:12px;color:var(--muted)}
-.row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
-select,input{
-  width:100%;
-  padding:10px;
-  border-radius:12px;
-  background:#020617;
-  border:1px solid var(--border);
-  color:var(--text);
-}
-.switch{text-align:center;margin:6px 0}
-.switch button{
-  background:#020617;
-  border:1px solid var(--border);
-  border-radius:10px;
-  padding:6px 10px;
-  color:var(--text);
-}
-.status{font-size:12px;margin-top:8px;color:var(--muted)}
-.success{color:var(--success)}
-.error{color:var(--error)}
-
-footer{
-  margin-top:40px;
-  font-size:11px;
-  color:var(--muted);
-  text-align:center;
-  border-top:1px solid var(--border);
-  padding-top:12px;
-}
-</style>
+  <style>
+    :root{
+      --bg:#050816;
+      --bg2:#070b1f;
+      --card:#0f172a;
+      --border:#1f2937;
+      --text:#e5e7eb;
+      --muted:#9ca3af;
+      --accent:#a855f7;
+      --accent2:#ec4899;
+      --good:#22c55e;
+      --bad:#ef4444;
+      --warn:#f59e0b;
+      --radius:18px;
+      --shadow:0 18px 45px rgba(0,0,0,.55);
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      background: radial-gradient(1200px 700px at 20% 0%, #0b102a 0%, var(--bg) 55%, #020617 100%);
+      color:var(--text);
+    }
+    a{color:inherit}
+    .wrap{max-width:1150px;margin:0 auto;padding:22px 14px 60px}
+    header{
+      display:flex;align-items:center;justify-content:space-between;gap:12px;
+      position:sticky;top:0;z-index:50;
+      backdrop-filter: blur(10px);
+      background:linear-gradient(180deg, rgba(5,8,22,.85), rgba(5,8,22,.45));
+      border-bottom:1px solid rgba(31,41,55,.6);
+      padding:14px 10px;margin:-22px -14px 18px;
+    }
+    .brand{
+      display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.4px
+    }
+    .logo{
+      width:34px;height:34px;border-radius:12px;
+      background:linear-gradient(135deg,var(--accent),var(--accent2));
+      box-shadow:0 10px 25px rgba(168,85,247,.25);
+    }
+    .brand span{font-size:16px}
+    .top-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+    .pill{
+      font-size:12px;color:var(--muted);
+      border:1px solid rgba(31,41,55,.9);
+      background:rgba(2,6,23,.55);
+      padding:8px 10px;border-radius:999px;
+    }
+    .btn{
+      cursor:pointer;border:none;
+      padding:10px 14px;border-radius:999px;
+      background:linear-gradient(120deg,var(--accent),var(--accent2));
+      color:#fff;font-weight:700;
+      box-shadow:0 12px 30px rgba(236,72,153,.15);
+    }
+    .btn:disabled{opacity:.6;cursor:not-allowed}
+    .btn2{
+      cursor:pointer;border:1px solid rgba(31,41,55,.9);
+      padding:10px 14px;border-radius:999px;
+      background:rgba(2,6,23,.55);
+      color:var(--text);font-weight:700;
+    }
+    .hero{
+      display:grid;grid-template-columns:1.3fr .7fr;gap:14px;
+      align-items:stretch;margin-top:8px;
+    }
+    @media(max-width:980px){.hero{grid-template-columns:1fr}}
+    .card{
+      background:linear-gradient(180deg, rgba(15,23,42,.92), rgba(15,23,42,.72));
+      border:1px solid rgba(31,41,55,.9);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:16px;
+    }
+    h1{font-size:26px;line-height:1.15}
+    .sub{margin-top:8px;color:var(--muted);font-size:13px}
+    .kpi{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+    .kpi .tag{
+      font-size:12px;color:var(--text);
+      border:1px solid rgba(31,41,55,.9);
+      background:rgba(2,6,23,.55);
+      padding:7px 10px;border-radius:999px;
+    }
+    .settings{
+      display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px
+    }
+    @media(max-width:520px){.settings{grid-template-columns:1fr}}
+    label{font-size:12px;color:var(--muted)}
+    input,select{
+      width:100%;margin-top:6px;
+      padding:10px 11px;border-radius:14px;
+      background:rgba(2,6,23,.65);
+      border:1px solid rgba(31,41,55,.9);
+      color:var(--text);outline:none;
+    }
+    .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .swaps{
+      display:grid;grid-template-columns:repeat(3,1fr);
+      gap:14px;margin-top:16px;
+    }
+    @media(max-width:980px){.swaps{grid-template-columns:1fr}}
+    .swap-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+    .swap-title b{font-size:13px}
+    .mini{font-size:12px;color:var(--muted)}
+    .swapbox{padding:16px}
+    .switch{
+      display:flex;justify-content:center;margin:10px 0;
+    }
+    .switch button{
+      border:1px solid rgba(31,41,55,.9);
+      background:rgba(2,6,23,.55);
+      color:var(--text);border-radius:12px;
+      padding:7px 10px;cursor:pointer;
+    }
+    .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+    .status{margin-top:10px;font-size:12px;color:var(--muted)}
+    .status.good{color:var(--good)}
+    .status.bad{color:var(--bad)}
+    .status.warn{color:var(--warn)}
+    .quoteLine{
+      margin-top:8px;font-size:12px;color:var(--muted);
+      display:flex;gap:10px;flex-wrap:wrap;align-items:center
+    }
+    .txlink{font-weight:700;text-decoration:none;border-bottom:1px dotted rgba(229,231,235,.35)}
+    footer{
+      margin-top:26px;text-align:center;color:var(--muted);
+      font-size:11px;line-height:1.6;
+      opacity:.95
+    }
+    .hr{height:1px;background:rgba(31,41,55,.7);margin:16px 0}
+    .warnbox{
+      border:1px solid rgba(245,158,11,.35);
+      background:rgba(245,158,11,.08);
+      padding:10px 12px;border-radius:14px;
+      font-size:12px;color:var(--muted);
+    }
+    code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}
+  </style>
 </head>
 
 <body>
-<div class="page">
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <div class="logo"></div>
+        <span>TRINITY Swap</span>
+      </div>
 
-<header>
-  <div class="brand">TRINITY Swap</div>
-  <button class="btn" onclick="connectWallet()">Connect Wallet</button>
-</header>
+      <div class="top-right">
+        <div class="pill" id="netPill">Réseau : —</div>
+        <div class="pill" id="walletPill">Wallet : non connecté</div>
+        <button class="btn" id="connectBtn">Connect Wallet</button>
+      </div>
+    </header>
 
-<section class="hero">
-  <h1>Swap 3 tokens. One interface.</h1>
-  <p>PulseX router • Non-custodial • Mode 1</p>
-</section>
+    <section class="hero">
+      <div class="card">
+        <h1>3 swaps indépendants, une seule interface.</h1>
+        <div class="sub">
+          Mode 1 (PulseX-like) : TRINITY = UI au-dessus du router PulseX • non-custodial • 0 fee TRINITY
+        </div>
 
-<section class="swaps" id="swaps"></section>
+        <div class="kpi">
+          <div class="tag">✅ 3 TX séparées</div>
+          <div class="tag">✅ Approve auto (si besoin)</div>
+          <div class="tag">✅ Quote en live</div>
+          <div class="tag">✅ Slippage réglable</div>
+        </div>
 
-<footer>
-TRINITY Swap — PulseChain<br>
-Uses PulseX router • No fees • Use at your own risk
-</footer>
+        <div class="hr"></div>
 
-</div>
+        <div class="warnbox">
+          ⚠️ Teste avec de petits montants. TRINITY ne garde pas tes fonds : c’est ton wallet qui signe.
+        </div>
+      </div>
+
+      <div class="card">
+        <b style="font-size:13px">Réglages</b>
+
+        <div class="settings">
+          <div>
+            <label>Slippage (%)</label>
+            <input id="slippage" type="number" min="0" step="0.1" value="2.0" />
+          </div>
+          <div>
+            <label>Deadline (minutes)</label>
+            <input id="deadlineM" type="number" min="1" step="1" value="10" />
+          </div>
+        </div>
+
+        <div style="margin-top:12px" class="warnbox">
+          Explorer : <a class="txlink" target="_blank" rel="noreferrer" href="https://otter.pulsechain.com/">otter.pulsechain.com</a>
+        </div>
+
+        <div class="hr"></div>
+
+        <button class="btn2" id="refreshBtn">↻ Refresh balances/quotes</button>
+      </div>
+    </section>
+
+    <section class="swaps" id="swaps"></section>
+
+    <footer>
+      TRINITY Swap — PulseChain • Mode 1 (PulseX-like) • Aucun frais TRINITY<br/>
+      Utilise à tes risques. Vérifie les adresses et teste petit.
+    </footer>
+  </div>
 
 <script>
 /* =========================
-   CONSTANTES
+   CONFIG (à vérifier)
 ========================= */
+
+// PulseChain chainId = 369 (0x171)
 const PULSECHAIN_ID = 369;
-const ROUTER = "0x98bf93ebf5c380C0e6Ae8e192A7e2b4bF4cFfC2e";
+
+// Router PulseX (⚠️ à confirmer/adapter si besoin)
+const PULSEX_ROUTER = "0x98bf93ebf5c380C0e6Ae8e192A7e2b4bF4cFfC2e";
+
+// WPLS (PulseChain) — adresse largement utilisée
 const WPLS = "0xA1077a294dDE1B09bB078844df40758a5D0f9a27";
 
+// Tokens v1 (tu peux en ajouter)
 const TOKENS = {
-  PLS:{symbol:"PLS",address:null,decimals:18},
-  WPLS:{symbol:"WPLS",address:WPLS,decimals:18},
-  PHEX:{symbol:"PHEX",address:"0x2b591e99afE9f32eAA6214f7B7629768c40Eeb39",decimals:8},
-  ATROPA:{symbol:"ATROPA",address:"0xCc78A0acDF847A2C1714D2A925bB4477df5d48a6",decimals:18},
-  PLSX:{symbol:"PLSX",address:"0x95B303987A60C71504D99Aa1b13B4DA07b0790ab",decimals:18},
-  DAI:{symbol:"DAI",address:"0x6B175474E89094C44Da98b954EedeAC495271d0F",decimals:18}
+  PLS:   { symbol:"PLS",   address:null, decimals:18 },
+  WPLS:  { symbol:"WPLS",  address:WPLS, decimals:18 },
+
+  // PRC20 “copies” (mêmes adresses que sur Ethereum pour beaucoup de tokens)
+  PHEX:  { symbol:"PHEX",  address:"0x2b591e99afE9f32eAA6214f7B7629768c40Eeb39", decimals:8 },
+  ATROPA:{ symbol:"ATROPA",address:"0xCc78A0acDF847A2C1714D2A925bB4477df5d48a6", decimals:18 },
+  PLSX:  { symbol:"PLSX",  address:"0x95B303987A60C71504D99Aa1b13B4DA07b0790ab", decimals:18 },
+  DAI:   { symbol:"DAI",   address:"0x6B175474E89094C44Da98b954EedeAC495271d0F", decimals:18 }
 };
 
-const ERC20_ABI=[
-  "function approve(address,uint) returns(bool)",
-  "function allowance(address,address) view returns(uint)"
-];
-const ROUTER_ABI=[
-  "function getAmountsOut(uint,address[]) view returns(uint[])",
-  "function swapExactTokensForTokens(uint,uint,address[],address,uint)",
-  "function swapExactETHForTokens(uint,address[],address,uint) payable",
-  "function swapExactTokensForETH(uint,uint,address[],address,uint)"
+// ABI minimale ERC20 / Router
+const ERC20_ABI = [
+  "function approve(address spender,uint256 amount) external returns (bool)",
+  "function allowance(address owner,address spender) external view returns (uint256)",
+  "function balanceOf(address owner) external view returns (uint256)",
+  "function decimals() external view returns (uint8)",
 ];
 
-let provider, signer, user;
+const ROUTER_ABI = [
+  "function getAmountsOut(uint256 amountIn, address[] calldata path) external view returns (uint256[] memory amounts)",
+  "function swapExactTokensForTokens(uint256 amountIn,uint256 amountOutMin,address[] calldata path,address to,uint256 deadline) external returns (uint256[] memory amounts)",
+  "function swapExactETHForTokens(uint256 amountOutMin,address[] calldata path,address to,uint256 deadline) external payable returns (uint256[] memory amounts)",
+  "function swapExactTokensForETH(uint256 amountIn,uint256 amountOutMin,address[] calldata path,address to,uint256 deadline) external returns (uint256[] memory amounts)"
+];
+
+// Explorer (Otter)
+function txUrl(hash){ return `https://otter.pulsechain.com/tx/${hash}`; }
 
 /* =========================
-   WALLET
+   STATE
 ========================= */
-async function connectWallet(){
-  if(!window.ethereum) return alert("Wallet requis");
-  await ethereum.request({method:"eth_requestAccounts"});
-  provider=new ethers.BrowserProvider(window.ethereum);
-  signer=await provider.getSigner();
-  user=await signer.getAddress();
-  const net=await provider.getNetwork();
-  if(Number(net.chainId)!==PULSECHAIN_ID){
-    alert("Passe sur PulseChain");
-    return;
-  }
-  alert("Connecté : "+user);
+let provider, signer, userAddress, networkOk = false;
+
+/* =========================
+   HELPERS
+========================= */
+const $ = (id) => document.getElementById(id);
+
+function shortAddr(a){
+  return a ? (a.slice(0,6)+"…"+a.slice(-4)) : "";
+}
+
+function setStatus(card, txt, cls=""){
+  const el = card.querySelector(".status");
+  el.className = "status" + (cls ? " "+cls : "");
+  el.textContent = txt;
+}
+
+function getSettings(){
+  const sl = parseFloat($("slippage").value || "2");
+  const dl = parseInt($("deadlineM").value || "10", 10);
+  return { slippage: Math.max(0, sl), deadlineMin: Math.max(1, dl) };
+}
+
+function toChecksum(addr){
+  return addr ? ethers.getAddress(addr) : null;
+}
+
+function tokenKeys(){
+  return Object.keys(TOKENS);
+}
+
+function buildPath(symIn, symOut){
+  const inT = TOKENS[symIn];
+  const outT = TOKENS[symOut];
+
+  if(symIn === "PLS" && symOut === "PLS") return null;
+  if(symIn === "PLS") return [WPLS, toChecksum(outT.address)];
+  if(symOut === "PLS") return [toChecksum(inT.address), WPLS];
+  return [toChecksum(inT.address), toChecksum(outT.address)];
+}
+
+function needsApprove(symIn){
+  return symIn !== "PLS";
+}
+
+function parseAmount(sym, human){
+  const dec = TOKENS[sym].decimals;
+  return ethers.parseUnits(human, dec);
+}
+
+function formatAmount(sym, raw){
+  const dec = TOKENS[sym].decimals;
+  const s = ethers.formatUnits(raw, dec);
+  // coupe un peu l’affichage
+  const num = Number(s);
+  if(!isFinite(num)) return s;
+  if(num === 0) return "0";
+  if(num < 0.0001) return num.toExponential(3);
+  return num.toLocaleString(undefined, { maximumFractionDigits: 6 });
 }
 
 /* =========================
-   UI
+   UI BUILD (3 swaps)
 ========================= */
-const swapsEl=document.getElementById("swaps");
+const swapsEl = $("swaps");
+
+function swapCardTemplate(i){
+  return `
+    <div class="card swapbox" id="swap${i}">
+      <div class="swap-title">
+        <b>Swap ${i}</b>
+        <span class="mini">TX #${i}</span>
+      </div>
+
+      <label>From</label>
+      <div class="row2">
+        <select class="from"></select>
+        <input class="amount" inputmode="decimal" placeholder="Montant" />
+      </div>
+
+      <div class="switch">
+        <button class="invert" title="Inverser">↕</button>
+      </div>
+
+      <label>To</label>
+      <div class="row2">
+        <select class="to"></select>
+        <input class="out" placeholder="Estimation" readonly />
+      </div>
+
+      <div class="quoteLine">
+        <span class="mini">Quote:</span>
+        <span class="mini quoteText">—</span>
+      </div>
+
+      <div class="actions">
+        <button class="btn2 approveBtn" style="display:none">Approve</button>
+        <button class="btn swapBtn">Swap</button>
+      </div>
+
+      <div class="status">Ready</div>
+      <div class="quoteLine" style="margin-top:10px">
+        <a class="txlink txA" target="_blank" rel="noreferrer" style="display:none">Voir TX</a>
+      </div>
+    </div>
+  `;
+}
 
 for(let i=1;i<=3;i++){
-  swapsEl.innerHTML+=`
-  <div class="swap" id="swap${i}">
-    <h3>Swap ${i}</h3>
-    <label>From</label>
-    <div class="row">
-      <select class="from"></select>
-      <input class="amount" placeholder="Amount">
-    </div>
-    <div class="switch"><button class="invert">↕</button></div>
-    <label>To</label>
-    <div class="row">
-      <select class="to"></select>
-      <input class="out" placeholder="Estimated" readonly>
-    </div>
-    <button class="btn" onclick="doSwap(${i})">Swap ${i}</button>
-    <div class="status">Ready</div>
-  </div>`;
+  swapsEl.insertAdjacentHTML("beforeend", swapCardTemplate(i));
 }
 
-document.querySelectorAll(".swap").forEach(card=>{
-  const f=card.querySelector(".from");
-  const t=card.querySelector(".to");
-  Object.keys(TOKENS).forEach(k=>{
-    f.innerHTML+=`<option>${k}</option>`;
-    t.innerHTML+=`<option>${k}</option>`;
+function fillSelect(sel, selected){
+  sel.innerHTML = "";
+  for(const k of tokenKeys()){
+    const opt = document.createElement("option");
+    opt.value = k;
+    opt.textContent = k;
+    sel.appendChild(opt);
+  }
+  sel.value = selected;
+}
+
+function initCardsDefaults(){
+  // defaults sympa
+  const defaults = [
+    {from:"PLS",  to:"PHEX"},
+    {from:"ATROPA",to:"DAI"},
+    {from:"PHEX", to:"PLSX"},
+  ];
+
+  document.querySelectorAll(".swapbox").forEach((card, idx)=>{
+    const fromSel = card.querySelector(".from");
+    const toSel   = card.querySelector(".to");
+    fillSelect(fromSel, defaults[idx].from);
+    fillSelect(toSel, defaults[idx].to);
+
+    card.querySelector(".invert").addEventListener("click", ()=>{
+      const a = fromSel.value;
+      fromSel.value = toSel.value;
+      toSel.value = a;
+      triggerQuote(card);
+    });
+
+    fromSel.addEventListener("change", ()=> triggerQuote(card));
+    toSel.addEventListener("change", ()=> triggerQuote(card));
+    card.querySelector(".amount").addEventListener("input", ()=> triggerQuote(card));
   });
-  f.value="PLS"; t.value="PHEX";
-  card.querySelector(".invert").onclick=()=>[f.value,t.value]=[t.value,f.value];
-});
+}
+initCardsDefaults();
 
 /* =========================
-   SWAP LOGIC
+   WALLET CONNECT
 ========================= */
-async function doSwap(i){
-  if(!signer) return alert("Connect wallet");
-  const card=document.getElementById("swap"+i);
-  const status=card.querySelector(".status");
-  const from=card.querySelector(".from").value;
-  const to=card.querySelector(".to").value;
-  const amt=card.querySelector(".amount").value;
-  if(!amt) return;
+async function connectWallet(){
+  if(!window.ethereum){
+    alert("Wallet requis : MetaMask ou Rabby");
+    return;
+  }
+
+  await window.ethereum.request({ method:"eth_requestAccounts" });
+
+  provider = new ethers.BrowserProvider(window.ethereum);
+  signer = await provider.getSigner();
+  userAddress = await signer.getAddress();
+
+  const net = await provider.getNetwork();
+  networkOk = (Number(net.chainId) === PULSECHAIN_ID);
+
+  $("walletPill").textContent = "Wallet : " + shortAddr(userAddress);
+  $("netPill").textContent = "Réseau : " + (networkOk ? "PulseChain ✅" : `Mauvais (${net.chainId}) ❌`);
+
+  if(!networkOk){
+    alert("Passe sur PulseChain (chainId 369) puis reconnecte.");
+    return;
+  }
+
+  // écoute changements
+  window.ethereum.on?.("accountsChanged", ()=> location.reload());
+  window.ethereum.on?.("chainChanged", ()=> location.reload());
+
+  // quotes direct
+  refreshAll();
+}
+
+$("connectBtn").addEventListener("click", connectWallet);
+$("refreshBtn").addEventListener("click", refreshAll);
+
+/* =========================
+   QUOTE + APPROVE CHECK
+========================= */
+async function getRouter(readOnly=true){
+  if(!provider) throw new Error("Provider missing");
+  const c = new ethers.Contract(PULSEX_ROUTER, ROUTER_ABI, readOnly ? provider : signer);
+  return c;
+}
+
+async function checkAllowance(symIn, amountRaw){
+  if(symIn === "PLS") return true;
+  const t = TOKENS[symIn];
+  const erc = new ethers.Contract(toChecksum(t.address), ERC20_ABI, provider);
+  const allowance = await erc.allowance(userAddress, PULSEX_ROUTER);
+  return allowance >= amountRaw;
+}
+
+async function doApprove(symIn, card){
+  const t = TOKENS[symIn];
+  const erc = new ethers.Contract(toChecksum(t.address), ERC20_ABI, signer);
+  setStatus(card, "Approving… (MetaMask)", "warn");
+  const tx = await erc.approve(PULSEX_ROUTER, ethers.MaxUint256);
+  setStatus(card, "Approve pending…", "warn");
+  await tx.wait();
+  setStatus(card, "Approve OK ✅", "good");
+}
+
+let quoteTimer = null;
+
+function triggerQuote(card){
+  if(quoteTimer) clearTimeout(quoteTimer);
+  quoteTimer = setTimeout(()=> updateQuote(card).catch(()=>{}), 250);
+}
+
+async function updateQuote(card){
+  const from = card.querySelector(".from").value;
+  const to = card.querySelector(".to").value;
+  const amt = (card.querySelector(".amount").value || "").trim();
+
+  const outInp = card.querySelector(".out");
+  const quoteText = card.querySelector(".quoteText");
+  const approveBtn = card.querySelector(".approveBtn");
+
+  outInp.value = "";
+  quoteText.textContent = "—";
+  approveBtn.style.display = "none";
+
+  if(!signer || !networkOk){
+    setStatus(card, "Ready (connect wallet)", "");
+    return;
+  }
+  if(!amt || Number(amt) <= 0){
+    setStatus(card, "Ready", "");
+    return;
+  }
+  if(from === to){
+    setStatus(card, "Choisis 2 tokens différents", "bad");
+    return;
+  }
 
   try{
-    status.textContent="Processing...";
-    const router=new ethers.Contract(ROUTER,ROUTER_ABI,signer);
-    const inTok=TOKENS[from];
-    const outTok=TOKENS[to];
-    const amountIn=ethers.parseUnits(amt,inTok.decimals);
+    setStatus(card, "Quoting…", "warn");
+    const amountIn = parseAmount(from, amt);
+    const path = buildPath(from, to);
+    if(!path) throw new Error("Invalid path");
 
-    if(from!=="PLS"){
-      const erc=new ethers.Contract(inTok.address,ERC20_ABI,signer);
-      const allowance=await erc.allowance(user,ROUTER);
-      if(allowance<amountIn){
-        status.textContent="Approving...";
-        const txa=await erc.approve(ROUTER,ethers.MaxUint256);
-        await txa.wait();
+    const router = await getRouter(true);
+    const amounts = await router.getAmountsOut(amountIn, path);
+    const outRaw = amounts[amounts.length - 1];
+
+    outInp.value = formatAmount(to, outRaw);
+    quoteText.textContent = `${amt} ${from} → ~${formatAmount(to, outRaw)} ${to}`;
+
+    // allowance check
+    if(needsApprove(from)){
+      const ok = await checkAllowance(from, amountIn);
+      if(!ok){
+        approveBtn.style.display = "inline-flex";
+        approveBtn.onclick = ()=> doApprove(from, card).then(()=> updateQuote(card)).catch((e)=>{
+          console.error(e);
+          setStatus(card, "Approve error", "bad");
+        });
+        setStatus(card, "Allowance insuffisante → Approve requis", "warn");
+        return;
       }
     }
 
-    const path = from==="PLS"
-      ? [WPLS,outTok.address]
-      : to==="PLS"
-        ? [inTok.address,WPLS]
-        : [inTok.address,outTok.address];
-
-    const amounts=await router.getAmountsOut(amountIn,path);
-    const minOut=amounts[1]*98n/100n;
-    const deadline=Math.floor(Date.now()/1000)+600;
-
-    let tx;
-    if(from==="PLS"){
-      tx=await router.swapExactETHForTokens(minOut,path,user,deadline,{value:amountIn});
-    }else if(to==="PLS"){
-      tx=await router.swapExactTokensForETH(amountIn,minOut,path,user,deadline);
-    }else{
-      tx=await router.swapExactTokensForTokens(amountIn,minOut,path,user,deadline);
-    }
-
-    await tx.wait();
-    status.textContent="Success ✓";
-    status.className="status success";
+    setStatus(card, "Ready ✅", "good");
   }catch(e){
-    status.textContent="Error";
-    status.className="status error";
     console.error(e);
+    setStatus(card, "Quote error (pair/liquidité ?)", "bad");
   }
 }
+
+async function refreshAll(){
+  const cards = document.querySelectorAll(".swapbox");
+  for(const c of cards){
+    await updateQuote(c);
+  }
+}
+
+/* =========================
+   SWAP EXECUTION
+========================= */
+async function executeSwap(card){
+  if(!signer || !networkOk){
+    alert("Connecte ton wallet sur PulseChain");
+    return;
+  }
+
+  const from = card.querySelector(".from").value;
+  const to   = card.querySelector(".to").value;
+  const amt  = (card.querySelector(".amount").value || "").trim();
+  const txLink = card.querySelector(".txA");
+  txLink.style.display = "none";
+
+  if(!amt || Number(amt) <= 0) return;
+  if(from === to){
+    setStatus(card, "Tokens identiques", "bad");
+    return;
+  }
+
+  const { slippage, deadlineMin } = getSettings();
+
+  try{
+    const router = await getRouter(false);
+
+    const amountIn = parseAmount(from, amt);
+    const path = buildPath(from, to);
+    if(!path) throw new Error("Invalid path");
+
+    // Approve si nécessaire
+    if(needsApprove(from)){
+      const ok = await checkAllowance(from, amountIn);
+      if(!ok){
+        await doApprove(from, card);
+      }
+    }
+
+    // minOut avec slippage
+    setStatus(card, "Calcul minOut…", "warn");
+    const amounts = await router.getAmountsOut(amountIn, path);
+    const outRaw  = amounts[amounts.length - 1];
+
+    // minOut = outRaw * (1 - slippage/100)
+    // BigInt safe
+    const bps = Math.round(slippage * 100); // 1% = 100 bps
+    const minOut = outRaw * BigInt(10000 - bps) / 10000n;
+
+    const deadline = Math.floor(Date.now()/1000) + (deadlineMin * 60);
+
+    let tx;
+
+    setStatus(card, "Signature (MetaMask)…", "warn");
+
+    if(from === "PLS"){
+      tx = await router.swapExactETHForTokens(
+        minOut,
+        path,
+        userAddress,
+        deadline,
+        { value: amountIn }
+      );
+    }else if(to === "PLS"){
+      tx = await router.swapExactTokensForETH(
+        amountIn,
+        minOut,
+        path,
+        userAddress,
+        deadline
+      );
+    }else{
+      tx = await router.swapExactTokensForTokens(
+        amountIn,
+        minOut,
+        path,
+        userAddress,
+        deadline
+      );
+    }
+
+    setStatus(card, "Pending…", "warn");
+    txLink.href = txUrl(tx.hash);
+    txLink.textContent = "Voir TX";
+    txLink.style.display = "inline-flex";
+
+    await tx.wait();
+
+    setStatus(card, "Success ✅", "good");
+    // refresh quote après swap
+    await updateQuote(card);
+
+  }catch(e){
+    console.error(e);
+    setStatus(card, "Swap error (cancel ? liquidité ?)", "bad");
+  }
+}
+
+// bind swap buttons
+document.querySelectorAll(".swapbox").forEach((card)=>{
+  card.querySelector(".swapBtn").addEventListener("click", ()=> executeSwap(card));
+});
 </script>
 </body>
 </html>
+
