@@ -28,18 +28,45 @@
       --r:18px;
     }
     *{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%}
     body{
       font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      color:var(--text);
+      min-height:100vh;
+      position:relative;
+      overflow-x:hidden;
+      background: #02040e;
+    }
+    /* ✅ FOND IMAGE FULL-PAGE */
+    body::before{
+      content:"";
+      position:fixed; inset:0;
+      background-image: url("paliers.png");
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      transform: scale(1.04);
+      filter: blur(10px) brightness(.35) saturate(1.1) contrast(1.05);
+      opacity: .95;
+      z-index:0;
+      pointer-events:none;
+    }
+    /* ✅ OVERLAY + GLOW comme ton style */
+    body::after{
+      content:"";
+      position:fixed; inset:0;
       background:
         radial-gradient(1000px 420px at 12% 0%, rgba(168,85,247,.22), transparent 60%),
         radial-gradient(900px 420px at 92% 10%, rgba(236,72,153,.18), transparent 55%),
         radial-gradient(1200px 700px at 50% 120%, rgba(34,197,94,.06), transparent 60%),
-        linear-gradient(180deg, var(--bg), #02040e);
-      color:var(--text);
-      min-height:100vh;
+        linear-gradient(180deg, rgba(4,8,23,.88), rgba(2,4,14,.94));
+      z-index:0;
+      pointer-events:none;
     }
+
     a{color:inherit;text-decoration:none}
-    .wrap{max-width:1200px;margin:0 auto;padding:22px 16px 56px}
+    .wrap{max-width:1200px;margin:0 auto;padding:22px 16px 56px;position:relative;z-index:1}
+
     .topbar{
       display:flex;align-items:center;justify-content:space-between;
       gap:12px;margin-bottom:14px;
@@ -61,6 +88,7 @@
       border:1px solid var(--border);
       color:var(--muted);
       font-size:12px;
+      backdrop-filter: blur(10px);
     }
     .pill .dot{
       width:8px;height:8px;border-radius:99px;background:rgba(255,255,255,.25)
@@ -83,6 +111,7 @@
       border:1px solid var(--border2);
       transition: transform .08s ease, filter .08s ease;
       white-space:nowrap;
+      backdrop-filter: blur(10px);
     }
     .btn2:active{transform:scale(.98);filter:brightness(.98)}
     .layout{
@@ -101,6 +130,7 @@
       border-radius: var(--r);
       box-shadow: var(--shadow);
       overflow:hidden;
+      backdrop-filter: blur(10px);
     }
     .cardPad{padding:16px}
     .hero h1{
@@ -267,30 +297,6 @@
     @media(max-width:980px){.bottomGrid{grid-template-columns:1fr}}
     .notes p{color:var(--muted);font-size:12px;line-height:1.45}
     .notes .rule{margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,.06)}
-    .paliersWrap{
-      margin-top:12px;
-      border-radius:16px;
-      background: rgba(0,0,0,.22);
-      border:1px solid rgba(255,255,255,.10);
-      overflow:hidden;
-    }
-    .paliersWrap img{
-      width:100%;
-      display:block;
-      max-height: 260px;
-      object-fit: cover;
-      object-position: center;
-      filter: saturate(1.05) contrast(1.02);
-    }
-    .paliersCap{
-      padding:10px 12px;
-      font-size:12px;
-      color:#cfd2e7;
-      display:flex;align-items:center;justify-content:space-between;gap:10px;
-      border-top:1px solid rgba(255,255,255,.06);
-      background: rgba(255,255,255,.02);
-    }
-    .paliersCap b{font-weight:900}
     .links .item{
       display:flex;align-items:center;justify-content:space-between;
       gap:10px;padding:14px 16px;
@@ -330,6 +336,7 @@
       border-radius:18px;
       box-shadow: var(--shadow);
       overflow:hidden;
+      backdrop-filter: blur(10px);
     }
     .modalHead{
       display:flex;align-items:center;justify-content:space-between;gap:10px;
@@ -394,6 +401,7 @@
       color:#fff;font-size:12px;
       display:none;
       z-index:10000;
+      backdrop-filter: blur(10px);
     }
   </style>
 </head>
@@ -495,7 +503,7 @@
     <div class="swapGrid" id="swapGrid"></div>
 
     <div class="bottomGrid">
-      <!-- Notes + IMAGE (remplace l'astuce) -->
+      <!-- Notes (✅ bloc paliers supprimé) -->
       <div class="card notes">
         <div class="cardPad">
           <b>Notes</b>
@@ -503,19 +511,8 @@
             Mode 1 = pas de fee TRINITY, pas de smart contract maison, chaque swap = 1 transaction.
             Si une quote échoue, c’est souvent un manque de liquidité sur la paire.
           </p>
-
           <div class="rule"></div>
-
-          <!-- ✅ ICI : l'image des paliers -->
-          <div class="paliersWrap">
-            <!-- Mets ton fichier dans le même dossier : paliers.png -->
-            <img src="paliers.png" alt="Paliers TRINITY (crevette → dauphin → requin → baleine)" />
-            <div class="paliersCap">
-              <span><b>Paliers</b> • progression</span>
-              <span style="color:rgba(255,255,255,.55)">crevette → dauphin → requin → baleine</span>
-            </div>
-          </div>
-
+          <!-- (vide volontairement) -->
         </div>
       </div>
 
@@ -657,13 +654,11 @@ document.getElementById("refreshBtn").addEventListener("click", async () => {
 });
 
 document.getElementById("openModalBtn").addEventListener("click", () => {
-  // juste scroll vers la section swaps
   document.querySelector(".sectionTitle").scrollIntoView({ behavior:"smooth", block:"start" });
 });
 
 document.getElementById("runABCBtn").addEventListener("click", async () => {
   if(!connected) return toastMsg("Connecte ton wallet d'abord.");
-  // Exécute A puis B puis C (si amount > 0)
   for(let i=0;i<3;i++){
     const amt = (swaps[i].amount||"").trim();
     if(!amt) continue;
@@ -692,14 +687,11 @@ function nowDeadline(){
 }
 function slippageBps(){
   const s = Math.max(0, Number(document.getElementById("slippage").value||2));
-  // 2.0% -> 200 bps
   return Math.floor(s * 100);
 }
 function formatHuman(raw, decimals){
-  // raw bigint -> string (limité)
   try{
     const s = ethers.formatUnits(raw, decimals);
-    // limiter à 6 décimales lisibles
     const [i,d] = s.split(".");
     if(!d) return i;
     return i + "." + d.slice(0,6);
@@ -712,24 +704,19 @@ function formatHuman(raw, decimals){
    PATH / QUOTE
 ========================= */
 function pathFor(tokenIn, tokenOut){
-  // PLS = natif, sur router on passe via WPLS
   const inT = TOKENS[tokenIn];
   const outT = TOKENS[tokenOut];
 
   if(tokenIn === "PLS" && tokenOut === "PLS") return null;
 
   if(tokenIn === "PLS"){
-    // PLS -> Token
     if(tokenOut === "WPLS") return [WPLS];
     return [WPLS, outT.address];
   }
   if(tokenOut === "PLS"){
-    // Token -> PLS
     if(tokenIn === "WPLS") return [WPLS];
     return [inT.address, WPLS];
   }
-
-  // Token -> Token
   return [inT.address, outT.address];
 }
 
@@ -744,7 +731,6 @@ async function getQuoteForSwap(i){
   try{
     const amountIn = ethers.parseUnits(amt, TOKENS[s.from].decimals);
 
-    // Try direct path, fallback via WPLS if needed
     let path = pathFor(s.from, s.to);
     if(!path) throw new Error("Même token");
 
@@ -752,7 +738,6 @@ async function getQuoteForSwap(i){
     try{
       amounts = await router.getAmountsOut(amountIn, path);
     }catch(e){
-      // fallback: in -> WPLS -> out (si token-token)
       if(s.from !== "PLS" && s.to !== "PLS" && s.from !== "WPLS" && s.to !== "WPLS"){
         const p2 = [TOKENS[s.from].address, WPLS, TOKENS[s.to].address];
         amounts = await router.getAmountsOut(amountIn, p2);
@@ -784,14 +769,12 @@ async function getQuoteForSwap(i){
 ========================= */
 async function refreshBalances(){
   if(!provider || !connected) {
-    // show placeholders
     for(const k of Object.keys(TOKENS)){
       balances[k] = { raw: 0n, human: "Connect wallet" };
     }
     return;
   }
 
-  // PLS balance
   try{
     const b = await provider.getBalance(userAddress);
     balances["PLS"] = { raw: b, human: formatHuman(b, 18) };
@@ -799,7 +782,6 @@ async function refreshBalances(){
     balances["PLS"] = { raw: 0n, human: "—" };
   }
 
-  // ERC20 balances for used tokens + common ones
   const need = new Set(["WPLS","PHEX","ATROPA","PLSX","DAI"]);
   for(const s of swaps){ need.add(s.from); need.add(s.to); }
 
@@ -833,7 +815,6 @@ async function ensureApprove(tokenSym, amountIn){
   const allowance = await c.allowance(userAddress, PULSEX_ROUTER);
   if(allowance >= amountIn) return;
 
-  // Approve MAX
   await c.approve(PULSEX_ROUTER, ethers.MaxUint256);
 }
 
@@ -844,7 +825,6 @@ async function doSwap(i){
   const amt = (s.amount||"").trim();
   if(!amt) return toastMsg("Montant manquant.");
 
-  // Validate tokens
   if(!TOKENS[s.from] || !TOKENS[s.to]) return toastMsg("Token invalide.");
   if(s.from === s.to) return toastMsg("From = To.");
 
@@ -858,7 +838,6 @@ async function doSwap(i){
 
     const amountIn = ethers.parseUnits(amt, TOKENS[s.from].decimals);
 
-    // Get quote for minOut
     let path = pathFor(s.from, s.to);
     if(!path) throw new Error("Même token");
 
@@ -878,31 +857,26 @@ async function doSwap(i){
     const outRaw = amounts[amounts.length - 1];
     const minOut = outRaw * BigInt(10000 - bps) / 10000n;
 
-    // Approve if needed
     if(s.from !== "PLS"){
       setStatus(i, "Approve (si besoin)…", "warn");
       renderSwaps();
       await ensureApprove(s.from, amountIn);
     }
 
-    // Swap
     setStatus(i, "Transaction… (MetaMask)", "warn");
     renderSwaps();
 
     let tx;
     if(s.from === "PLS"){
-      // PLS -> Token : swapExactETHForTokens
       tx = await router.swapExactETHForTokens(
         minOut, path, userAddress, deadline,
         { value: amountIn }
       );
     } else if(s.to === "PLS"){
-      // Token -> PLS : swapExactTokensForETH
       tx = await router.swapExactTokensForETH(
         amountIn, minOut, path, userAddress, deadline
       );
     } else {
-      // Token -> Token
       tx = await router.swapExactTokensForTokens(
         amountIn, minOut, path, userAddress, deadline
       );
@@ -916,7 +890,6 @@ async function doSwap(i){
     setStatus(i, "Success ✓", "ok");
     renderSwaps();
 
-    // refresh balances after swap
     await refreshAll();
 
   }catch(err){
@@ -949,7 +922,6 @@ async function connectWallet(){
       netDot.style.background = "rgba(245,158,11,.95)";
       walTxt.textContent = shortAddr(userAddress);
       connected = true;
-      // bouton reste utile
       connectBtn.textContent = "Changer réseau";
       toastMsg("Passe sur PulseChain (chainId 369).");
     }else{
@@ -961,7 +933,6 @@ async function connectWallet(){
       toastMsg("Wallet connecté.");
     }
 
-    // Listen changes
     window.ethereum.removeListener?.("accountsChanged", onAccountsChanged);
     window.ethereum.removeListener?.("chainChanged", onChainChanged);
     window.ethereum.on?.("accountsChanged", onAccountsChanged);
@@ -984,7 +955,6 @@ async function onAccountsChanged(accs){
     await refreshAll();
     return;
   }
-  // reconnect state
   provider = new ethers.BrowserProvider(window.ethereum);
   signer = await provider.getSigner();
   userAddress = await signer.getAddress();
@@ -994,7 +964,6 @@ async function onAccountsChanged(accs){
 }
 
 async function onChainChanged(){
-  // reload simple
   location.reload();
 }
 
@@ -1060,7 +1029,6 @@ async function watchAsset(token){
       }
     });
   }catch(e){
-    // MetaMask peut refuser / non supporté selon contexte
     console.error(e);
     toastMsg("Ajout refusé/non supporté.");
   }
@@ -1072,8 +1040,6 @@ function copyText(txt){
 
 function renderTokenList(){
   const q = (tokenSearch.value||"").trim().toLowerCase();
-
-  // If user pasted address, try to resolve + show single entry
   const pastedAddr = isAddr(q) ? q : null;
 
   tokList.innerHTML = "";
@@ -1086,7 +1052,6 @@ function renderTokenList(){
     })
     .sort((a,b)=> (a.symbol==="PLS" ? -1 : 0) - (b.symbol==="PLS" ? -1 : 0));
 
-  // If pasted address, put it on top
   if(pastedAddr){
     const div = document.createElement("div");
     div.className = "tokRow";
@@ -1104,7 +1069,7 @@ function renderTokenList(){
       if(!t){ toastMsg("Adresse invalide / non ERC20."); return; }
       applyTokenSelection(t.symbol);
       closeTokenModal();
-      toastMsg(`Ajouté : ${t.symbol}`);
+      toastMsg(\`Ajouté : \${t.symbol}\`);
       await refreshAll();
     };
     tokList.appendChild(div);
@@ -1129,15 +1094,12 @@ function renderTokenList(){
       </div>
     `;
 
-    // Row click selects token
     row.addEventListener("click", (e)=>{
-      // ignore if icon clicked
       if(e.target && e.target.classList && e.target.classList.contains("miniIcon")) return;
       applyTokenSelection(t.symbol);
       closeTokenModal();
     });
 
-    // Icons
     const icons = row.querySelectorAll(".miniIcon");
     if(icons.length){
       icons[0].addEventListener("click", (e)=>{ e.stopPropagation(); copyText(t.address); });
@@ -1157,13 +1119,11 @@ function applyTokenSelection(sym){
   const { swapIndex, field } = modalTarget;
   swaps[swapIndex][field] = sym;
 
-  // if same token both sides, keep but quote will fail; user can change
   swaps[swapIndex].out = "";
   swaps[swapIndex].quote = "—";
   setStatus(swapIndex, connected ? "Ready ✓" : "Ready (connect wallet)", connected ? "ok" : "warn");
 
   renderSwaps();
-  // refresh quote for this swap
   setTimeout(()=>getQuoteForSwap(swapIndex), 50);
 }
 
@@ -1232,11 +1192,10 @@ function renderSwaps(){
       </div>
     `;
 
-    // handlers
     const tokBtns = card.querySelectorAll(".tokBtn");
     tokBtns.forEach(btn=>{
       btn.addEventListener("click", ()=>{
-        const which = btn.getAttribute("data-open"); // from|to
+        const which = btn.getAttribute("data-open");
         openTokenModal({ swapIndex:i, field:which });
       });
     });
@@ -1247,24 +1206,20 @@ function renderSwaps(){
     const swapGo = card.querySelector(".swapGo");
     const pctBtns = card.querySelectorAll(".pct");
 
-    // Amount typing -> quote (debounced)
     let t;
     amtInput.addEventListener("input", ()=>{
       swaps[i].amount = amtInput.value;
       clearTimeout(t);
       t = setTimeout(()=>getQuoteForSwap(i), 250);
-      renderSwaps(); // keep UI synced
+      renderSwaps();
     });
 
-    // MAX
     maxBtn.addEventListener("click", ()=>{
       if(!connected) return toastMsg("Connecte ton wallet d'abord.");
       const b = balances[s.from];
       if(!b) return;
-      // For PLS, keep small gas buffer
       let raw = b.raw;
       if(s.from === "PLS"){
-        // subtract 1 PLS buffer
         const buffer = ethers.parseUnits("1", 18);
         raw = raw > buffer ? (raw - buffer) : 0n;
       }
@@ -1274,7 +1229,6 @@ function renderSwaps(){
       setTimeout(()=>getQuoteForSwap(i), 50);
     });
 
-    // 25/50/75
     pctBtns.forEach(p=>{
       p.addEventListener("click", ()=>{
         if(!connected) return toastMsg("Connecte ton wallet d'abord.");
@@ -1293,7 +1247,6 @@ function renderSwaps(){
       });
     });
 
-    // Flip
     flipBtn.addEventListener("click", ()=>{
       const tmp = swaps[i].from;
       swaps[i].from = swaps[i].to;
@@ -1304,7 +1257,6 @@ function renderSwaps(){
       setTimeout(()=>getQuoteForSwap(i), 80);
     });
 
-    // Execute
     swapGo.addEventListener("click", async ()=>{
       await doSwap(i);
     });
@@ -1317,7 +1269,6 @@ function renderSwaps(){
    REFRESH ALL
 ========================= */
 async function refreshAll(){
-  // network display
   if(window.ethereum){
     try{
       const p = new ethers.BrowserProvider(window.ethereum);
@@ -1335,7 +1286,6 @@ async function refreshAll(){
 
   await refreshBalances();
 
-  // update button label
   if(connected && userAddress){
     walTxt.textContent = shortAddr(userAddress);
     connectBtn.textContent = shortAddr(userAddress);
@@ -1344,7 +1294,6 @@ async function refreshAll(){
     connectBtn.textContent = "Connect Wallet";
   }
 
-  // update statuses
   swaps.forEach((s,i)=>{
     if(!connected){
       setStatus(i, "Ready (connect wallet)", "warn");
@@ -1353,7 +1302,6 @@ async function refreshAll(){
 
   renderSwaps();
 
-  // quotes (only if connected OR provider present)
   if(provider){
     for(let i=0;i<swaps.length;i++){
       if((swaps[i].amount||"").trim()){
@@ -1362,7 +1310,6 @@ async function refreshAll(){
     }
   }
 
-  // If modal open, refresh list (balances)
   if(modalOverlay.style.display === "flex"){
     renderTokenList();
   }
