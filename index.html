@@ -165,7 +165,7 @@
     #tokenModal{display:none; position:fixed; inset:0; z-index:9999;}
     #tmBackdrop{position:absolute; inset:0; background:rgba(0,0,0,.65);}
     .tmBox{
-      position:relative; max-width:520px; margin:6vh auto;
+      position:relative; max-width:560px; margin:6vh auto;
       background:rgba(15,23,42,.96);
       border:1px solid rgba(31,41,55,.9);
       border-radius:18px; box-shadow:0 18px 45px rgba(0,0,0,.55);
@@ -179,16 +179,37 @@
     }
     .tmList{margin-top:10px; max-height:420px; overflow:auto; padding-right:6px;}
     .tmRow{
-      display:flex; align-items:center; justify-content:space-between; gap:10px;
+      display:grid; grid-template-columns:1fr auto; align-items:center; gap:10px;
       padding:12px; border-radius:16px; margin-bottom:10px;
       border:1px solid rgba(31,41,55,.9); background:rgba(2,6,23,.45);
       cursor:pointer;
     }
     .tmRow small{color:var(--muted)}
+    .tmRight{display:flex; align-items:center; gap:10px; justify-content:flex-end}
+    .tmBal{
+      min-width:110px;
+      text-align:right;
+      font-weight:900;
+      font-size:12px;
+      color:#e5e7eb;
+      opacity:.95;
+    }
+    .tmBalMuted{color:var(--muted); font-weight:800;}
     .tmActions{display:flex; gap:8px; align-items:center;}
     .tmIconBtn{
       border:1px solid rgba(31,41,55,.9); background:rgba(2,6,23,.55);
       color:#e5e7eb; border-radius:12px; padding:8px 10px; cursor:pointer;
+    }
+    .tmMeta{display:flex; justify-content:space-between; align-items:center; gap:10px; margin-top:10px; color:#9ca3af; font-size:12px;}
+    .tmMiniBtn{
+      border:1px solid rgba(31,41,55,.9);
+      background:rgba(2,6,23,.55);
+      color:#e5e7eb;
+      border-radius:999px;
+      padding:7px 10px;
+      cursor:pointer;
+      font-weight:900;
+      font-size:12px;
     }
   </style>
 </head>
@@ -218,6 +239,7 @@
         <div class="chip"><span class="okdot"></span>Quotes live</div>
         <div class="chip"><span class="okdot"></span>Approve auto</div>
         <div class="chip"><span class="okdot"></span>MAX + balances</div>
+        <div class="chip"><span class="okdot"></span>Modal tokens + search</div>
       </div>
 
       <div class="ctaRow">
@@ -254,7 +276,7 @@
         Explorer : <a class="txlink" target="_blank" rel="noreferrer" href="https://otter.pulsechain.com/">otter.pulsechain.com</a>
       </div>
 
-      <div style="margin-top:12px">
+      <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap">
         <button class="btn2" id="refreshBtn">↻ Refresh balances/quotes</button>
       </div>
     </div>
@@ -320,6 +342,11 @@
     </div>
     <input class="tmSearch" id="tmSearch" placeholder="Search name or paste address" />
     <div class="tmList" id="tmList"></div>
+
+    <div class="tmMeta">
+      <div>💡 Balance visible après connexion (sinon “—”).</div>
+      <button class="tmMiniBtn" id="tmRefresh">↻ Refresh balances</button>
+    </div>
     <div style="margin-top:10px; color:#9ca3af; font-size:12px;">
       Clique sur un token pour le sélectionner. 📋 copie l’adresse. 🦊 ajoute à MetaMask.
     </div>
@@ -333,6 +360,9 @@ const PULSECHAIN_HEX = "0x171"; // 369
 const PULSEX_ROUTER = "0x98bf93ebf5c380C0e6Ae8e192A7e2AE08edAcc02";
 const WPLS = "0xA1077a294dDE1B09bB078844df40758a5D0f9a27";
 const PLS_GAS_RESERVE = ethers.parseUnits("0.05", 18);
+
+// Modal: tri tokens avec balance > 0 en haut
+const MODAL_SORT_BY_BALANCE = true;
 
 const TOKENS = {
   PLS:    { symbol:"PLS",   address:null, decimals:18 },
@@ -552,7 +582,7 @@ async function connectWallet(){
   $("walletPill").textContent = "Wallet : " + shortAddr(userAddress);
   $("netPill").textContent = "Réseau : " + (ok ? "PulseChain ✅" : "Mauvais réseau ❌");
 
-  // ✅ bouton devient adresse + copie
+  // bouton devient adresse + copie
   const btn = $("connectBtn");
   btn.textContent = shortAddr(userAddress);
   btn.onclick = async () => {
@@ -568,6 +598,7 @@ async function connectWallet(){
   }
 
   await refreshAll();
+  await refreshModalBalances().catch(()=>{});
 
   window.ethereum.on?.("accountsChanged", ()=> location.reload());
   window.ethereum.on?.("chainChanged", ()=> location.reload());
@@ -774,6 +805,7 @@ async function executeSwap(card){
 
     setStatus(card, "Success ✅", "good");
     await refreshAll();
+    await refreshModalBalances().catch(()=>{});
 
   }catch(e){
     console.error(e);
@@ -818,10 +850,24 @@ $("execTrinityBtn").addEventListener("click", async ()=>{
 
 /* =============== Token modal PulseX-like =============== */
 let tokenModalTarget = null;
+
+// cache balances modal
+const modalBalances = new Map(); // sym -> { raw: bigint, fmt: string }
+let modalBalancesLoadedAt = 0;
+
 function openTokenModal(card, side){
   tokenModalTarget = { card, side };
   $("tokenModal").style.display = "block";
   $("tmSearch").value = "";
+
+  // refresh balances si connecté (ou si cache vieux)
+  if(networkOk && userAddress){
+    const stale = (Date.now() - modalBalancesLoadedAt) > 20_000;
+    if(stale){
+      refreshModalBalances().catch(()=>{});
+    }
+  }
+
   renderTokenList("");
   setTimeout(()=>$("tmSearch").focus(), 50);
 }
@@ -832,6 +878,10 @@ function closeTokenModal(){
 $("tmClose").onclick = closeTokenModal;
 $("tmBackdrop").onclick = closeTokenModal;
 $("tmSearch").addEventListener("input", (e)=> renderTokenList((e.target.value||"").trim()));
+$("tmRefresh").addEventListener("click", async ()=>{
+  await refreshModalBalances().catch(()=>{});
+  renderTokenList(($("tmSearch").value||"").trim());
+});
 
 function isAddr(x){ return /^0x[a-fA-F0-9]{40}$/.test(x); }
 function norm(x){ return (x||"").toLowerCase(); }
@@ -846,6 +896,7 @@ async function copyText(txt){
   }
 }
 
+// 🦊 MetaMask add token (peut marcher même si pas "connecté" côté site)
 async function addTokenToMetaMask(sym){
   const t = TOKENS[sym];
   if(!window.ethereum) return alert("MetaMask requis");
@@ -877,33 +928,80 @@ async function addTokenToMetaMask(sym){
   }
 }
 
+// charge balances pour la whitelist
+async function refreshModalBalances(){
+  modalBalances.clear();
+  modalBalancesLoadedAt = Date.now();
+
+  if(!networkOk || !userAddress || !provider){
+    return;
+  }
+
+  const syms = Object.keys(TOKENS);
+
+  // parallel
+  await Promise.all(syms.map(async (sym)=>{
+    try{
+      let raw;
+      if(sym === "PLS"){
+        raw = await provider.getBalance(userAddress);
+      }else{
+        raw = await getErc20(TOKENS[sym].address, true).balanceOf(userAddress);
+      }
+      modalBalances.set(sym, { raw, fmt: formatAmount(sym, raw) });
+    }catch(_){
+      // ignore
+    }
+  }));
+}
+
 function renderTokenList(q){
   const list = $("tmList");
   const keys = Object.keys(TOKENS);
   const nq = norm(q);
 
-  const filtered = keys.filter(sym=>{
+  let filtered = keys.filter(sym=>{
     if(!q) return true;
     const t = TOKENS[sym];
     if(isAddr(q)) return t.address && norm(t.address) === nq;
     return norm(sym).includes(nq);
   });
 
+  // tri par balance si connecté
+  if(MODAL_SORT_BY_BALANCE && networkOk && userAddress){
+    filtered = filtered.slice().sort((a,b)=>{
+      const aa = modalBalances.get(a)?.raw ?? 0n;
+      const bb = modalBalances.get(b)?.raw ?? 0n;
+      if(aa === bb) return a.localeCompare(b);
+      return (bb > aa) ? 1 : -1;
+    });
+  }
+
   list.innerHTML = filtered.map(sym=>{
     const t = TOKENS[sym];
     const addr = t.address ? shortAddr(t.address) : "Native";
     const showBtns = !!t.address;
+
+    const balObj = modalBalances.get(sym);
+    const balTxt = (networkOk && userAddress && balObj)
+      ? balObj.fmt
+      : "—";
+
     return `
       <div class="tmRow" data-sym="${sym}">
         <div>
           <div style="font-weight:900">${sym}</div>
           <small>${addr}</small>
         </div>
-        <div class="tmActions">
-          ${showBtns ? `
-            <button class="tmIconBtn tmCopy" title="Copy address">📋</button>
-            <button class="tmIconBtn tmAdd" title="Add to MetaMask">🦊</button>
-          ` : `<small>—</small>`}
+
+        <div class="tmRight">
+          <div class="tmBal ${balTxt==="—" ? "tmBalMuted" : ""}">${balTxt}</div>
+          <div class="tmActions">
+            ${showBtns ? `
+              <button class="tmIconBtn tmCopy" title="Copy address">📋</button>
+              <button class="tmIconBtn tmAdd" title="Add to MetaMask">🦊</button>
+            ` : `<small class="tmBalMuted">—</small>`}
+          </div>
         </div>
       </div>
     `;
@@ -942,7 +1040,7 @@ function renderTokenList(q){
   });
 }
 
-// Hook : ouvrir modal au clic sur les selects (PulseX-like)
+// Hook : ouvrir modal au clic sur les selects
 document.querySelectorAll(".swapbox").forEach(card=>{
   const fromSel = card.querySelector(".from");
   const toSel   = card.querySelector(".to");
