@@ -23,34 +23,22 @@
     }
     *{box-sizing:border-box;margin:0;padding:0}
 
-    /* ==================== FOND IMAGE FULL PAGE ==================== */
+    /* ✅ FOND IMAGE (bg.png) SUR TOUTE LA PAGE */
     body{
       font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
       color:var(--text);
-      background: #050816; /* fallback */
       min-height:100vh;
-      position:relative;
-      overflow-x:hidden;
-    }
-    body::before{
-      content:"";
-      position:fixed;
-      inset:0;
-      background-image:url("./bg.png");
+
+      /* overlay sombre + image */
+      background:
+        radial-gradient(1200px 700px at 20% 0%, rgba(11,16,42,.82) 0%, rgba(5,8,22,.88) 55%, rgba(2,6,23,.94) 100%),
+        linear-gradient(180deg, rgba(0,0,0,.35), rgba(0,0,0,.72)),
+        url("./bg.png");
+
       background-size:cover;
       background-position:center;
       background-repeat:no-repeat;
-      opacity:.22;           /* Ajuste 0.15 à 0.35 si tu veux */
-      z-index:-2;
-    }
-    body::after{
-      content:"";
-      position:fixed;
-      inset:0;
-      background:
-        radial-gradient(1200px 700px at 20% 0%, rgba(11,16,42,.82) 0%, rgba(5,8,22,.85) 55%, rgba(2,6,23,.92) 100%),
-        linear-gradient(180deg, rgba(0,0,0,.35), rgba(0,0,0,.65));
-      z-index:-1;
+      background-attachment:fixed;
     }
 
     a{color:inherit;text-decoration:none}
@@ -300,7 +288,7 @@
         Si une quote échoue, c’est souvent un manque de liquidité sur la paire.
       </p>
       <div class="hr"></div>
-      <!-- ✅ bloc Astuce supprimé -->
+      <!-- ✅ Astuce supprimée -->
     </div>
 
     <div class="card">
