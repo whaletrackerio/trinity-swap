@@ -4,6 +4,8 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>TRINITY Swap — PulseChain</title>
+
+  <!-- Ethers v6 -->
   <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.2/dist/ethers.umd.min.js"></script>
 
   <style>
@@ -20,39 +22,37 @@
       --warn:#f59e0b;
       --radius:18px;
       --shadow:0 18px 45px rgba(0,0,0,.55);
-    }
-    *{box-sizing:border-box;margin:0;padding:0}
-    html, body{height:100%}
 
-    /* ✅ FOND IMAGE (bg.png) SUR TOUTE LA PAGE — méthode “béton” */
+      /* ✅ Réglages fond */
+      --bgTop: 60px;                 /* descend l’image si besoin */
+      --bgWidth: min(980px, 92vw);   /* taille de l’image */
+      --overlayA: rgba(2,6,23,.48);  /* overlay haut */
+      --overlayB: rgba(2,6,23,.78);  /* overlay bas */
+    }
+
+    *{box-sizing:border-box;margin:0;padding:0}
+
+    /* ✅ FOND IMAGE VISIBLE + STABLE */
     body{
       font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
       color:var(--text);
-      background:#050816;
-      position:relative;
-      isolation:isolate; /* important pour z-index négatifs */
-      overflow-x:hidden;
-    }
-    body::before{
-      content:"";
-      position:fixed;
-      inset:0;
-      background:url("./bg.png") center/cover no-repeat;
-      z-index:-2;
-    }
-    body::after{
-      content:"";
-      position:fixed;
-      inset:0;
-      /* voile + léger glow */
+      min-height:100vh;
+
       background:
-        radial-gradient(1200px 700px at 20% 0%, rgba(11,16,42,.55) 0%, rgba(5,8,22,.72) 55%, rgba(2,6,23,.88) 100%),
-        linear-gradient(180deg, rgba(0,0,0,.45), rgba(0,0,0,.70));
-      z-index:-1;
+        linear-gradient(180deg, var(--overlayA), var(--overlayB)),
+        url("./bg.png");
+
+      background-repeat:no-repeat;
+      background-position:center var(--bgTop);
+      background-size: var(--bgWidth) auto;
+      background-attachment:fixed;
+
+      /* garde un fond sombre derrière (si l’image ne remplit pas tout) */
+      background-color: #020617;
     }
 
     a{color:inherit;text-decoration:none}
-    .wrap{max-width:1200px;margin:0 auto;padding:22px 14px 90px; position:relative; z-index:1;}
+    .wrap{max-width:1200px;margin:0 auto;padding:22px 14px 90px}
 
     header{
       display:flex;align-items:center;justify-content:space-between;gap:12px;
@@ -184,11 +184,11 @@
     .linkBtn{padding:8px 12px;border-radius:999px}
     footer{margin-top:26px;text-align:center;color:var(--muted);font-size:11px;line-height:1.6}
 
-    /* Token modal */
+    /* ========== TOKEN MODAL ========== */
     #tokenModal{display:none; position:fixed; inset:0; z-index:9999;}
     #tmBackdrop{position:absolute; inset:0; background:rgba(0,0,0,.65);}
     .tmBox{
-      position:relative; max-width:520px; margin:6vh auto;
+      position:relative; max-width:560px; margin:6vh auto;
       background:rgba(15,23,42,.96);
       border:1px solid rgba(31,41,55,.9);
       border-radius:18px; box-shadow:0 18px 45px rgba(0,0,0,.55);
@@ -212,6 +212,13 @@
     .tmIconBtn{
       border:1px solid rgba(31,41,55,.9); background:rgba(2,6,23,.55);
       color:#e5e7eb; border-radius:12px; padding:8px 10px; cursor:pointer;
+    }
+    .tmLeft{display:flex;align-items:center;gap:10px}
+    .tmLogo{
+      width:28px;height:28px;border-radius:10px;object-fit:cover;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(2,6,23,.55);
+      flex:0 0 auto;
     }
   </style>
 </head>
@@ -357,13 +364,60 @@ const PULSEX_ROUTER = "0x98bf93ebf5c380C0e6Ae8e192A7e2AE08edAcc02";
 const WPLS = "0xA1077a294dDE1B09bB078844df40758a5D0f9a27";
 const PLS_GAS_RESERVE = ethers.parseUnits("0.05", 18);
 
+/* ================= TOKENS (avec logos) =================
+   Logos à mettre dans: /trinity-swap/logos/
+   Exemple: /trinity-swap/logos/pls.png
+*/
 const TOKENS = {
-  PLS:    { symbol:"PLS",   address:null, decimals:18 },
-  WPLS:   { symbol:"WPLS",  address:WPLS, decimals:18 },
-  PHEX:   { symbol:"PHEX",  address:"0x2b591e99afE9f32eAA6214f7B7629768c40Eeb39", decimals:8 },
-  ATROPA: { symbol:"ATROPA",address:"0xCc78A0acDF847A2C1714D2A925bB4477df5d48a6", decimals:18 },
-  PLSX:   { symbol:"PLSX",  address:"0x95B303987A60C71504D99Aa1b13B4DA07b0790ab", decimals:18 },
-  DAI:    { symbol:"DAI",   address:"0x6B175474E89094C44Da98b954EedeAC495271d0F", decimals:18 },
+  // ===== Base PulseChain =====
+  PLS:    { symbol:"PLS",   address:null, decimals:18, logo:"logos/pls.png" },
+  WPLS:   { symbol:"WPLS",  address:WPLS, decimals:18, logo:"logos/wpls.png" },
+
+  PHEX:   { symbol:"PHEX",  address:"0x2b591e99afE9f32eAA6214f7B7629768c40Eeb39", decimals:8,  logo:"logos/phex.png" },
+  EHEX:   { symbol:"EHEX",  address:"0x57fde0a71132198BBeC939B98976993d8D89D225", decimals:8,  logo:"logos/ehex.png" },
+
+  ATROPA: { symbol:"ATROPA",address:"0xCc78A0acDF847A2C1714D2A925bB4477df5d48a6", decimals:18, logo:"logos/atropa.png" },
+
+  PLSX:   { symbol:"PLSX",  address:"0x95B303987A60C71504D99Aa1b13B4DA07b0790ab", decimals:18, logo:"logos/plsx.png" },
+  INC:    { symbol:"INC",   address:"0x2fa878Ab3F87CC1C9737Fc071108F904c0B0C95d", decimals:18, logo:"logos/inc.png" },
+
+  DAI:    { symbol:"DAI",   address:"0xefD766cCb38EaF1dfd701853BFCe31359239F305", decimals:18, logo:"logos/dai.png" },
+  USDC:   { symbol:"USDC",  address:"0x15D38573d2feeb82e7ad5187aB8c1D52810B1f07", decimals:6,  logo:"logos/usdc.png" },
+  WETH:   { symbol:"WETH",  address:"0x02DcdD04e3F455D838cd1249292C58f3B79e3C3C", decimals:18, logo:"logos/weth.png" },
+
+  AXIS:    { symbol:"AXIS",    address:"0x8BDB63033b02C15f113De51EA1C3a96Af9e8ecb5", decimals:18, logo:"logos/axis.png" },
+  BANANAS: { symbol:"BANANAS", address:"0xC6B28B2E3Bf9fF26299D540a4D654F7ade4dFdB0", decimals:18, logo:"logos/bananas.png" },
+  CST:     { symbol:"CST",     address:"0x600136dA8cc6D1Ea07449514604dc4ab7098dB82", decimals:18, logo:"logos/cst.png" },
+  EARN:    { symbol:"EARN",    address:"0xb513038BbFdF9D40B676F41606f4F61D4b02c4A2", decimals:18, logo:"logos/earn.png" },
+  ELIXIR:  { symbol:"ELIXIR",  address:"0xeCd465A15fac825B0Fe69416A4c7BfE03A50c12E", decimals:18, logo:"logos/elixir.png" },
+  HDRN:    { symbol:"HDRN",    address:"0x3819f64f282bf135d62168C1e513280dAF905e06", decimals:9,  logo:"logos/hdrn.png" }, // décimales souvent 9
+  HELGO:   { symbol:"HELGO",   address:"0x0567CA0dE35606E9C260CC2358404B11DE21DB44", decimals:18, logo:"logos/helgo.png" },
+  IM:      { symbol:"IM",      address:"0xBBcF895BFCb57d0f457D050bb806d1499436c0CE", decimals:18, logo:"logos/im.png" },
+  pBSKR:   { symbol:"pBSKR",   address:"0x1DcbF345bC44696BbBed402367f7C62e524Fe8B5", decimals:18, logo:"logos/pbskr.png" },
+
+  LOAN:    { symbol:"LOAN",    address:"0x9159f1D2a9f51998Fc9Ab03fbd8f265ab14A1b3B", decimals:18, logo:"logos/loan.png" },
+  PHUX:    { symbol:"PHUX",    address:"0x9663c2d75ffd5F4017310405fCe61720aF45B829", decimals:18, logo:"logos/phux.png" },
+  PRS:     { symbol:"PRS",     address:"0xb6B57227150a7097723e0C013752001AaD01248F", decimals:18, logo:"logos/prs.png" },
+  pTGC:    { symbol:"pTGC",    address:"0x94534EeEe131840b1c0F61847c572228bdfDDE93", decimals:18, logo:"logos/ptgc.png" },
+  PTS:     { symbol:"PTS",     address:"0x2A06a971fE6ffa002fd242d437E3db2b5cC5B433", decimals:18, logo:"logos/pts.png" },
+  PXDC:    { symbol:"PXDC",    address:"0xeB6b7932Da20c6D7B3a899D5887d86dfB09A6408", decimals:18, logo:"logos/pxdc.png" },
+  RFX:     { symbol:"RFX",     address:"0xF876BDf9D6403AA7D5bF7F523E8f440A841CC596", decimals:18, logo:"logos/rfx.png" },
+  SOUNDX:  { symbol:"SOUNDX",  address:"0xA301c1871Dbf414261946281C7F62213fae22CfE", decimals:18, logo:"logos/soundx.png" },
+  TETRAp:  { symbol:"TETRAp",  address:"0xAeC4C07537B03E3E62fc066EC62401Aed5Fdd361", decimals:18, logo:"logos/tetrap.png" },
+  TEXAN:   { symbol:"TEXAN",   address:"0xcFCFfE432A48dB53F59c301422d2EdD77B2A88d7", decimals:18, logo:"logos/texan.png" },
+  TIME:    { symbol:"TIME",    address:"0xCA35638A3fdDD02fEC597D8c1681198C06b23F58", decimals:18, logo:"logos/time.png" },
+  UFO:     { symbol:"UFO",     address:"0x456548A9B56eFBbD89Ca0309edd17a9E20b04018", decimals:18, logo:"logos/ufo.png" },
+  USDL:    { symbol:"USDL",    address:"0x0dEEd1486bc52aA0d3E6f8849cEC5adD6598A162", decimals:18, logo:"logos/usdl.png" },
+  VORTEX:  { symbol:"VORTEX",  address:"0x73d8a4D01d658E565cF83068397FD39Baf386C48", decimals:18, logo:"logos/vortex.png" },
+  WATT:    { symbol:"WATT",    address:"0xDfdc2836FD2E63Bba9f0eE07901aD465Bff4DE71", decimals:18, logo:"logos/watt.png" },
+
+  /* ===== Adresses ETH mainnet (peuvent échouer sur PulseX) ===== */
+  LINK: { symbol:"LINK", address:"0x514910771AF9Ca656af840dff83E8264EcF986CA", decimals:18, logo:"logos/link.png" },
+  PEPE: { symbol:"PEPE", address:"0x6982508145454Ce325dDbE47a25d4ec3d2311933", decimals:18, logo:"logos/pepe.png" },
+  SHIB: { symbol:"SHIB", address:"0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE", decimals:18, logo:"logos/shib.png" },
+  UNI:  { symbol:"UNI",  address:"0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984", decimals:18, logo:"logos/uni.png" },
+  USDT: { symbol:"USDT", address:"0xdAC17F958D2ee523a2206206994597C13D831ec7", decimals:6,  logo:"logos/usdt.png" },
+  WBTC: { symbol:"WBTC", address:"0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599", decimals:8,  logo:"logos/wbtc.png" },
 };
 
 const ERC20_ABI = [
@@ -371,14 +425,12 @@ const ERC20_ABI = [
   "function allowance(address owner,address spender) external view returns (uint256)",
   "function balanceOf(address owner) external view returns (uint256)",
 ];
+
 const ROUTER_ABI = [
   "function getAmountsOut(uint256 amountIn, address[] calldata path) external view returns (uint256[] memory amounts)",
   "function swapExactTokensForTokens(uint256 amountIn,uint256 amountOutMin,address[] calldata path,address to,uint256 deadline) external returns (uint256[] memory amounts)",
   "function swapExactETHForTokens(uint256 amountOutMin,address[] calldata path,address to,uint256 deadline) external payable returns (uint256[] memory amounts)",
-  "function swapExactTokensForETH(uint256 amountIn,uint256 amountOutMin,address[] calldata path,address to,uint256 deadline) external returns (uint256[] memory amounts)",
-  "function swapExactTokensForETHSupportingFeeOnTransferTokens(uint256,uint256,address[] calldata,address,uint256) external",
-  "function swapExactTokensForTokensSupportingFeeOnTransferTokens(uint256,uint256,address[] calldata,address,uint256) external",
-  "function swapExactETHForTokensSupportingFeeOnTransferTokens(uint256,address[] calldata,address,uint256) external payable"
+  "function swapExactTokensForETH(uint256 amountIn,uint256 amountOutMin,address[] calldata path,address to,uint256 deadline) external returns (uint256[] memory amounts)"
 ];
 
 /* ================= HELPERS ================= */
@@ -390,19 +442,24 @@ function setStatus(card, txt, cls=""){
   el.className = "status" + (cls ? " "+cls : "");
   el.textContent = txt;
 }
+
 function getSettings(){
   const sl = parseFloat($("slippage").value || "2");
   const dl = parseInt($("deadlineM").value || "10", 10);
   return { slippage: Math.max(0, sl), deadlineMin: Math.max(1, dl) };
 }
+
 function buildPath(symIn, symOut){
   if(symIn === symOut) return null;
   const inT = TOKENS[symIn];
   const outT = TOKENS[symOut];
+
   if(symIn === "PLS") return [WPLS, ethers.getAddress(outT.address)];
   if(symOut === "PLS") return [ethers.getAddress(inT.address), WPLS];
+
   return [ethers.getAddress(inT.address), ethers.getAddress(outT.address)];
 }
+
 function formatAmount(sym, raw){
   const dec = TOKENS[sym].decimals;
   const s = ethers.formatUnits(raw, dec);
@@ -412,9 +469,11 @@ function formatAmount(sym, raw){
   if(num < 0.0001) return num.toExponential(3);
   return num.toLocaleString(undefined, { maximumFractionDigits: 6 });
 }
+
 function parseAmount(sym, human){
   return ethers.parseUnits(human, TOKENS[sym].decimals);
 }
+
 function validatePair(card){
   const from = card.querySelector(".from").value;
   const to = card.querySelector(".to").value;
@@ -424,6 +483,7 @@ function validatePair(card){
   }
   return true;
 }
+
 function txUrl(hash){ return `https://otter.pulsechain.com/tx/${hash}`; }
 
 /* ================= STATE ================= */
@@ -431,6 +491,7 @@ let provider, signer, userAddress, networkOk = false;
 
 /* ================= UI BUILD ================= */
 const swapsEl = $("swaps");
+
 function swapCardTemplate(i, label){
   return `
     <div class="card swapbox" id="swap${i}">
@@ -481,6 +542,7 @@ function swapCardTemplate(i, label){
     </div>
   `;
 }
+
 swapsEl.insertAdjacentHTML("beforeend", swapCardTemplate(1,"Swap A"));
 swapsEl.insertAdjacentHTML("beforeend", swapCardTemplate(2,"Swap B"));
 swapsEl.insertAdjacentHTML("beforeend", swapCardTemplate(3,"Swap C"));
@@ -490,22 +552,25 @@ function fillSelect(sel, selected){
   for(const k of Object.keys(TOKENS)){
     const opt = document.createElement("option");
     opt.value = k;
-    opt.textContent = k;
+    opt.textContent = TOKENS[k].symbol || k;
     sel.appendChild(opt);
   }
   sel.value = selected;
 }
+
 function initCardsDefaults(){
   const defaults = [
     {from:"PLS",  to:"PHEX"},
     {from:"PLS",  to:"ATROPA"},
     {from:"PHEX", to:"PLSX"},
   ];
+
   document.querySelectorAll(".swapbox").forEach((card, idx)=>{
     const fromSel = card.querySelector(".from");
     const toSel   = card.querySelector(".to");
-    fillSelect(fromSel, defaults[idx].from);
-    fillSelect(toSel, defaults[idx].to);
+
+    fillSelect(fromSel, defaults[idx]?.from || "PLS");
+    fillSelect(toSel, defaults[idx]?.to || "WPLS");
 
     card.querySelector(".invert").addEventListener("click", ()=>{
       const a = fromSel.value;
@@ -519,6 +584,7 @@ function initCardsDefaults(){
       triggerQuote(card);
       refreshCardBalance(card).catch(()=>{});
     });
+
     toSel.addEventListener("change", ()=> triggerQuote(card));
     card.querySelector(".amount").addEventListener("input", ()=> triggerQuote(card));
   });
@@ -598,6 +664,7 @@ async function connectWallet(){
   window.ethereum.on?.("accountsChanged", ()=> location.reload());
   window.ethereum.on?.("chainChanged", ()=> location.reload());
 }
+
 $("connectBtn").addEventListener("click", connectWallet);
 $("refreshBtn").addEventListener("click", ()=> refreshAll());
 
@@ -605,6 +672,7 @@ $("refreshBtn").addEventListener("click", ()=> refreshAll());
 function getRouter(readOnly=true){
   return new ethers.Contract(PULSEX_ROUTER, ROUTER_ABI, readOnly ? provider : signer);
 }
+
 function getErc20(tokenAddr, readOnly=true){
   return new ethers.Contract(ethers.getAddress(tokenAddr), ERC20_ABI, readOnly ? provider : signer);
 }
@@ -614,6 +682,7 @@ async function getBalance(sym){
   if(sym === "PLS") return await provider.getBalance(userAddress);
   return await getErc20(TOKENS[sym].address, true).balanceOf(userAddress);
 }
+
 async function refreshCardBalance(card){
   const balEl = card.querySelector(".balIn");
   if(!networkOk || !userAddress){
@@ -624,6 +693,7 @@ async function refreshCardBalance(card){
   const bal = await getBalance(from);
   balEl.textContent = formatAmount(from, bal);
 }
+
 async function refreshAll(){
   const cards = document.querySelectorAll(".swapbox");
   for(const card of cards){
@@ -652,6 +722,7 @@ async function setAmountFromPercent(card, pct){
   card.querySelector(".amount").value = ethers.formatUnits(amount, TOKENS[from].decimals);
   await updateQuote(card);
 }
+
 document.querySelectorAll(".swapbox").forEach(card=>{
   card.querySelector(".maxBtn").addEventListener("click", ()=> setAmountFromPercent(card, 100).catch(console.error));
   card.querySelectorAll(".pctBtn").forEach(b=>{
@@ -665,6 +736,7 @@ async function checkAllowance(symIn, amountRaw){
   const allowance = await getErc20(TOKENS[symIn].address, true).allowance(userAddress, PULSEX_ROUTER);
   return allowance >= amountRaw;
 }
+
 async function doApprove(symIn, card){
   const erc = getErc20(TOKENS[symIn].address, false);
   setStatus(card, "Approving… (MetaMask)", "warn");
@@ -776,7 +848,7 @@ async function executeSwap(card){
     const amounts = await routerRead.getAmountsOut(amountIn, path);
     const outRaw  = amounts[amounts.length - 1];
 
-    const bps = Math.round(slippage * 100);
+    const bps = Math.round(slippage * 100); // 2.0% => 200 bps
     const minOut = outRaw * BigInt(10000 - bps) / 10000n;
     const deadline = Math.floor(Date.now()/1000) + (deadlineMin * 60);
 
@@ -806,6 +878,7 @@ async function executeSwap(card){
     setStatus(card, "Swap error (cancel ? liquidité ?)", "bad");
   }
 }
+
 document.querySelectorAll(".swapbox").forEach(card=>{
   card.querySelector(".swapBtn").addEventListener("click", ()=> executeSwap(card));
 });
@@ -844,6 +917,7 @@ $("execTrinityBtn").addEventListener("click", async ()=>{
 
 /* =============== Token modal PulseX-like =============== */
 let tokenModalTarget = null;
+
 function openTokenModal(card, side){
   tokenModalTarget = { card, side };
   $("tokenModal").style.display = "block";
@@ -851,10 +925,12 @@ function openTokenModal(card, side){
   renderTokenList("");
   setTimeout(()=>$("tmSearch").focus(), 50);
 }
+
 function closeTokenModal(){
   $("tokenModal").style.display = "none";
   tokenModalTarget = null;
 }
+
 $("tmClose").onclick = closeTokenModal;
 $("tmBackdrop").onclick = closeTokenModal;
 $("tmSearch").addEventListener("input", (e)=> renderTokenList((e.target.value||"").trim()));
@@ -882,12 +958,19 @@ async function addTokenToMetaMask(sym){
       method: "wallet_watchAsset",
       params: {
         type: "ERC20",
-        options: { address: t.address, symbol: sym, decimals: t.decimals }
+        options: {
+          address: t.address,
+          symbol: sym,
+          decimals: t.decimals
+        }
       }
     });
 
-    if(wasAdded) alert("Token ajouté ✅");
-    else alert("Ajout refusé (cancel)");
+    if(wasAdded){
+      alert("Token ajouté ✅");
+    }else{
+      alert("Ajout refusé (cancel)");
+    }
   }catch(e){
     console.error(e);
     try{ await copyText(t.address); }catch(_){}
@@ -912,11 +995,19 @@ function renderTokenList(q){
     const t = TOKENS[sym];
     const addr = t.address ? shortAddr(t.address) : "Native";
     const showBtns = !!t.address;
+
+    const logoHtml = t.logo
+      ? `<img class="tmLogo" src="${t.logo}" alt="${sym}" onerror="this.style.display='none'"/>`
+      : `<div class="tmLogo"></div>`;
+
     return `
       <div class="tmRow" data-sym="${sym}">
-        <div>
-          <div style="font-weight:900">${sym}</div>
-          <small>${addr}</small>
+        <div class="tmLeft">
+          ${logoHtml}
+          <div>
+            <div style="font-weight:900">${sym}</div>
+            <small>${addr}</small>
+          </div>
         </div>
         <div class="tmActions">
           ${showBtns ? `
@@ -933,9 +1024,11 @@ function renderTokenList(q){
       const sym = row.dataset.sym;
       if(e.target.classList.contains("tmCopy") || e.target.classList.contains("tmAdd")) return;
       if(!tokenModalTarget) return;
+
       const { card, side } = tokenModalTarget;
       const sel = card.querySelector(side === "from" ? ".from" : ".to");
       sel.value = sym;
+
       closeTokenModal();
       await refreshCardBalance(card).catch(()=>{});
       await updateQuote(card).catch(()=>{});
@@ -961,10 +1054,11 @@ function renderTokenList(q){
   });
 }
 
-// Hook : ouvrir modal au clic sur les selects (PulseX-like)
+/* Hook : ouvrir modal au clic sur les selects (PulseX-like) */
 document.querySelectorAll(".swapbox").forEach(card=>{
   const fromSel = card.querySelector(".from");
   const toSel   = card.querySelector(".to");
+
   fromSel.addEventListener("mousedown", (e)=>{ e.preventDefault(); openTokenModal(card,"from"); });
   toSel.addEventListener("mousedown", (e)=>{ e.preventDefault(); openTokenModal(card,"to"); });
 });
@@ -972,5 +1066,6 @@ document.querySelectorAll(".swapbox").forEach(card=>{
 /* ================= INIT ================= */
 setConnectedUI(false);
 </script>
+
 </body>
 </html>
