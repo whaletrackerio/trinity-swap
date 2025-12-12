@@ -1,705 +1,339 @@
 <!doctype html>
 <html lang="fr">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>TRINITY Swap — PulseChain</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TRINITY Swap — PulseChain</title>
 
-  <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.2/dist/ethers.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/ethers@6.13.2/dist/ethers.umd.min.js"></script>
 
-  <style>
-    :root{
-      --bg:#050816;
-      --card:#0f172a;
-      --border:#1f2937;
-      --text:#e5e7eb;
-      --muted:#9ca3af;
-      --accent:#a855f7;
-      --accent2:#ec4899;
-      --good:#22c55e;
-      --bad:#ef4444;
-      --warn:#f59e0b;
-      --radius:18px;
-      --shadow:0 18px 45px rgba(0,0,0,.55);
-    }
-    *{box-sizing:border-box;margin:0;padding:0}
-    body{
-      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-      background: radial-gradient(1200px 700px at 20% 0%, #0b102a 0%, var(--bg) 55%, #020617 100%);
-      color:var(--text);
-    }
-    a{color:inherit;text-decoration:none}
-    .wrap{max-width:1200px;margin:0 auto;padding:22px 14px 70px}
-    header{
-      display:flex;align-items:center;justify-content:space-between;gap:12px;
-      position:sticky;top:0;z-index:50;
-      backdrop-filter: blur(10px);
-      background:linear-gradient(180deg, rgba(5,8,22,.85), rgba(5,8,22,.45));
-      border-bottom:1px solid rgba(31,41,55,.6);
-      padding:14px 10px;margin:-22px -14px 18px;
-    }
-    .brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.4px}
-    .logo{
-      width:34px;height:34px;border-radius:12px;
-      background:linear-gradient(135deg,var(--accent),var(--accent2));
-      box-shadow:0 10px 25px rgba(168,85,247,.25);
-    }
-    .top-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}
-    .pill{
-      font-size:12px;color:var(--muted);
-      border:1px solid rgba(31,41,55,.9);
-      background:rgba(2,6,23,.55);
-      padding:8px 10px;border-radius:999px;
-    }
-    .btn{
-      cursor:pointer;border:none;
-      padding:10px 14px;border-radius:999px;
-      background:linear-gradient(120deg,var(--accent),var(--accent2));
-      color:#fff;font-weight:800;
-      box-shadow:0 12px 30px rgba(236,72,153,.15);
-    }
-    .btn:disabled{opacity:.6;cursor:not-allowed}
-    .btn2{
-      cursor:pointer;border:1px solid rgba(31,41,55,.9);
-      padding:10px 14px;border-radius:999px;
-      background:rgba(2,6,23,.55);
-      color:var(--text);font-weight:800;
-    }
-    .chiprow{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
-    .chip{
-      font-size:12px;color:var(--text);
-      border:1px solid rgba(31,41,55,.9);
-      background:rgba(2,6,23,.55);
-      padding:7px 10px;border-radius:999px;
-      display:flex;align-items:center;gap:8px;
-    }
-    .okdot{
-      width:10px;height:10px;border-radius:999px;background:var(--good);
-      box-shadow:0 0 0 3px rgba(34,197,94,.15);
-    }
+<style>
+:root{
+--bg:#050816;
+--card:#0f172a;
+--border:#1f2937;
+--text:#e5e7eb;
+--muted:#9ca3af;
+--accent:#a855f7;
+--accent2:#ec4899;
+--good:#22c55e;
+--bad:#ef4444;
+--warn:#f59e0b;
+--radius:18px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;
+background:radial-gradient(1200px 700px at 20% 0%,#0b102a 0%,#050816 55%,#020617 100%);
+color:var(--text);
+}
+.wrap{max-width:1200px;margin:auto;padding:24px 16px 80px}
+a{text-decoration:none;color:inherit}
 
-    .grid2{
-      display:grid;grid-template-columns:1.25fr .75fr;gap:14px;align-items:stretch;
-    }
-    @media(max-width:980px){.grid2{grid-template-columns:1fr}}
-    .card{
-      background:linear-gradient(180deg, rgba(15,23,42,.92), rgba(15,23,42,.72));
-      border:1px solid rgba(31,41,55,.9);
-      border-radius:var(--radius);
-      box-shadow:var(--shadow);
-      padding:16px;
-    }
-    h1{font-size:34px;line-height:1.05}
-    .sub{margin-top:10px;color:var(--muted);font-size:13px;line-height:1.55}
-    .hr{height:1px;background:rgba(31,41,55,.7);margin:14px 0}
-    .warnbox{
-      border:1px solid rgba(245,158,11,.35);
-      background:rgba(245,158,11,.08);
-      padding:10px 12px;border-radius:14px;
-      font-size:12px;color:var(--muted);
-    }
+header{
+display:flex;justify-content:space-between;align-items:center;
+position:sticky;top:0;z-index:50;
+background:rgba(5,8,22,.8);
+backdrop-filter:blur(10px);
+padding:14px 10px;margin:-24px -16px 24px;
+border-bottom:1px solid var(--border)
+}
+.brand{display:flex;align-items:center;gap:10px;font-weight:900}
+.logo{
+width:32px;height:32px;border-radius:10px;
+background:linear-gradient(135deg,var(--accent),var(--accent2));
+}
 
-    .miniCards{
-      display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px;
-    }
-    @media(max-width:520px){.miniCards{grid-template-columns:1fr}}
-    .miniCard{
-      border:1px solid rgba(31,41,55,.9);
-      background:rgba(2,6,23,.45);
-      border-radius:16px;
-      padding:12px;
-    }
-    .miniTitle{font-weight:900;font-size:13px}
-    .miniDesc{color:var(--muted);font-size:12px;margin-top:4px}
+.pill{
+font-size:12px;color:var(--muted);
+border:1px solid var(--border);
+padding:6px 10px;border-radius:999px
+}
+.btn{
+border:none;cursor:pointer;
+padding:10px 16px;border-radius:999px;
+background:linear-gradient(120deg,var(--accent),var(--accent2));
+color:white;font-weight:900
+}
+.btn:disabled{opacity:.6;cursor:not-allowed}
+.btn2{
+border:1px solid var(--border);
+background:transparent;
+color:var(--text);
+padding:10px 14px;border-radius:999px;
+font-weight:800;cursor:pointer
+}
 
-    .ctaRow{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
-    .ctaRow .btn2, .ctaRow .btn{display:inline-flex;align-items:center;gap:8px}
+.card{
+background:linear-gradient(180deg,rgba(15,23,42,.95),rgba(15,23,42,.75));
+border:1px solid var(--border);
+border-radius:var(--radius);
+padding:16px;
+}
 
-    /* ====== MULTISWAP WEB3 ====== */
-    .sectionTitle{
-      margin-top:18px;font-weight:900;font-size:14px;letter-spacing:.35px;color:var(--text);
-      display:flex;align-items:center;justify-content:space-between;gap:10px;
-    }
-    .sectionTitle small{color:var(--muted);font-weight:700}
-    .swaps{
-      display:grid;grid-template-columns:repeat(3,1fr);
-      gap:14px;margin-top:12px;
-    }
-    @media(max-width:980px){.swaps{grid-template-columns:1fr}}
-    label{font-size:12px;color:var(--muted)}
-    input,select{
-      width:100%;margin-top:6px;
-      padding:10px 11px;border-radius:14px;
-      background:rgba(2,6,23,.65);
-      border:1px solid rgba(31,41,55,.9);
-      color:var(--text);outline:none;
-    }
-    .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-    .swap-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
-    .swap-title b{font-size:13px}
-    .swap-title span{font-size:12px;color:var(--muted)}
-    .switch{display:flex;justify-content:center;margin:10px 0;}
-    .switch button{
-      border:1px solid rgba(31,41,55,.9);
-      background:rgba(2,6,23,.55);
-      color:var(--text);border-radius:12px;
-      padding:7px 10px;cursor:pointer;
-    }
-    .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
-    .status{margin-top:10px;font-size:12px;color:var(--muted)}
-    .status.good{color:var(--good)}
-    .status.bad{color:var(--bad)}
-    .status.warn{color:var(--warn)}
-    .quoteLine{
-      margin-top:8px;font-size:12px;color:var(--muted);
-      display:flex;gap:10px;flex-wrap:wrap;align-items:center
-    }
-    .txlink{font-weight:900;border-bottom:1px dotted rgba(229,231,235,.35)}
-    footer{
-      margin-top:26px;text-align:center;color:var(--muted);
-      font-size:11px;line-height:1.6;
-      opacity:.95
-    }
+.hero{
+display:grid;grid-template-columns:1.3fr .7fr;gap:16px
+}
+@media(max-width:900px){.hero{grid-template-columns:1fr}}
 
-    /* ===== Liens rapides ===== */
-    .bottomGrid{
-      display:grid;grid-template-columns:1fr .9fr;gap:14px;margin-top:14px;
-    }
-    @media(max-width:980px){.bottomGrid{grid-template-columns:1fr}}
-    .linkItem{
-      display:flex;align-items:center;justify-content:space-between;gap:10px;
-      padding:12px;border-radius:16px;
-      border:1px solid rgba(31,41,55,.9);
-      background:rgba(2,6,23,.45);
-      margin-top:10px;
-    }
-    .linkItem b{font-size:13px}
-    .linkItem span{display:block;color:var(--muted);font-size:12px;margin-top:2px}
-    .linkBtn{padding:8px 12px;border-radius:999px}
-  </style>
+.chips{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0}
+.chip{
+font-size:12px;
+border:1px solid var(--border);
+padding:6px 10px;border-radius:999px
+}
+
+.warn{
+border:1px solid rgba(245,158,11,.4);
+background:rgba(245,158,11,.08);
+padding:10px;border-radius:12px;font-size:12px;color:var(--muted)
+}
+
+h1{font-size:32px}
+
+.swaps{
+display:grid;grid-template-columns:repeat(3,1fr);
+gap:16px;margin-top:20px
+}
+@media(max-width:900px){.swaps{grid-template-columns:1fr}}
+
+label{font-size:12px;color:var(--muted)}
+select,input{
+width:100%;margin-top:6px;
+padding:10px;border-radius:14px;
+background:#020617;border:1px solid var(--border);
+color:var(--text)
+}
+
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.switch{text-align:center;margin:10px 0}
+.switch button{
+border:1px solid var(--border);
+background:#020617;color:white;
+padding:6px 10px;border-radius:10px;cursor:pointer
+}
+
+.balRow{
+display:flex;justify-content:space-between;align-items:center;
+margin-top:6px;font-size:12px;color:var(--muted)
+}
+.maxBtn{
+border:1px solid var(--border);
+background:#020617;color:white;
+padding:4px 10px;border-radius:999px;
+cursor:pointer;font-weight:900
+}
+
+.status{margin-top:10px;font-size:12px;color:var(--muted)}
+.good{color:var(--good)}
+.bad{color:var(--bad)}
+.warnTxt{color:var(--warn)}
+
+.links{margin-top:20px;display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:900px){.links{grid-template-columns:1fr}}
+.linkItem{
+display:flex;justify-content:space-between;align-items:center;
+border:1px solid var(--border);
+padding:12px;border-radius:14px
+}
+
+footer{text-align:center;font-size:11px;color:var(--muted);margin-top:40px}
+</style>
 </head>
 
 <body>
 <div class="wrap">
 
-  <header>
-    <div class="brand">
-      <div class="logo"></div>
-      <div style="font-weight:900">TRINITY Swap</div>
-    </div>
+<header>
+<div class="brand"><div class="logo"></div>TRINITY Swap</div>
+<div style="display:flex;gap:10px;align-items:center">
+<div class="pill" id="net">Réseau —</div>
+<div class="pill" id="wallet">Wallet non connecté</div>
+<button class="btn" id="connect">Connect Wallet</button>
+</div>
+</header>
 
-    <div class="top-right">
-      <div class="pill" id="netPill">Réseau : —</div>
-      <div class="pill" id="walletPill">Wallet : non connecté</div>
-      <button class="btn" id="connectBtn">Connect Wallet</button>
-    </div>
-  </header>
+<section class="hero">
+<div class="card">
+<h1>Swap 3 tokens en parallèle.<br>Une interface, trois actions.</h1>
+<p style="margin-top:10px;color:var(--muted)">
+TRINITY = MultiSwap PulseChain. UI au-dessus du router PulseX.<br>
+Mode 1 • Non-custodial • 0 fee TRINITY
+</p>
 
-  <!-- ===== HERO DASHBOARD (ce qui te manquait) ===== -->
-  <section class="grid2">
-    <div class="card">
-      <h1>Swap 3 tokens en parallèle.<br/>Une interface, trois actions.</h1>
-      <p class="sub">
-        TRINITY = <b>MultiSwap</b> : tu prépares 3 swaps différents et tu lances chaque swap avec son propre bouton.
-        Mode 1 (PulseX-like) : UI au-dessus du router PulseX • non-custodial • 0 fee TRINITY.
-      </p>
+<div class="chips">
+<div class="chip">3 swaps indépendants</div>
+<div class="chip">Style PulseChain-like</div>
+<div class="chip">Quotes live</div>
+<div class="chip">Web3 ready</div>
+</div>
 
-      <div class="chiprow">
-        <div class="chip"><span class="okdot"></span>3 swaps indépendants</div>
-        <div class="chip"><span class="okdot"></span>Style PulseChain-like</div>
-        <div class="chip"><span class="okdot"></span>Mobile friendly</div>
-        <div class="chip"><span class="okdot"></span>Prêt Web3 + quotes</div>
-      </div>
+<div style="display:flex;gap:10px;flex-wrap:wrap">
+<button class="btn" onclick="document.getElementById('multi').scrollIntoView({behavior:'smooth'})">🚀 Ouvrir le MultiSwap</button>
+<a class="btn2" href="https://whaletrackerio.github.io/autopilot-pulsechain/" target="_blank">⚡ AutoPilot</a>
+<a class="btn2" href="https://whaletrackerio.github.io/dca-pulsechain/" target="_blank">📈 DCA</a>
+</div>
 
-      <div class="ctaRow">
-        <button class="btn" onclick="document.getElementById('multiswap').scrollIntoView({behavior:'smooth'})">
-          🚀 Ouvrir le MultiSwap
-        </button>
-        <a class="btn2" href="https://whaletrackerio.github.io/autopilot-pulsechain/" target="_blank" rel="noreferrer">⚡ AutoPilot</a>
-        <a class="btn2" href="https://whaletrackerio.github.io/dca-pulsechain/" target="_blank" rel="noreferrer">📈 DCA</a>
-      </div>
+<div class="warn" style="margin-top:14px">
+⚠️ Teste avec de petits montants. TRINITY ne garde pas tes fonds.
+</div>
+</div>
 
-      <div class="hr"></div>
-      <div class="warnbox">
-        ⚠️ Teste avec de petits montants. TRINITY ne garde pas tes fonds : c’est ton wallet qui signe.
-      </div>
-    </div>
+<div class="card">
+<label>Slippage (%)</label>
+<input id="slippage" value="2">
 
-    <div class="card">
-      <div style="font-weight:900;font-size:14px">Un écran → 3 cartes Swap</div>
-      <p class="sub">Chaque carte peut viser une paire différente.</p>
+<label style="margin-top:10px">Deadline (minutes)</label>
+<input id="deadline" value="10">
 
-      <div class="miniCards">
-        <div class="miniCard">
-          <div class="miniTitle">Swap A</div>
-          <div class="miniDesc">Action rapide (ex: PLS → PHEX)</div>
-        </div>
-        <div class="miniCard">
-          <div class="miniTitle">Swap B</div>
-          <div class="miniDesc">Rotation (ex: PLS → ATROPA)</div>
-        </div>
-        <div class="miniCard">
-          <div class="miniTitle">Swap C</div>
-          <div class="miniDesc">Exposition (ex: PHEX → PLSX)</div>
-        </div>
-        <div class="miniCard">
-          <div class="miniTitle">Roadmap</div>
-          <div class="miniDesc">Web3 + Router + quotes ✅</div>
-        </div>
-      </div>
+<div class="warn" style="margin-top:14px">
+Explorer : <a href="https://otter.pulsechain.com" target="_blank">otter.pulsechain.com</a>
+</div>
 
-      <div class="hr"></div>
+<button class="btn2" style="margin-top:14px" onclick="refreshAll()">↻ Refresh balances / quotes</button>
+</div>
+</section>
 
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-        <div>
-          <label>Slippage (%)</label>
-          <input id="slippage" type="number" min="0" step="0.1" value="2.0" />
-        </div>
-        <div>
-          <label>Deadline (minutes)</label>
-          <input id="deadlineM" type="number" min="1" step="1" value="10" />
-        </div>
-      </div>
+<h3 id="multi" style="margin-top:30px">MULTISWAP</h3>
 
-      <div class="hr"></div>
-      <div class="warnbox">
-        Explorer : <a class="txlink" target="_blank" rel="noreferrer" href="https://otter.pulsechain.com/">otter.pulsechain.com</a>
-      </div>
+<section class="swaps" id="swaps"></section>
 
-      <div style="margin-top:12px">
-        <button class="btn2" id="refreshBtn">↻ Refresh balances/quotes</button>
-      </div>
-    </div>
-  </section>
+<section class="links">
+<div class="card">
+<b>Notes</b>
+<p style="margin-top:8px;color:var(--muted)">
+Mode 1 = pas de fee TRINITY, pas de smart contract maison.<br>
+Chaque swap = 1 transaction.
+</p>
+<div class="warn" style="margin-top:10px">
+Astuce : partage TRINITY sur X, ça ramène des users qualifiés vers tes bots.
+</div>
+</div>
 
-  <!-- ===== MULTISWAP WEB3 ===== -->
-  <div class="sectionTitle" id="multiswap">
-    <div>MULTISWAP</div>
-    <small>Prépare 3 swaps puis clique sur le bouton de celui que tu veux exécuter.</small>
-  </div>
+<div class="card">
+<b>LIENS RAPIDES</b>
 
-  <section class="swaps" id="swaps"></section>
+<div class="linkItem"><span>PulseX</span><a class="btn2" href="https://pulsex.com" target="_blank">Ouvrir</a></div>
+<div class="linkItem"><span>PulseScan</span><a class="btn2" href="https://scan.pulsechain.com" target="_blank">Explorer</a></div>
+<div class="linkItem"><span>AutoPilot</span><a class="btn2" href="https://whaletrackerio.github.io/autopilot-pulsechain/" target="_blank">Aller</a></div>
+<div class="linkItem"><span>DCA PulseChain</span><a class="btn2" href="https://whaletrackerio.github.io/dca-pulsechain/" target="_blank">Aller</a></div>
+</div>
+</section>
 
-  <!-- ===== BLOCS LIENS RAPIDES (ce qui te manquait) ===== -->
-  <section class="bottomGrid">
-    <div class="card">
-      <div style="font-weight:900;font-size:14px">Notes</div>
-      <p class="sub">
-        Mode 1 = pas de fee TRINITY, pas de smart contract maison, chaque swap = 1 transaction.
-        Si une quote échoue, c’est souvent un manque de liquidité sur la paire.
-      </p>
-      <div class="hr"></div>
-      <div class="warnbox">
-        Astuce : partage TRINITY sur X, c’est “différent” et ça ramène des users qualifiés vers tes bots.
-      </div>
-    </div>
-
-    <div class="card">
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
-        <div style="font-weight:900;font-size:14px">LIENS RAPIDES</div>
-      </div>
-
-      <div class="linkItem">
-        <div>
-          <b>PulseX</b>
-          <span>Swap officiel PulseChain.</span>
-        </div>
-        <a class="btn2 linkBtn" href="https://pulsex.com" target="_blank" rel="noreferrer">Ouvrir</a>
-      </div>
-
-      <div class="linkItem">
-        <div>
-          <b>PulseScan</b>
-          <span>Explorer / tx / contrats.</span>
-        </div>
-        <a class="btn2 linkBtn" href="https://scan.pulsechain.com" target="_blank" rel="noreferrer">Explorer</a>
-      </div>
-
-      <div class="linkItem">
-        <div>
-          <b>AutoPilot</b>
-          <span>Tes bots HEX/ATROPA.</span>
-        </div>
-        <a class="btn2 linkBtn" href="https://whaletrackerio.github.io/autopilot-pulsechain/" target="_blank" rel="noreferrer">Aller</a>
-      </div>
-
-      <div class="linkItem">
-        <div>
-          <b>DCA PulseChain</b>
-          <span>8 bots DCA (achat à l’unité).</span>
-        </div>
-        <a class="btn2 linkBtn" href="https://whaletrackerio.github.io/dca-pulsechain/" target="_blank" rel="noreferrer">Aller</a>
-      </div>
-    </div>
-  </section>
-
-  <footer>
-    TRINITY Swap — PulseChain • Mode 1 (PulseX-like) • Aucun frais TRINITY<br/>
-    Utilise à tes risques. Vérifie les adresses et teste petit.
-  </footer>
+<footer>
+TRINITY Swap — PulseChain • Mode 1 • Aucun frais TRINITY<br>
+Utilise à tes risques.
+</footer>
 
 </div>
 
 <script>
-/* =========================
-   CONFIG
-========================= */
+/* ================= CONFIG ================= */
+
+// ROUTER EXACT DE TES BOTS
+const PULSEX_ROUTER = "0x98bf93ebf5c380C0e6Ae8e192A7e2AE08edAcc02";
 const PULSECHAIN_ID = 369;
-
-// ⚠️ Router : si tu dois le changer, fais-le ici
-const PULSEX_ROUTER = "0x98bf93ebf5c380C0e6Ae8e192A7e2b4bF4cFfC2e";
-
-// WPLS
 const WPLS = "0xA1077a294dDE1B09bB078844df40758a5D0f9a27";
 
-// Tokens v1
 const TOKENS = {
-  PLS:   { symbol:"PLS",   address:null, decimals:18 },
-  WPLS:  { symbol:"WPLS",  address:WPLS, decimals:18 },
-  PHEX:  { symbol:"PHEX",  address:"0x2b591e99afE9f32eAA6214f7B7629768c40Eeb39", decimals:8 },
-  ATROPA:{ symbol:"ATROPA",address:"0xCc78A0acDF847A2C1714D2A925bB4477df5d48a6", decimals:18 },
-  PLSX:  { symbol:"PLSX",  address:"0x95B303987A60C71504D99Aa1b13B4DA07b0790ab", decimals:18 },
-  DAI:   { symbol:"DAI",   address:"0x6B175474E89094C44Da98b954EedeAC495271d0F", decimals:18 }
+PLS:{address:null,decimals:18},
+PHEX:{address:"0x2b591e99afE9f32eAA6214f7B7629768c40Eeb39",decimals:8},
+ATROPA:{address:"0xCc78A0acDF847A2C1714D2A925bB4477df5d48a6",decimals:18},
+PLSX:{address:"0x95B303987A60C71504D99Aa1b13B4DA07b0790ab",decimals:18},
+DAI:{address:"0x6B175474E89094C44Da98b954EedeAC495271d0F",decimals:18}
 };
 
-const ERC20_ABI = [
-  "function approve(address spender,uint256 amount) external returns (bool)",
-  "function allowance(address owner,address spender) external view returns (uint256)",
+const ERC20_ABI=[
+"function balanceOf(address) view returns(uint)",
+"function allowance(address,address) view returns(uint)",
+"function approve(address,uint) returns(bool)"
 ];
 
-const ROUTER_ABI = [
-  "function getAmountsOut(uint256 amountIn, address[] calldata path) external view returns (uint256[] memory amounts)",
-  "function swapExactTokensForTokens(uint256 amountIn,uint256 amountOutMin,address[] calldata path,address to,uint256 deadline) external returns (uint256[] memory amounts)",
-  "function swapExactETHForTokens(uint256 amountOutMin,address[] calldata path,address to,uint256 deadline) external payable returns (uint256[] memory amounts)",
-  "function swapExactTokensForETH(uint256 amountIn,uint256 amountOutMin,address[] calldata path,address to,uint256 deadline) external returns (uint256[] memory amounts)"
+const ROUTER_ABI=[
+"function getAmountsOut(uint,address[]) view returns(uint[])",
+"function swapExactTokensForTokens(uint,uint,address[],address,uint)",
+"function swapExactETHForTokens(uint,address[],address,uint) payable",
+"function swapExactTokensForETH(uint,uint,address[],address,uint)"
 ];
 
-function txUrl(hash){ return `https://otter.pulsechain.com/tx/${hash}`; }
-const $ = (id) => document.getElementById(id);
-function shortAddr(a){ return a ? (a.slice(0,6)+"…"+a.slice(-4)) : ""; }
-function setStatus(card, txt, cls=""){
-  const el = card.querySelector(".status");
-  el.className = "status" + (cls ? " "+cls : "");
-  el.textContent = txt;
-}
-function getSettings(){
-  const sl = parseFloat($("slippage").value || "2");
-  const dl = parseInt($("deadlineM").value || "10", 10);
-  return { slippage: Math.max(0, sl), deadlineMin: Math.max(1, dl) };
-}
-function toChecksum(addr){ return addr ? ethers.getAddress(addr) : null; }
-function tokenKeys(){ return Object.keys(TOKENS); }
+let provider,signer,user;
 
-function buildPath(symIn, symOut){
-  const inT = TOKENS[symIn];
-  const outT = TOKENS[symOut];
-  if(symIn === "PLS" && symOut === "PLS") return null;
-  if(symIn === "PLS") return [WPLS, toChecksum(outT.address)];
-  if(symOut === "PLS") return [toChecksum(inT.address), WPLS];
-  return [toChecksum(inT.address), toChecksum(outT.address)];
-}
-function needsApprove(symIn){ return symIn !== "PLS"; }
-function parseAmount(sym, human){ return ethers.parseUnits(human, TOKENS[sym].decimals); }
-function formatAmount(sym, raw){
-  const s = ethers.formatUnits(raw, TOKENS[sym].decimals);
-  const n = Number(s);
-  if(!isFinite(n)) return s;
-  if(n === 0) return "0";
-  if(n < 0.0001) return n.toExponential(3);
-  return n.toLocaleString(undefined, { maximumFractionDigits: 6 });
-}
+/* ================= UI BUILD ================= */
 
-/* =========================
-   STATE
-========================= */
-let provider, signer, userAddress, networkOk = false;
+const swaps=document.getElementById("swaps");
 
-/* =========================
-   UI BUILD (3 swaps)
-========================= */
-const swapsEl = $("swaps");
-function swapCardTemplate(i, label){
-  return `
-    <div class="card" id="swap${i}">
-      <div class="swap-title">
-        <b>${label}</b>
-        <span>TX #${i}</span>
-      </div>
+["Swap A","Swap B","Swap C"].forEach((name,i)=>{
+swaps.innerHTML+=`
+<div class="card" id="c${i}">
+<b>${name}</b>
+<label>Tu payes</label>
+<div class="row2">
+<select class="from"></select>
+<input class="amt" placeholder="Montant">
+</div>
+<div class="balRow">
+<span>Balance: <span class="bal">—</span></span>
+<button class="maxBtn">MAX</button>
+</div>
 
-      <label>Tu payes</label>
-      <div class="row2">
-        <select class="from"></select>
-        <input class="amount" inputmode="decimal" placeholder="Montant" />
-      </div>
+<div class="switch"><button>↕</button></div>
 
-      <div class="switch"><button class="invert" title="Inverser">↕</button></div>
+<label>Tu reçois</label>
+<div class="row2">
+<select class="to"></select>
+<input readonly placeholder="Estimation">
+</div>
 
-      <label>Tu reçois</label>
-      <div class="row2">
-        <select class="to"></select>
-        <input class="out" placeholder="Estimation" readonly />
-      </div>
+<button class="btn" style="margin-top:12px">Exécuter ${name}</button>
+<div class="status">Ready</div>
+</div>`;
+});
 
-      <div class="quoteLine">
-        <span>Quote:</span>
-        <span class="quoteText">—</span>
-      </div>
+document.querySelectorAll(".from,.to").forEach(sel=>{
+Object.keys(TOKENS).forEach(t=>{
+sel.innerHTML+=`<option>${t}</option>`;
+});
+});
 
-      <div class="actions">
-        <button class="btn2 approveBtn" style="display:none">Approve</button>
-        <button class="btn swapBtn">Exécuter ${label}</button>
-      </div>
+/* ================= WALLET ================= */
 
-      <div class="status">Ready</div>
-      <div class="quoteLine" style="margin-top:10px">
-        <a class="txlink txA" target="_blank" rel="noreferrer" style="display:none">Voir TX</a>
-      </div>
-    </div>
-  `;
-}
+document.getElementById("connect").onclick=async()=>{
+await window.ethereum.request({method:"eth_requestAccounts"});
+provider=new ethers.BrowserProvider(window.ethereum);
+signer=await provider.getSigner();
+user=await signer.getAddress();
+const net=await provider.getNetwork();
 
-swapsEl.insertAdjacentHTML("beforeend", swapCardTemplate(1, "Swap A"));
-swapsEl.insertAdjacentHTML("beforeend", swapCardTemplate(2, "Swap B"));
-swapsEl.insertAdjacentHTML("beforeend", swapCardTemplate(3, "Swap C"));
+document.getElementById("wallet").textContent=user.slice(0,6)+"…"+user.slice(-4);
+document.getElementById("net").textContent=Number(net.chainId)===PULSECHAIN_ID?"PulseChain":"Wrong network";
 
-function fillSelect(sel, selected){
-  sel.innerHTML = "";
-  for(const k of tokenKeys()){
-    const opt = document.createElement("option");
-    opt.value = k;
-    opt.textContent = k;
-    sel.appendChild(opt);
-  }
-  sel.value = selected;
-}
+refreshAll();
+};
 
-function initCardsDefaults(){
-  const defaults = [
-    {from:"PLS",  to:"PHEX"},
-    {from:"PLS",  to:"ATROPA"},
-    {from:"PHEX", to:"PLSX"},
-  ];
-  document.querySelectorAll("#swaps .card").forEach((card, idx)=>{
-    const fromSel = card.querySelector(".from");
-    const toSel   = card.querySelector(".to");
-    fillSelect(fromSel, defaults[idx].from);
-    fillSelect(toSel, defaults[idx].to);
+/* ================= BALANCE + MAX ================= */
 
-    card.querySelector(".invert").addEventListener("click", ()=>{
-      const a = fromSel.value;
-      fromSel.value = toSel.value;
-      toSel.value = a;
-      triggerQuote(card);
-    });
-
-    fromSel.addEventListener("change", ()=> triggerQuote(card));
-    toSel.addEventListener("change", ()=> triggerQuote(card));
-    card.querySelector(".amount").addEventListener("input", ()=> triggerQuote(card));
-  });
-}
-initCardsDefaults();
-
-/* =========================
-   WALLET CONNECT
-========================= */
-async function connectWallet(){
-  if(!window.ethereum){
-    alert("Wallet requis : MetaMask ou Rabby");
-    return;
-  }
-  await window.ethereum.request({ method:"eth_requestAccounts" });
-
-  provider = new ethers.BrowserProvider(window.ethereum);
-  signer = await provider.getSigner();
-  userAddress = await signer.getAddress();
-
-  const net = await provider.getNetwork();
-  networkOk = (Number(net.chainId) === PULSECHAIN_ID);
-
-  $("walletPill").textContent = "Wallet : " + shortAddr(userAddress);
-  $("netPill").textContent = "Réseau : " + (networkOk ? "PulseChain ✅" : `Mauvais (${net.chainId}) ❌`);
-
-  if(!networkOk){
-    alert("Passe sur PulseChain (chainId 369) puis reconnecte.");
-    return;
-  }
-
-  window.ethereum.on?.("accountsChanged", ()=> location.reload());
-  window.ethereum.on?.("chainChanged", ()=> location.reload());
-
-  refreshAll();
-}
-
-$("connectBtn").addEventListener("click", connectWallet);
-$("refreshBtn").addEventListener("click", refreshAll);
-
-async function getRouter(readOnly=true){
-  const c = new ethers.Contract(PULSEX_ROUTER, ROUTER_ABI, readOnly ? provider : signer);
-  return c;
-}
-
-async function checkAllowance(symIn, amountRaw){
-  if(symIn === "PLS") return true;
-  const erc = new ethers.Contract(toChecksum(TOKENS[symIn].address), ERC20_ABI, provider);
-  const allowance = await erc.allowance(userAddress, PULSEX_ROUTER);
-  return allowance >= amountRaw;
-}
-
-async function doApprove(symIn, card){
-  const erc = new ethers.Contract(toChecksum(TOKENS[symIn].address), ERC20_ABI, signer);
-  setStatus(card, "Approving… (MetaMask)", "warn");
-  const tx = await erc.approve(PULSEX_ROUTER, ethers.MaxUint256);
-  setStatus(card, "Approve pending…", "warn");
-  await tx.wait();
-  setStatus(card, "Approve OK ✅", "good");
-}
-
-let quoteTimer = null;
-function triggerQuote(card){
-  if(quoteTimer) clearTimeout(quoteTimer);
-  quoteTimer = setTimeout(()=> updateQuote(card).catch(()=>{}), 250);
-}
-
-async function updateQuote(card){
-  const from = card.querySelector(".from").value;
-  const to = card.querySelector(".to").value;
-  const amt = (card.querySelector(".amount").value || "").trim();
-
-  const outInp = card.querySelector(".out");
-  const quoteText = card.querySelector(".quoteText");
-  const approveBtn = card.querySelector(".approveBtn");
-
-  outInp.value = "";
-  quoteText.textContent = "—";
-  approveBtn.style.display = "none";
-
-  if(!signer || !networkOk){
-    setStatus(card, "Ready (connect wallet)", "");
-    return;
-  }
-  if(!amt || Number(amt) <= 0){
-    setStatus(card, "Ready", "");
-    return;
-  }
-  if(from === to){
-    setStatus(card, "Choisis 2 tokens différents", "bad");
-    return;
-  }
-
-  try{
-    setStatus(card, "Quoting…", "warn");
-    const amountIn = parseAmount(from, amt);
-    const path = buildPath(from, to);
-    if(!path) throw new Error("Invalid path");
-
-    const router = await getRouter(true);
-    const amounts = await router.getAmountsOut(amountIn, path);
-    const outRaw = amounts[amounts.length - 1];
-
-    outInp.value = formatAmount(to, outRaw);
-    quoteText.textContent = `${amt} ${from} → ~${formatAmount(to, outRaw)} ${to}`;
-
-    if(needsApprove(from)){
-      const ok = await checkAllowance(from, amountIn);
-      if(!ok){
-        approveBtn.style.display = "inline-flex";
-        approveBtn.onclick = ()=> doApprove(from, card).then(()=> updateQuote(card)).catch((e)=>{
-          console.error(e);
-          setStatus(card, "Approve error", "bad");
-        });
-        setStatus(card, "Allowance insuffisante → Approve requis", "warn");
-        return;
-      }
-    }
-
-    setStatus(card, "Ready ✅", "good");
-  }catch(e){
-    console.error(e);
-    setStatus(card, "Quote error (pair/liquidité ?)", "bad");
-  }
+async function getBalance(token){
+if(token==="PLS") return await provider.getBalance(user);
+const c=new ethers.Contract(TOKENS[token].address,ERC20_ABI,provider);
+return await c.balanceOf(user);
 }
 
 async function refreshAll(){
-  const cards = document.querySelectorAll("#swaps .card");
-  for(const c of cards){
-    await updateQuote(c);
-  }
+document.querySelectorAll("#swaps .card").forEach(async card=>{
+const from=card.querySelector(".from").value;
+const bal=await getBalance(from);
+card.querySelector(".bal").textContent=ethers.formatUnits(bal,TOKENS[from].decimals);
+});
 }
 
-async function executeSwap(card){
-  if(!signer || !networkOk){
-    alert("Connecte ton wallet sur PulseChain");
-    return;
-  }
-
-  const from = card.querySelector(".from").value;
-  const to   = card.querySelector(".to").value;
-  const amt  = (card.querySelector(".amount").value || "").trim();
-  const txLink = card.querySelector(".txA");
-  txLink.style.display = "none";
-
-  if(!amt || Number(amt) <= 0) return;
-  if(from === to){
-    setStatus(card, "Tokens identiques", "bad");
-    return;
-  }
-
-  const { slippage, deadlineMin } = getSettings();
-
-  try{
-    const router = await getRouter(false);
-    const amountIn = parseAmount(from, amt);
-    const path = buildPath(from, to);
-    if(!path) throw new Error("Invalid path");
-
-    if(needsApprove(from)){
-      const ok = await checkAllowance(from, amountIn);
-      if(!ok) await doApprove(from, card);
-    }
-
-    setStatus(card, "Calcul minOut…", "warn");
-    const amounts = await router.getAmountsOut(amountIn, path);
-    const outRaw  = amounts[amounts.length - 1];
-
-    const bps = Math.round(slippage * 100); // 1% = 100 bps
-    const minOut = outRaw * BigInt(10000 - bps) / 10000n;
-
-    const deadline = Math.floor(Date.now()/1000) + (deadlineMin * 60);
-
-    let tx;
-    setStatus(card, "Signature (MetaMask)…", "warn");
-
-    if(from === "PLS"){
-      tx = await router.swapExactETHForTokens(
-        minOut, path, userAddress, deadline, { value: amountIn }
-      );
-    }else if(to === "PLS"){
-      tx = await router.swapExactTokensForETH(
-        amountIn, minOut, path, userAddress, deadline
-      );
-    }else{
-      tx = await router.swapExactTokensForTokens(
-        amountIn, minOut, path, userAddress, deadline
-      );
-    }
-
-    setStatus(card, "Pending…", "warn");
-    txLink.href = txUrl(tx.hash);
-    txLink.textContent = "Voir TX";
-    txLink.style.display = "inline-flex";
-
-    await tx.wait();
-    setStatus(card, "Success ✅", "good");
-    await updateQuote(card);
-
-  }catch(e){
-    console.error(e);
-    setStatus(card, "Swap error (cancel ? liquidité ?)", "bad");
-  }
-}
-
-document.querySelectorAll("#swaps .card").forEach((card)=>{
-  card.querySelector(".swapBtn").addEventListener("click", ()=> executeSwap(card));
+document.querySelectorAll(".maxBtn").forEach(btn=>{
+btn.onclick=async e=>{
+const card=e.target.closest(".card");
+const from=card.querySelector(".from").value;
+let bal=await getBalance(from);
+if(from==="PLS") bal-=ethers.parseUnits("0.05",18);
+card.querySelector(".amt").value=ethers.formatUnits(bal,TOKENS[from].decimals);
+};
 });
 </script>
 </body>
