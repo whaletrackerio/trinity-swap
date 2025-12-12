@@ -24,11 +24,13 @@
     *{box-sizing:border-box;margin:0;padding:0}
     body{
       font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-      background: radial-gradient(1200px 700px at 20% 0%, #0b102a 0%, var(--bg) 55%, #020617 100%);
+      background:
+        radial-gradient(1200px 700px at 20% 0%, #0b102a 0%, var(--bg) 55%, #020617 100%);
       color:var(--text);
     }
     a{color:inherit;text-decoration:none}
     .wrap{max-width:1200px;margin:0 auto;padding:22px 14px 90px}
+
     header{
       display:flex;align-items:center;justify-content:space-between;gap:12px;
       position:sticky;top:0;z-index:50;
@@ -64,8 +66,10 @@
       background:rgba(2,6,23,.55);
       color:var(--text);font-weight:900;
     }
+
     .grid2{display:grid;grid-template-columns:1.25fr .75fr;gap:14px;align-items:stretch}
     @media(max-width:980px){.grid2{grid-template-columns:1fr}}
+
     .card{
       background:linear-gradient(180deg, rgba(15,23,42,.92), rgba(15,23,42,.72));
       border:1px solid rgba(31,41,55,.9);
@@ -93,13 +97,16 @@
     }
     .ctaRow{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
     .ctaRow .btn2, .ctaRow .btn{display:inline-flex;align-items:center;gap:8px}
+
     .sectionTitle{
       margin-top:18px;font-weight:900;font-size:14px;letter-spacing:.35px;color:var(--text);
       display:flex;align-items:center;justify-content:space-between;gap:10px;
     }
     .sectionTitle small{color:var(--muted);font-weight:800}
+
     .swaps{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:12px;padding-bottom:30px}
     @media(max-width:980px){.swaps{grid-template-columns:1fr}}
+
     label{font-size:12px;color:var(--muted)}
     input,select{
       width:100%;margin-top:6px;
@@ -322,18 +329,18 @@
 <script>
 /* ================= CONFIG ================= */
 const PULSECHAIN_ID = 369;
-const PULSECHAIN_HEX = "0x171";
+const PULSECHAIN_HEX = "0x171"; // 369
 const PULSEX_ROUTER = "0x98bf93ebf5c380C0e6Ae8e192A7e2AE08edAcc02";
 const WPLS = "0xA1077a294dDE1B09bB078844df40758a5D0f9a27";
 const PLS_GAS_RESERVE = ethers.parseUnits("0.05", 18);
 
 const TOKENS = {
-  PLS:   { symbol:"PLS",   address:null, decimals:18 },
-  WPLS:  { symbol:"WPLS",  address:WPLS, decimals:18 },
-  PHEX:  { symbol:"PHEX",  address:"0x2b591e99afE9f32eAA6214f7B7629768c40Eeb39", decimals:8 },
-  ATROPA:{ symbol:"ATROPA",address:"0xCc78A0acDF847A2C1714D2A925bB4477df5d48a6", decimals:18 },
-  PLSX:  { symbol:"PLSX",  address:"0x95B303987A60C71504D99Aa1b13B4DA07b0790ab", decimals:18 },
-  DAI:   { symbol:"DAI",   address:"0x6B175474E89094C44Da98b954EedeAC495271d0F", decimals:18 },
+  PLS:    { symbol:"PLS",   address:null, decimals:18 },
+  WPLS:   { symbol:"WPLS",  address:WPLS, decimals:18 },
+  PHEX:   { symbol:"PHEX",  address:"0x2b591e99afE9f32eAA6214f7B7629768c40Eeb39", decimals:8 },
+  ATROPA: { symbol:"ATROPA",address:"0xCc78A0acDF847A2C1714D2A925bB4477df5d48a6", decimals:18 },
+  PLSX:   { symbol:"PLSX",  address:"0x95B303987A60C71504D99Aa1b13B4DA07b0790ab", decimals:18 },
+  DAI:    { symbol:"DAI",   address:"0x6B175474E89094C44Da98b954EedeAC495271d0F", decimals:18 },
 };
 
 const ERC20_ABI = [
@@ -348,6 +355,7 @@ const ROUTER_ABI = [
   "function swapExactTokensForETH(uint256 amountIn,uint256 amountOutMin,address[] calldata path,address to,uint256 deadline) external returns (uint256[] memory amounts)"
 ];
 
+/* ================= HELPERS ================= */
 const $ = (id) => document.getElementById(id);
 function shortAddr(a){ return a ? (a.slice(0,6)+"…"+a.slice(-4)) : ""; }
 
@@ -390,13 +398,13 @@ function validatePair(card){
   }
   return true;
 }
+function txUrl(hash){ return `https://otter.pulsechain.com/tx/${hash}`; }
 
 /* ================= STATE ================= */
 let provider, signer, userAddress, networkOk = false;
 
 /* ================= UI BUILD ================= */
 const swapsEl = $("swaps");
-
 function swapCardTemplate(i, label){
   return `
     <div class="card swapbox" id="swap${i}">
@@ -447,7 +455,6 @@ function swapCardTemplate(i, label){
     </div>
   `;
 }
-
 swapsEl.insertAdjacentHTML("beforeend", swapCardTemplate(1,"Swap A"));
 swapsEl.insertAdjacentHTML("beforeend", swapCardTemplate(2,"Swap B"));
 swapsEl.insertAdjacentHTML("beforeend", swapCardTemplate(3,"Swap C"));
@@ -462,7 +469,6 @@ function fillSelect(sel, selected){
   }
   sel.value = selected;
 }
-
 function initCardsDefaults(){
   const defaults = [
     {from:"PLS",  to:"PHEX"},
@@ -517,7 +523,7 @@ $("openMultiBtn").addEventListener("click", ()=>{
 /* ================= WEB3 CONNECT ================= */
 async function connectWallet(){
   if(!window.ethereum){
-    alert("Wallet requis : MetaMask ou Rabby");
+    alert("Wallet requis : MetaMask");
     return;
   }
 
@@ -527,23 +533,26 @@ async function connectWallet(){
   userAddress = await signer.getAddress();
 
   const net = await provider.getNetwork();
-  networkOk = (Number(net.chainId) === PULSECHAIN_ID);
+  let ok = (Number(net.chainId) === PULSECHAIN_ID);
 
-  if(!networkOk){
+  if(!ok){
     try{
       await window.ethereum.request({
         method: "wallet_switchEthereumChain",
         params: [{ chainId: PULSECHAIN_HEX }]
       });
       const net2 = await provider.getNetwork();
-      networkOk = (Number(net2.chainId) === PULSECHAIN_ID);
-    }catch(_e){}
+      ok = (Number(net2.chainId) === PULSECHAIN_ID);
+    }catch(e){
+      console.error(e);
+    }
   }
 
+  networkOk = ok;
   $("walletPill").textContent = "Wallet : " + shortAddr(userAddress);
-  $("netPill").textContent = "Réseau : " + (networkOk ? "PulseChain ✅" : `Mauvais réseau ❌`);
+  $("netPill").textContent = "Réseau : " + (ok ? "PulseChain ✅" : "Mauvais réseau ❌");
 
-  // bouton devient adresse + copie
+  // ✅ bouton devient adresse + copie
   const btn = $("connectBtn");
   btn.textContent = shortAddr(userAddress);
   btn.onclick = async () => {
@@ -551,18 +560,18 @@ async function connectWallet(){
     alert("Adresse copiée ✅");
   };
 
-  setConnectedUI(networkOk);
-  if(!networkOk){
+  setConnectedUI(ok);
+
+  if(!ok){
     alert("Passe sur PulseChain (chainId 369) puis reconnecte.");
     return;
   }
 
+  await refreshAll();
+
   window.ethereum.on?.("accountsChanged", ()=> location.reload());
   window.ethereum.on?.("chainChanged", ()=> location.reload());
-
-  await refreshAll();
 }
-
 $("connectBtn").addEventListener("click", connectWallet);
 $("refreshBtn").addEventListener("click", ()=> refreshAll());
 
@@ -617,7 +626,6 @@ async function setAmountFromPercent(card, pct){
   card.querySelector(".amount").value = ethers.formatUnits(amount, TOKENS[from].decimals);
   await updateQuote(card);
 }
-
 document.querySelectorAll(".swapbox").forEach(card=>{
   card.querySelector(".maxBtn").addEventListener("click", ()=> setAmountFromPercent(card, 100).catch(console.error));
   card.querySelectorAll(".pctBtn").forEach(b=>{
@@ -687,6 +695,7 @@ async function updateQuote(card){
       if(!ok){
         approveBtn.style.display = "inline-flex";
         approveBtn.disabled = false;
+        approveBtn.textContent = "Approve " + from;
         approveBtn.onclick = async ()=>{
           try{
             await doApprove(from, card);
@@ -704,13 +713,11 @@ async function updateQuote(card){
     setStatus(card, "Ready ✅", "good");
   }catch(e){
     console.error(e);
-    setStatus(card, "Quote error (liquidité/pair ?) ", "bad");
+    setStatus(card, "Quote error (liquidité/pair ?)", "bad");
   }
 }
 
 /* ================= SWAP EXECUTION ================= */
-function txUrl(hash){ return `https://otter.pulsechain.com/tx/${hash}`; }
-
 async function executeSwap(card){
   if(!networkOk || !userAddress) return alert("Connecte ton wallet sur PulseChain");
 
@@ -743,7 +750,7 @@ async function executeSwap(card){
     const amounts = await routerRead.getAmountsOut(amountIn, path);
     const outRaw  = amounts[amounts.length - 1];
 
-    const bps = Math.round(slippage * 100);
+    const bps = Math.round(slippage * 100); // 2.0% => 200 bps
     const minOut = outRaw * BigInt(10000 - bps) / 10000n;
     const deadline = Math.floor(Date.now()/1000) + (deadlineMin * 60);
 
@@ -773,7 +780,6 @@ async function executeSwap(card){
     setStatus(card, "Swap error (cancel ? liquidité ?)", "bad");
   }
 }
-
 document.querySelectorAll(".swapbox").forEach(card=>{
   card.querySelector(".swapBtn").addEventListener("click", ()=> executeSwap(card));
 });
@@ -812,7 +818,6 @@ $("execTrinityBtn").addEventListener("click", async ()=>{
 
 /* =============== Token modal PulseX-like =============== */
 let tokenModalTarget = null;
-
 function openTokenModal(card, side){
   tokenModalTarget = { card, side };
   $("tokenModal").style.display = "block";
@@ -843,19 +848,32 @@ async function copyText(txt){
 
 async function addTokenToMetaMask(sym){
   const t = TOKENS[sym];
-  if(!window.ethereum) return alert("Wallet requis");
+  if(!window.ethereum) return alert("MetaMask requis");
   if(!t.address) return alert("PLS = token natif (pas ERC20)");
+
   try{
-    await window.ethereum.request({
-      method:"wallet_watchAsset",
-      params:{
-        type:"ERC20",
-        options:{ address:t.address, symbol:sym, decimals:t.decimals }
+    const wasAdded = await window.ethereum.request({
+      method: "wallet_watchAsset",
+      params: {
+        type: "ERC20",
+        options: {
+          address: t.address,
+          symbol: sym,
+          decimals: t.decimals
+        }
       }
     });
+
+    if(wasAdded){
+      alert("Token ajouté ✅");
+    }else{
+      alert("Ajout refusé (cancel)");
+    }
   }catch(e){
     console.error(e);
-    alert("Ajout refusé/non supporté.");
+    try{ await copyText(t.address); }catch(_){}
+    alert("Impossible d’ajouter automatiquement.\n✅ Adresse copiée.\n➡️ Ajoute-la via Import token dans MetaMask.");
+    window.open("https://otter.pulsechain.com/address/" + t.address, "_blank");
   }
 }
 
@@ -924,11 +942,10 @@ function renderTokenList(q){
   });
 }
 
-// Hook: ouvrir modal au clic sur les selects (comme PulseX)
+// Hook : ouvrir modal au clic sur les selects (PulseX-like)
 document.querySelectorAll(".swapbox").forEach(card=>{
   const fromSel = card.querySelector(".from");
   const toSel   = card.querySelector(".to");
-
   fromSel.addEventListener("mousedown", (e)=>{ e.preventDefault(); openTokenModal(card,"from"); });
   toSel.addEventListener("mousedown", (e)=>{ e.preventDefault(); openTokenModal(card,"to"); });
 });
