@@ -109,20 +109,47 @@
 
     @media(max-width:980px){
       header{flex-wrap:wrap; align-items:flex-start}
-      .brand-logo{ height:160px; }
+      .brand-logo{ height:80px; }
       html{ scroll-padding-top: 120px; }
 
+      /* GRAND RECTANGLE ART */
       .header-rect{
-        order:3;
-        width:100%;
-        max-width:none;
-        min-width:0;
-        height:160px;
-        margin-top:10px;
-        background-position: 50% 90%;
+        flex:1 1 auto;
+        min-width:420px;
+        max-width:760px;
+      
+        height:120px;              /* un peu + haut pour voir la tête */
+        border-radius:18px;
+        border:1px solid rgba(31,41,55,.80);
+      
+        background-color: rgba(2,6,23,.55);
+        background-image: url("./header-art.png");
+        background-size: cover;
+        background-repeat: no-repeat;
+      
+        /* ✅ on décale vers la gauche + un peu vers le bas pour montrer la tête */
+        background-position: 62% 78%;
+      
+        opacity:1;
+        filter: saturate(1.15) contrast(1.08) brightness(1.08);
       }
-      .top-right{order:2; width:calc(100% - 0px); justify-content:flex-end}
-    }
+
+/* MOBILE */
+@media (max-width:980px){
+  .header-rect{
+    order:3;
+    width:100%;
+    max-width:none;
+    min-width:0;
+
+    height:170px;            /* plus haut sur mobile */
+    margin-top:10px;
+
+    /* ✅ encore un peu plus bas pour la tête */
+    background-position: 60% 82%;
+  }
+}
+
 
     .pill{
       font-size:12px;color:var(--muted);
