@@ -23,7 +23,6 @@
     }
     *{box-sizing:border-box;margin:0;padding:0}
     html,body{height:100%}
-
     body{
       font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
       color:var(--text);
@@ -230,6 +229,11 @@
       user-select:none;
     }
     .tmIcon img{width:100%;height:100%;object-fit:cover;display:block}
+    .tmIcon.plsNative{
+      background:linear-gradient(135deg,var(--accent),var(--accent2));
+      color:#fff; border:none;
+      box-shadow:0 10px 25px rgba(168,85,247,.25);
+    }
     .tmSym{font-weight:900;font-size:16px}
     .tmMeta{color:var(--muted);font-size:12px;margin-top:2px}
     .tmBal{
@@ -337,7 +341,9 @@
         Si une quote échoue, c’est souvent un manque de liquidité sur la paire.
       </p>
       <div class="hr"></div>
-      <div class="warnbox">Tip : logos garantis pour les tokens principaux. Les autres = auto ou fallback lettre.</div>
+      <div class="warnbox">
+        Logos : on prend d’abord la tokenlist PulseX, sinon on fallback sur le CDN PLS369 (pas besoin d’uploader des .png). 
+      </div>
     </div>
 
     <div class="card">
@@ -395,7 +401,7 @@
 <script>
 /* ================= CONFIG ================= */
 const PULSECHAIN_ID = 369;
-const PULSECHAIN_HEX = "0x171"; // 369
+const PULSECHAIN_HEX = "0x171";
 const PULSEX_ROUTER = "0x98bf93ebf5c380C0e6Ae8e192A7e2AE08edAcc02";
 const WPLS_ADDR = "0xA1077a294dDE1B09bB078844df40758a5D0f9a27";
 const PLS_GAS_RESERVE = ethers.parseUnits("0.05", 18);
@@ -403,36 +409,24 @@ const PLS_GAS_RESERVE = ethers.parseUnits("0.05", 18);
 // tokenlist PulseX
 const PULSEX_TOKENLIST_URL = "https://tokens.app.pulsex.com/pulsex-extended-v0.1.2.tokenlist.json";
 
-/* ================= LOGOS GARANTIS (SANS FICHIERS LOCAUX) =================
-   - Tokens clés : URL fixes (trustwallet quand dispo)
-   - Fallback générique : PLS369 (jsDelivr + raw GitHub) basé sur l’adresse
-*/
-const HARD_LOGOS = {
-  // PLS natif : badge UI (pas d'image)
-  WPLS:  "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/pulsechain/assets/0xA1077a294dDE1B09bB078844df40758a5D0f9a27/logo.png",
-  PHEX:  "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/pulsechain/assets/0x2b591e99afE9f32eAA6214f7B7629768c40Eeb39/logo.png",
-  PLSX:  "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/pulsechain/assets/0x95B303987A60C71504D99Aa1b13B4DA07b0790ab/logo.png",
-  INC:   "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/pulsechain/assets/0x2fa878Ab3F87CC1C9737Fc071108F904c0B0C95d/logo.png",
-  ATROPA:"https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/pulsechain/assets/0xCc78A0acDF847A2C1714D2A925bB4477df5d48a6/logo.png",
-  // WETH fallback Ethereum (si jamais)
-  WETH:  "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xC02aaA39b223FE8D0A0E5C4F27eAD9083C756Cc2/logo.png",
-};
-
-function pls369UrlsByAddress(addr){
-  try{
-    const a = ethers.getAddress(addr);
-    return {
-      cdn: `https://cdn.jsdelivr.net/gh/PLS369/pulsechain-tokens-flat@main/pulsechain/${a}.png`,
-      raw: `https://raw.githubusercontent.com/PLS369/pulsechain-tokens-flat/main/pulsechain/${a}.png`,
-    };
-  }catch{
-    return { cdn:null, raw:null };
-  }
+// CDN logos PulseChain (PLS369) — hotlink recommandé :contentReference[oaicite:1]{index=1}
+function pls369LogoURL(addr){
+  // IMPORTANT : PLS369 stocke les png par adresse checksummée
+  const cs = ethers.getAddress(addr);
+  return "https://cdn.jsdelivr.net/gh/PLS369/pulsechain-tokens-flat@main/pulsechain/" + cs + ".png";
 }
+
+// IPFS normalisation (beaucoup de tokenlists ont ipfs://)
 function normalizeLogoURI(uri){
   if(!uri) return null;
-  if(uri.startsWith("ipfs://")) return "https://ipfs.io/ipfs/" + uri.slice("ipfs://".length);
-  return uri;
+  const u = String(uri).trim();
+  if(!u) return null;
+  if(u.startsWith("ipfs://")){
+    const cid = u.replace("ipfs://","").replace(/^ipfs\//,"");
+    // Cloudflare IPFS généralement stable
+    return "https://cloudflare-ipfs.com/ipfs/" + cid;
+  }
+  return u;
 }
 
 /* ================= TES TOKENS ================= */
@@ -474,7 +468,7 @@ const USER_TOKENS_BY_SYMBOL = {
   WBTC:"0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
 };
 
-// tokens natifs & essentiels PulseChain
+// tokens essentiels
 const BASE_FIXED = {
   PLS:  { symbol:"PLS",  address:null, decimals:18, name:"PulseChain", logoURI:null },
   WPLS: { symbol:"WPLS", address:WPLS_ADDR, decimals:18, name:"Wrapped PLS", logoURI:null },
@@ -534,18 +528,12 @@ function formatAmountWithDec(decimals, raw){
 
 /* ================= STATE ================= */
 let provider, signer, userAddress, networkOk = false;
-
-// TOKENS_MAP: symbol -> token object {symbol,address,decimals,name,logoURI}
 let TOKENS = { ...BASE_FIXED };
-
-// index par adresse
 let TOKENS_BY_ADDR = {};
 let TOKENLIST_READY = false;
-
-// cache balances
 let BAL_CACHE = new Map();
 
-/* ================= TOKENLIST (PulseX) ================= */
+/* ================= TOKENLIST + MERGE ================= */
 async function loadPulseXTokenList(){
   try{
     const r = await fetch(PULSEX_TOKENLIST_URL, { cache: "no-store" });
@@ -559,8 +547,9 @@ async function loadPulseXTokenList(){
 }
 
 function dedupeTokens(tokens){
-  const wantedAddrSet = new Set(Object.values(USER_TOKENS_BY_SYMBOL).map(a => norm(a)).filter(Boolean));
-
+  const wantedAddrSet = new Set(
+    Object.values(USER_TOKENS_BY_SYMBOL).map(a => norm(a)).filter(Boolean)
+  );
   const best = new Map();
   for(const t of tokens){
     const sym = (t.symbol || "").toUpperCase().trim();
@@ -570,8 +559,10 @@ function dedupeTokens(tokens){
     const hasLogo = !!t.logoURI;
     const isWanted = addr && wantedAddrSet.has(addr);
 
-    if(!best.has(sym)){ best.set(sym, t); continue; }
-
+    if(!best.has(sym)){
+      best.set(sym, t);
+      continue;
+    }
     const cur = best.get(sym);
     const curAddr = cur.address ? norm(cur.address) : null;
     const curHasLogo = !!cur.logoURI;
@@ -595,11 +586,10 @@ function mergeTokenDataFromList(list){
       address: safeGetAddress(t.address),
       decimals: Number(t.decimals ?? 18),
       name: t.name || t.symbol || "Token",
-      logoURI: t.logoURI || null
+      logoURI: normalizeLogoURI(t.logoURI) || null
     });
   }
 
-  // enrich base fixed
   for(const sym of Object.keys(TOKENS)){
     const base = TOKENS[sym];
     if(!base.address) continue;
@@ -609,7 +599,6 @@ function mergeTokenDataFromList(list){
     }
   }
 
-  // add tokenlist tokens
   for(const t of byAddr.values()){
     const sym = t.symbol;
     if(!sym) continue;
@@ -621,7 +610,6 @@ function mergeTokenDataFromList(list){
     }
   }
 
-  // add user tokens
   for(const [symRaw, addr] of Object.entries(USER_TOKENS_BY_SYMBOL)){
     const sym = symRaw.toUpperCase();
     const a = safeGetAddress(addr);
@@ -636,10 +624,10 @@ function mergeTokenDataFromList(list){
       const cur = TOKENS[sym];
       const curAddr = cur.address ? norm(cur.address) : "";
       const wantedAddr = norm(a);
-      if(curAddr === wantedAddr){
-        TOKENS[sym] = { ...cur, ...merged };
-      }else{
+      if(curAddr !== wantedAddr){
         if(merged.logoURI) TOKENS[sym] = merged;
+      }else{
+        TOKENS[sym] = { ...cur, ...merged };
       }
     }
   }
@@ -648,7 +636,6 @@ function mergeTokenDataFromList(list){
   for(const t of Object.values(TOKENS)){
     if(t.address) TOKENS_BY_ADDR[norm(t.address)] = t;
   }
-
   TOKENLIST_READY = true;
 }
 
@@ -814,7 +801,6 @@ function buildPath(symIn, symOut){
 
   if(symIn === "PLS") return [WPLS_ADDR, ethers.getAddress(outT.address)];
   if(symOut === "PLS") return [ethers.getAddress(inT.address), WPLS_ADDR];
-
   return [ethers.getAddress(inT.address), ethers.getAddress(outT.address)];
 }
 
@@ -867,7 +853,6 @@ async function refreshAll(){
     await refreshCardBalance(card);
     await updateQuote(card);
   }
-
   if($("tokenModal").style.display === "block"){
     await renderTokenList(($("tmSearch").value||"").trim(), true);
   }
@@ -1090,7 +1075,7 @@ $("execTrinityBtn").addEventListener("click", async ()=>{
   }
 });
 
-/* ================= TOKEN MODAL (logos fix) ================= */
+/* ================= TOKEN MODAL ================= */
 let tokenModalTarget = null;
 
 function openTokenModal(card, side){
@@ -1144,60 +1129,59 @@ async function addTokenToMetaMask(sym){
 
 function fallbackIconText(sym){ return (sym||"?").slice(0,1).toUpperCase(); }
 
-/* RESOLVE LOGO: HARD -> tokenlist -> ipfs -> pls369(cdn -> raw) -> lettre */
-function resolveLogoSet(t){
-  if(!t) return { primary:null, alt:null, alt2:null };
+// --- image failover: essaye plusieurs URLs dans l’ordre ---
+window.__trinityImgFail = function(imgEl){
+  try{
+    const list = (imgEl.dataset.fallbacks || "").split("|").filter(Boolean);
+    let idx = parseInt(imgEl.dataset.idx || "0", 10);
+    idx += 1;
+    imgEl.dataset.idx = String(idx);
 
-  // tokens clés
-  const hard = HARD_LOGOS[t.symbol];
-  if(hard) return { primary: hard, alt: null, alt2: null };
-
-  // tokenlist
-  const primary = normalizeLogoURI(t.logoURI);
-
-  // pls369 by address
-  let alt=null, alt2=null;
-  if(t.address){
-    const u = pls369UrlsByAddress(t.address);
-    alt = u.cdn;
-    alt2 = u.raw;
+    if(list[idx]){
+      imgEl.src = list[idx];
+      return;
+    }
+    const parent = imgEl.parentElement;
+    if(parent) parent.textContent = imgEl.dataset.fallbackChar || "?";
+  }catch(_){
+    const parent = imgEl.parentElement;
+    if(parent) parent.textContent = "?";
   }
-  return { primary, alt, alt2 };
+};
+
+function buildLogoCandidates(t){
+  const urls = [];
+  if(t.logoURI) urls.push(normalizeLogoURI(t.logoURI));
+  if(t.address) urls.push(pls369LogoURL(t.address)); // fallback PLS369 :contentReference[oaicite:2]{index=2}
+  return urls.filter(Boolean);
 }
 
 function renderIconHTML(t){
-  if(!t) return `<div class="tmIcon">?</div>`;
-
-  // PLS natif : badge joli
   if(!t.address){
-    return `<div class="tmIcon" style="background:linear-gradient(135deg,#a855f7,#ec4899);color:#fff;border:none;font-weight:900">PLS</div>`;
+    // PLS natif : icône propre, pas besoin d’image
+    return `<div class="tmIcon plsNative">PLS</div>`;
   }
 
-  const { primary, alt, alt2 } = resolveLogoSet(t);
-  const fallback = fallbackIconText(t.symbol);
-  const src = primary || alt || alt2 || "";
-
-  if(!src){
-    return `<div class="tmIcon">${fallback}</div>`;
+  const candidates = buildLogoCandidates(t);
+  if(candidates.length){
+    const fc = fallbackIconText(t.symbol);
+    const first = candidates[0];
+    const all = candidates.join("|").replace(/"/g,"&quot;");
+    return `
+      <div class="tmIcon">
+        <img
+          src="${first}"
+          alt="${t.symbol}"
+          referrerpolicy="no-referrer"
+          data-fallbacks="${all}"
+          data-idx="0"
+          data-fallback-char="${fc}"
+          onerror="window.__trinityImgFail(this)"
+        />
+      </div>
+    `;
   }
-
-  // onerror : primary -> alt -> alt2 -> lettre
-  return `
-    <div class="tmIcon">
-      <img
-        src="${src}"
-        data-alt="${alt || ""}"
-        data-alt2="${alt2 || ""}"
-        referrerpolicy="no-referrer"
-        alt="${t.symbol}"
-        onerror="
-          if(this.dataset.alt && this.src !== this.dataset.alt){ this.src=this.dataset.alt; return; }
-          if(this.dataset.alt2 && this.src !== this.dataset.alt2){ this.src=this.dataset.alt2; return; }
-          this.parentElement.textContent='${fallback}';
-        "
-      />
-    </div>
-  `;
+  return `<div class="tmIcon">${fallbackIconText(t.symbol)}</div>`;
 }
 
 function tokenMetaLine(t){
@@ -1366,18 +1350,10 @@ $("refreshBtn").addEventListener("click", ()=> refreshAll());
 (async function boot(){
   setConnectedUI(false);
 
-  // 1) tokenlist PulseX (si ça charge, tant mieux)
   const tokenlist = await loadPulseXTokenList();
-  if(Array.isArray(tokenlist) && tokenlist.length) mergeTokenDataFromList(tokenlist);
-  else{
-    // même si tokenlist HS, on a quand même BASE_FIXED + tes tokens
-    mergeTokenDataFromList([]); // rebuild maps
-  }
+  mergeTokenDataFromList(tokenlist);
 
-  // 2) init selects
   initCardsDefaults();
-
-  // 3) refresh quotes (sans wallet => ready)
   document.querySelectorAll(".swapbox").forEach(card => updateQuote(card).catch(()=>{}));
 })();
 </script>
