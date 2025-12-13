@@ -57,50 +57,73 @@
     a{color:inherit;text-decoration:none}
     .wrap{max-width:1200px;margin:0 auto;padding:22px 14px 90px}
 
+    /* =========================
+       HEADER STICKY
+       ========================= */
     header{
-      display:flex;align-items:center;justify-content:space-between;gap:12px;
+      display:flex;align-items:center;justify-content:space-between;gap:14px;
       position:sticky;top:0;z-index:50;
       backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
       background:linear-gradient(180deg, rgba(5,8,22,.92), rgba(5,8,22,.55));
       border-bottom:1px solid rgba(31,41,55,.6);
       padding:14px 10px;
       margin:-22px -14px 18px;
       box-shadow: 0 18px 45px rgba(0,0,0,.35);
+      flex-wrap:nowrap;
     }
 
-    .brand{display:flex;align-items:center;gap:12px;min-width:240px}
+    .brand{display:flex;align-items:center;gap:12px;flex:0 0 auto}
     .brand-logo{
-      height:96px;
+      height:110px;
       width:auto;
       display:block;
-      filter:
-        drop-shadow(0 12px 28px rgba(168,85,247,.35))
-        drop-shadow(0 0 18px rgba(168,85,247,.25));
+      filter: drop-shadow(0 14px 26px rgba(168,85,247,.22));
     }
 
-    /* (optionnel) Rectangle header art si tu l’utilises */
+    /* ✅ GRAND RECTANGLE ART (évite le “petit carré”) */
     .header-rect{
-      flex:1;
-      height:84px;
+      flex:1 1 auto;                 /* ✅ prend la place dispo */
+      min-width:420px;               /* ✅ empêche de s’écraser */
+      max-width:760px;
+      height:110px;                  /* ✅ hauteur fixe = plus carré */
       border-radius:18px;
       border:1px solid rgba(31,41,55,.80);
       background-color: rgba(2,6,23,.55);
-      background-image: url("header-art.png");
+      background-image: url("./header-art.png");
       background-size: cover;
-      background-repeat: no-repeat;
-      background-position: center;
-      box-shadow: inset 0 0 40px rgba(0,0,0,.45);
+      background-repeat:no-repeat;
+
+      /* ✅ on “remonte” l’image pour voir la tête de la baleine */
+      background-position: 50% 35%;
+
+      filter: saturate(1.20) contrast(1.12) brightness(1.10);
+      box-shadow: 0 18px 45px rgba(0,0,0,.45);
       overflow:hidden;
     }
 
-    @media(max-width:980px){
-      html{ scroll-padding-top: 120px; }
-      .brand-logo{ height:64px; }
-      .brand{min-width:auto}
-      .header-rect{display:none;} /* mobile: plus compact */
+    .top-right{
+      display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end;
+      flex:0 0 auto;
     }
 
-    .top-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+    @media(max-width:980px){
+      header{flex-wrap:wrap; align-items:flex-start}
+      .brand-logo{ height:80px; }
+      html{ scroll-padding-top: 120px; }
+
+      .header-rect{
+        order:3;
+        width:100%;
+        max-width:none;
+        min-width:0;
+        height:120px;
+        margin-top:10px;
+        background-position: 50% 32%;
+      }
+      .top-right{order:2; width:calc(100% - 0px); justify-content:flex-end}
+    }
+
     .pill{
       font-size:12px;color:var(--muted);
       border:1px solid rgba(31,41,55,.9);
@@ -217,12 +240,12 @@
     footer{margin-top:26px;text-align:center;color:var(--muted);font-size:11px;line-height:1.6}
 
     /* =========================
-       TOKEN MODAL (PulseX-like)
+       TOKEN MODAL (PulseX-like + import par adresse)
        ========================= */
     #tokenModal{display:none; position:fixed; inset:0; z-index:9999;}
     #tmBackdrop{position:absolute; inset:0; background:rgba(0,0,0,.65);}
     .tmBox{
-      position:relative; max-width:760px; width:calc(100% - 24px);
+      position:relative; max-width:820px; width:calc(100% - 24px);
       margin:6vh auto;
       background:rgba(15,23,42,.96);
       border:1px solid rgba(31,41,55,.9);
@@ -237,9 +260,10 @@
       background:rgba(2,6,23,.70); border:1px solid rgba(34,197,94,.35); color:#e5e7eb;
     }
     .tmList{margin-top:10px; max-height:520px; overflow:auto; padding-right:6px;}
+
     .tmRow{
       display:grid;
-      grid-template-columns: 44px 1fr 120px 120px;
+      grid-template-columns: 44px 1fr 140px 140px;
       gap:10px;
       align-items:center;
       padding:12px; border-radius:16px; margin-bottom:10px;
@@ -247,7 +271,7 @@
       cursor:pointer;
     }
     @media(max-width:650px){
-      .tmRow{grid-template-columns: 44px 1fr 110px; }
+      .tmRow{grid-template-columns: 44px 1fr 120px; }
       .tmActions{display:none;}
     }
     .tmIcon{
@@ -282,19 +306,24 @@
     .tmBottom .btn2{padding:8px 12px}
     .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;}
 
-    .importTag{
-      display:inline-flex;
-      align-items:center;
-      gap:6px;
-      padding:6px 10px;
-      border-radius:999px;
+    /* ✅ Import row style */
+    .tmImport{
+      border:1px solid rgba(168,85,247,.45) !important;
+      background: rgba(168,85,247,.08) !important;
+      cursor:default;
+    }
+    .badge{
+      display:inline-flex;align-items:center;gap:6px;
+      padding:6px 10px;border-radius:999px;
       border:1px solid rgba(245,158,11,.35);
-      background:rgba(245,158,11,.10);
-      color:#fbbf24;
-      font-weight:900;
-      font-size:12px;
-      margin-left:10px;
+      background:rgba(245,158,11,.08);
+      color:#fbbf24;font-weight:900;font-size:12px;
       white-space:nowrap;
+    }
+    .badge.ok{
+      border:1px solid rgba(34,197,94,.35);
+      background:rgba(34,197,94,.08);
+      color:#34d399;
     }
   </style>
 </head>
@@ -305,8 +334,11 @@
   <header>
     <div class="brand">
       <img src="./trinity-logo-full.png" alt="TRINITY Swap" class="brand-logo">
-      <div class="header-rect" aria-hidden="true"></div>
     </div>
+
+    <!-- ✅ ton grand rectangle art -->
+    <div class="header-rect" aria-label="Header art"></div>
+
     <div class="top-right">
       <div class="pill" id="netPill">Réseau : —</div>
       <div class="pill" id="walletPill">Wallet : non connecté</div>
@@ -430,12 +462,12 @@
       <button class="tmClose" id="tmClose">✕</button>
     </div>
 
-    <input class="tmSearch" id="tmSearch" placeholder="Search name or paste address" />
+    <input class="tmSearch" id="tmSearch" placeholder="Search name or paste address (0x...)" />
 
     <div class="tmList" id="tmList"></div>
 
     <div class="tmBottom">
-      <div>Coller une adresse 0x… pour importer un token (comme PulseX). 📋 copie l’adresse. 🦊 ajoute à MetaMask.</div>
+      <div>Coller une adresse 0x... pour importer un token (comme PulseX). 📋 copie l’adresse. 🦊 ajoute à MetaMask.</div>
       <button class="btn2" id="tmRefresh">↻ Refresh</button>
     </div>
   </div>
@@ -448,11 +480,26 @@ const PULSECHAIN_HEX = "0x171";
 const PULSEX_ROUTER = "0x98bf93ebf5c380C0e6Ae8e192A7e2AE08edAcc02";
 const WPLS_ADDR = "0xA1077a294dDE1B09bB078844df40758a5D0f9a27";
 const PLS_GAS_RESERVE = ethers.parseUnits("0.05", 18);
-
 const PULSEX_TOKENLIST_URL = "https://tokens.app.pulsex.com/pulsex-extended-v0.1.2.tokenlist.json";
 const PITEAS_LOGO_BASE = "https://raw.githubusercontent.com/piteasio/app-tokens/main/token-logo/";
 
-/* ================= TES TOKENS (2 blocs) ================= */
+/* ✅ RPC read-only (import sans wallet) */
+const RPCS = [
+  "https://rpc.pulsechain.com",
+  "https://pulsechain.publicnode.com",
+  "https://pulsechain-rpc.publicnode.com"
+];
+
+function makeReadProvider(){
+  for(const url of RPCS){
+    try{ return new ethers.JsonRpcProvider(url, PULSECHAIN_ID); }
+    catch(e){}
+  }
+  return null;
+}
+const readProvider = makeReadProvider();
+
+/* ================= TOKENS ================= */
 const USER_TOKENS_BY_SYMBOL = {
   EHEX: "0x57fde0a71132198BBeC939B98976993d8D89D225",
   INC:  "0x2fa878Ab3F87CC1C9737Fc071108F904c0B0C95d",
@@ -512,8 +559,7 @@ const ROUTER_ABI = [
   "function getAmountsOut(uint256 amountIn, address[] calldata path) external view returns (uint256[] memory amounts)",
   "function swapExactTokensForTokens(uint256 amountIn,uint256 amountOutMin,address[] calldata path,address to,uint256 deadline) external returns (uint256[] memory amounts)",
   "function swapExactETHForTokens(uint256 amountOutMin,address[] calldata path,address to,uint256 deadline) external payable returns (uint256[] memory amounts)",
-  "function swapExactTokensForETH(uint256 amountIn,uint256 amountOutMin,address[] calldata path,address to,uint256 deadline) external returns (uint256[] memory amounts)",
-  "function swapExactTokensForETHSupportingFeeOnTransferTokens(uint256 amountIn,uint256 amountOutMin,address[] calldata path,address to,uint256 deadline) external"
+  "function swapExactTokensForETH(uint256 amountIn,uint256 amountOutMin,address[] calldata path,address to,uint256 deadline) external returns (uint256[] memory amounts)"
 ];
 
 /* ================= HELPERS ================= */
@@ -528,17 +574,9 @@ function setStatus(card, txt, cls=""){
   el.className = "status" + (cls ? " "+cls : "");
   el.textContent = txt;
 }
-
-function getSettings(){
-  const sl = parseFloat($("slippage").value || "2");
-  const dl = parseInt($("deadlineM").value || "10", 10);
-  return { slippage: Math.max(0, sl), deadlineMin: Math.max(1, dl) };
-}
-
 function safeGetAddress(a){
   try{ return ethers.getAddress(a); }catch{ return null; }
 }
-
 function formatAmountWithDec(decimals, raw){
   const s = ethers.formatUnits(raw, decimals);
   const num = Number(s);
@@ -546,6 +584,11 @@ function formatAmountWithDec(decimals, raw){
   if(num === 0) return "0";
   if(num < 0.0001) return num.toExponential(3);
   return num.toLocaleString(undefined, { maximumFractionDigits: 6 });
+}
+function getSettings(){
+  const sl = parseFloat($("slippage").value || "2");
+  const dl = parseInt($("deadlineM").value || "10", 10);
+  return { slippage: Math.max(0, sl), deadlineMin: Math.max(1, dl) };
 }
 
 /* ✅ LOGO utils */
@@ -569,6 +612,7 @@ function buildLogoCandidates(t){
   }
   return out;
 }
+function fallbackIconText(sym){ return (sym||"?").slice(0,1).toUpperCase(); }
 
 /* ================= STATE ================= */
 let provider, signer, userAddress, networkOk = false;
@@ -577,8 +621,30 @@ let TOKENS_BY_ADDR = {};
 let TOKENLIST_READY = false;
 let BAL_CACHE = new Map();
 
-/* Import-by-address cache */
-const IMPORT_CACHE = new Map(); // addrLower => { status:"loading"|"ok"|"err", token?, err? }
+const LS_IMPORTED_KEY = "TRINITY_IMPORTED_TOKENS";
+
+/* ================= IMPORTED TOKENS (LocalStorage) ================= */
+function loadImportedTokens(){
+  try{
+    const raw = localStorage.getItem(LS_IMPORTED_KEY);
+    if(!raw) return [];
+    const arr = JSON.parse(raw);
+    if(!Array.isArray(arr)) return [];
+    return arr.filter(t => t && isAddr(t.address) && t.symbol && t.decimals != null);
+  }catch{ return []; }
+}
+function saveImportedTokens(list){
+  localStorage.setItem(LS_IMPORTED_KEY, JSON.stringify(list.slice(0,200)));
+}
+function addImportedToken(t){
+  const cur = loadImportedTokens();
+  const a = norm(t.address);
+  const exists = cur.some(x => norm(x.address) === a);
+  if(!exists){
+    cur.unshift({ symbol:t.symbol, address:t.address, decimals:t.decimals, name:t.name||t.symbol, logoURI:t.logoURI||null });
+    saveImportedTokens(cur);
+  }
+}
 
 /* ================= BUILD TOKEN SET ================= */
 async function loadPulseXTokenList(){
@@ -623,6 +689,13 @@ function dedupeTokens(tokens){
   return Array.from(best.values());
 }
 
+function rebuildTOKENS_BY_ADDR(){
+  TOKENS_BY_ADDR = {};
+  for(const t of Object.values(TOKENS)){
+    if(t.address) TOKENS_BY_ADDR[norm(t.address)] = t;
+  }
+}
+
 function mergeTokenDataFromList(list){
   const cleaned = dedupeTokens(list.filter(t => Number(t.chainId) === PULSECHAIN_ID && isAddr(t.address)));
 
@@ -638,6 +711,7 @@ function mergeTokenDataFromList(list){
     });
   }
 
+  // base fixed override
   for(const sym of Object.keys(TOKENS)){
     const base = TOKENS[sym];
     if(!base.address) continue;
@@ -647,6 +721,7 @@ function mergeTokenDataFromList(list){
     }
   }
 
+  // add missing from list
   for(const t of byAddr.values()){
     const sym = t.symbol;
     if(!sym) continue;
@@ -658,6 +733,7 @@ function mergeTokenDataFromList(list){
     }
   }
 
+  // force your tokens list
   for(const [symRaw, addr] of Object.entries(USER_TOKENS_BY_SYMBOL)){
     const sym = symRaw.toUpperCase();
     const a = safeGetAddress(addr);
@@ -680,15 +756,19 @@ function mergeTokenDataFromList(list){
     }
   }
 
-  rebuildTokByAddr();
-  TOKENLIST_READY = true;
-}
-
-function rebuildTokByAddr(){
-  TOKENS_BY_ADDR = {};
-  for(const t of Object.values(TOKENS)){
-    if(t.address) TOKENS_BY_ADDR[norm(t.address)] = t;
+  // add imported from localStorage
+  const imported = loadImportedTokens();
+  for(const t of imported){
+    const sym = (t.symbol||"").toUpperCase();
+    const addr = safeGetAddress(t.address);
+    if(!sym || !addr) continue;
+    if(!TOKENS[sym]){
+      TOKENS[sym] = { ...t, symbol:sym, address:addr, decimals:Number(t.decimals) };
+    }
   }
+
+  rebuildTOKENS_BY_ADDR();
+  TOKENLIST_READY = true;
 }
 
 /* ================= WEB3 ================= */
@@ -697,6 +777,10 @@ function getRouter(readOnly=true){
 }
 function getErc20(tokenAddr, readOnly=true){
   return new ethers.Contract(ethers.getAddress(tokenAddr), ERC20_ABI, readOnly ? provider : signer);
+}
+function getErc20ReadOnly(tokenAddr){
+  if(!readProvider) throw new Error("No RPC provider");
+  return new ethers.Contract(ethers.getAddress(tokenAddr), ERC20_ABI, readProvider);
 }
 
 async function getBalance(sym){
@@ -716,85 +800,6 @@ async function getBalanceByToken(t){
   const bal = await getErc20(t.address, true).balanceOf(userAddress);
   BAL_CACHE.set(key, bal);
   return bal;
-}
-
-/* ================= IMPORT BY ADDRESS (PulseX-like) ================= */
-async function fetchTokenMetaByAddress(addr){
-  const a = safeGetAddress(addr);
-  if(!a) throw new Error("Adresse invalide");
-
-  if(!networkOk || !provider){
-    throw new Error("Connecte ton wallet sur PulseChain pour importer");
-  }
-
-  const c = getErc20(a, true);
-
-  // On essaie de lire symbol/decimals/name. Si ça throw => pas ERC20 / mauvais réseau.
-  const [symbolRaw, decimalsRaw, nameRaw] = await Promise.all([
-    c.symbol(),
-    c.decimals(),
-    c.name()
-  ]);
-
-  const symbol = String(symbolRaw || "").toUpperCase().trim();
-  const decimals = Number(decimalsRaw);
-  const name = String(nameRaw || "").trim() || symbol || "Token";
-
-  if(!symbol || !Number.isFinite(decimals)){
-    throw new Error("Contrat non ERC20 (ou incompatible)");
-  }
-
-  // si symbole déjà pris, on garde mais on distinguera via adresse (on utilise la clé adresse)
-  return {
-    symbol,
-    address: a,
-    decimals,
-    name,
-    logoURI: null,
-    custom: true
-  };
-}
-
-async function ensureImportCandidate(addr){
-  const key = norm(addr);
-  if(IMPORT_CACHE.has(key)) return IMPORT_CACHE.get(key);
-
-  IMPORT_CACHE.set(key, { status:"loading" });
-  try{
-    const token = await fetchTokenMetaByAddress(addr);
-    IMPORT_CACHE.set(key, { status:"ok", token });
-  }catch(e){
-    IMPORT_CACHE.set(key, { status:"err", err: (e?.message || "Import error") });
-  }
-  return IMPORT_CACHE.get(key);
-}
-
-function addCustomTokenToState(t){
-  // On garde la clé principale par symbole (UX), mais on évite d’écraser un token existant différent.
-  const addrL = norm(t.address);
-  if(TOKENS_BY_ADDR[addrL]) return; // déjà présent
-
-  const sym = t.symbol.toUpperCase();
-  if(!TOKENS[sym]){
-    TOKENS[sym] = t;
-  }else{
-    // symbole déjà existant avec autre adresse -> on crée un alias "SYM2", "SYM3"
-    let i = 2;
-    while(TOKENS[`${sym}${i}`]) i++;
-    TOKENS[`${sym}${i}`] = { ...t, symbol: `${sym}${i}` };
-  }
-
-  rebuildTokByAddr();
-
-  // refresh UI selects
-  document.querySelectorAll(".swapbox").forEach(card=>{
-    const fromSel = card.querySelector(".from");
-    const toSel = card.querySelector(".to");
-    const currentFrom = fromSel.value;
-    const currentTo = toSel.value;
-    fillSelect(fromSel, currentFrom);
-    fillSelect(toSel, currentTo);
-  });
 }
 
 /* ================= UI BUILD: 3 SWAPS ================= */
@@ -1259,8 +1264,6 @@ async function addTokenToMetaMask(sym){
   }
 }
 
-function fallbackIconText(sym){ return (sym||"?").slice(0,1).toUpperCase(); }
-
 function renderIconHTML(t){
   const candidates = buildLogoCandidates(t);
   if(!candidates.length){
@@ -1296,11 +1299,52 @@ function renderIconHTML(t){
 function tokenMetaLine(t){
   const addr = t.address ? shortAddr(t.address) : "Native";
   const name = t.name ? ` • ${t.name}` : "";
-  const tag = t.custom ? `<span class="importTag">⚠ Imported</span>` : "";
-  return `<div class="tmMeta mono">${addr}${name}${tag}</div>`;
+  return `<div class="tmMeta mono">${addr}${name}</div>`;
 }
 
-/* Render list + Import row if q is address */
+/* ✅ Import par adresse (read-only) */
+async function resolveTokenByAddress(addr){
+  const a = safeGetAddress(addr);
+  if(!a) throw new Error("Bad address");
+  // if known already
+  const known = TOKENS_BY_ADDR[norm(a)];
+  if(known) return known;
+
+  if(!readProvider) throw new Error("RPC indisponible (read-only)");
+  const c = getErc20ReadOnly(a);
+
+  const [sym, name, dec] = await Promise.all([
+    c.symbol(),
+    c.name(),
+    c.decimals()
+  ]);
+
+  const t = {
+    symbol: String(sym).toUpperCase().slice(0,11),
+    address: a,
+    decimals: Number(dec),
+    name: String(name).slice(0,64),
+    logoURI: null
+  };
+
+  return t;
+}
+
+function addTokenToRuntime(t){
+  // if symbol collision, keep unique key
+  let sym = (t.symbol||"").toUpperCase().trim();
+  if(!sym) sym = "TOKEN";
+  let key = sym;
+  let i = 2;
+  while(TOKENS[key] && TOKENS[key].address && norm(TOKENS[key].address) !== norm(t.address)){
+    key = sym + "_" + i;
+    i++;
+  }
+  TOKENS[key] = { ...t, symbol:key };
+  rebuildTOKENS_BY_ADDR();
+}
+
+/* ================= LIST RENDER ================= */
 async function renderTokenList(q, withBalances){
   const listEl = $("tmList");
   const nq = norm(q);
@@ -1312,18 +1356,36 @@ async function renderTokenList(q, withBalances){
     tokensArr.push(t);
   }
 
-  const isAddressQuery = isAddr(q);
-  const addrKey = isAddressQuery ? norm(q) : null;
-  const existsByAddr = isAddressQuery ? !!TOKENS_BY_ADDR[addrKey] : false;
+  const wantAddr = isAddr(q) ? safeGetAddress(q) : null;
 
+  // filtered tokens
   const filtered = tokensArr.filter(t=>{
     if(!q) return true;
-    if(isAddressQuery) return t.address && norm(t.address) === addrKey;
+    if(wantAddr) return t.address && norm(t.address) === norm(wantAddr);
     return norm(t.symbol).includes(nq) || norm(t.name||"").includes(nq);
   });
 
-  // Base rendering for existing tokens
-  listEl.innerHTML = filtered.map(t=>{
+  // build HTML
+  let html = "";
+
+  // ✅ Import row when address pasted
+  if(wantAddr){
+    html += `
+      <div class="tmRow tmImport" id="tmImportRow">
+        <div class="tmIcon">+</div>
+        <div>
+          <div class="tmSym">Import par adresse</div>
+          <div class="tmMeta mono">${shortAddr(wantAddr)} • lecture via RPC PulseChain</div>
+        </div>
+        <div class="tmBal" id="tmImportMeta"><b>—</b>Token</div>
+        <div class="tmActions">
+          <button class="tmIconBtn" id="tmImportBtn" disabled>Import</button>
+        </div>
+      </div>
+    `;
+  }
+
+  html += filtered.map(t=>{
     return `
       <div class="tmRow" data-sym="${t.symbol}">
         ${renderIconHTML(t)}
@@ -1342,71 +1404,19 @@ async function renderTokenList(q, withBalances){
     `;
   }).join("");
 
-  // If user pasted an address that isn't in list, show Import row
-  if(isAddressQuery && !existsByAddr){
-    const st = await ensureImportCandidate(q);
+  listEl.innerHTML = html;
 
-    let rowHTML = "";
-    if(st.status === "loading"){
-      rowHTML = `
-        <div class="tmRow" data-import="${q}">
-          <div class="tmIcon">⏳</div>
-          <div>
-            <div class="tmSym">Import token</div>
-            <div class="tmMeta mono">${shortAddr(q)} • lecture du contrat… <span class="importTag">⚠ Non vérifié</span></div>
-          </div>
-          <div class="tmBal"><b>—</b></div>
-          <div class="tmActions">
-            <button class="tmIconBtn" disabled>Import</button>
-          </div>
-        </div>
-      `;
-    }else if(st.status === "err"){
-      rowHTML = `
-        <div class="tmRow" data-import="${q}">
-          <div class="tmIcon">!</div>
-          <div>
-            <div class="tmSym">Import impossible</div>
-            <div class="tmMeta mono">${shortAddr(q)} • ${String(st.err).slice(0,80)} <span class="importTag">⚠ Vérifie réseau</span></div>
-          </div>
-          <div class="tmBal"><b>—</b></div>
-          <div class="tmActions">
-            <button class="tmIconBtn" disabled>Import</button>
-          </div>
-        </div>
-      `;
-    }else{
-      const t = st.token;
-      rowHTML = `
-        <div class="tmRow" data-import="${t.address}">
-          <div class="tmIcon">${fallbackIconText(t.symbol)}</div>
-          <div>
-            <div class="tmSym">Importer ${t.symbol}</div>
-            <div class="tmMeta mono">${shortAddr(t.address)} • ${t.name} <span class="importTag">⚠ Non vérifié</span></div>
-          </div>
-          <div class="tmBal"><b>—</b></div>
-          <div class="tmActions">
-            <button class="tmIconBtn tmDoImport">Import</button>
-          </div>
-        </div>
-      `;
-    }
-
-    // Put import row at top
-    listEl.insertAdjacentHTML("afterbegin", rowHTML);
-  }
-
-  // Row click to select token
-  listEl.querySelectorAll(".tmRow").forEach(row=>{
+  // click select token
+  listEl.querySelectorAll(".tmRow[data-sym]").forEach(row=>{
     row.addEventListener("click", async (e)=>{
-      if(e.target.classList.contains("tmCopy") || e.target.classList.contains("tmAdd") || e.target.classList.contains("tmDoImport")) return;
-
+      if(e.target.classList.contains("tmCopy") || e.target.classList.contains("tmAdd")) return;
       const sym = row.dataset.sym;
-      if(!sym) return;
       if(!tokenModalTarget) return;
-
       const { card, side } = tokenModalTarget;
       const sel = card.querySelector(side === "from" ? ".from" : ".to");
+
+      // refresh options before selecting (in case new import)
+      fillSelect(sel, sym);
       sel.value = sym;
 
       closeTokenModal();
@@ -1415,7 +1425,7 @@ async function renderTokenList(q, withBalances){
     });
   });
 
-  // Copy / Add buttons
+  // copy + add metamask
   listEl.querySelectorAll(".tmCopy").forEach(btn=>{
     btn.addEventListener("click", async (e)=>{
       e.stopPropagation();
@@ -1433,53 +1443,86 @@ async function renderTokenList(q, withBalances){
     });
   });
 
-  // Import button
-  const importBtn = listEl.querySelector(".tmDoImport");
-  if(importBtn){
-    importBtn.addEventListener("click", async (e)=>{
-      e.stopPropagation();
-      const row = e.target.closest(".tmRow");
-      const addr = row?.dataset?.import;
-      if(!addr) return;
+  // ✅ Import logic row
+  if(wantAddr){
+    const metaEl = $("tmImportMeta");
+    const btn = $("tmImportBtn");
 
-      const st = IMPORT_CACHE.get(norm(addr));
-      if(!st || st.status !== "ok") return;
+    btn.disabled = true;
+    metaEl.innerHTML = `<b>Lecture…</b>Token`;
 
-      // Add to state
-      addCustomTokenToState(st.token);
+    try{
+      const t = await resolveTokenByAddress(wantAddr);
 
-      // Select it immediately
-      if(tokenModalTarget){
-        const { card, side } = tokenModalTarget;
-        const addedAddr = norm(st.token.address);
-        const tokenObj = TOKENS_BY_ADDR[addedAddr];
-        // Find its symbol key in TOKENS (could be SYM2)
-        let symKey = null;
-        for(const [k,v] of Object.entries(TOKENS)){
-          if(v?.address && norm(v.address) === addedAddr){
-            symKey = k;
-            break;
+      // already known ?
+      const already = TOKENS_BY_ADDR[norm(t.address)];
+      if(already){
+        metaEl.innerHTML = `<b>${already.symbol}</b>${already.name ? " "+already.name : ""}`;
+        btn.textContent = "Déjà";
+        btn.disabled = true;
+      }else{
+        metaEl.innerHTML = `<b>${t.symbol}</b>${t.name ? " "+t.name : ""} • ${t.decimals} dec`;
+        btn.textContent = "Import";
+        btn.disabled = false;
+
+        btn.onclick = async ()=>{
+          try{
+            // add to runtime + localStorage
+            addTokenToRuntime(t);
+            addImportedToken(t);
+
+            // refresh selects globally (so token appears)
+            document.querySelectorAll(".swapbox").forEach(card=>{
+              const fromSel = card.querySelector(".from");
+              const toSel = card.querySelector(".to");
+              const curFrom = fromSel.value;
+              const curTo = toSel.value;
+              fillSelect(fromSel, curFrom);
+              fillSelect(toSel, curTo);
+            });
+
+            // auto-select imported in the targeted select
+            if(tokenModalTarget){
+              const { card, side } = tokenModalTarget;
+              const sel = card.querySelector(side === "from" ? ".from" : ".to");
+
+              // find the actual key we stored (could be SYMBOL_2)
+              const just = TOKENS_BY_ADDR[norm(t.address)];
+              if(just){
+                fillSelect(sel, just.symbol);
+                sel.value = just.symbol;
+              }
+            }
+
+            metaEl.innerHTML = `<b>Importé ✅</b>Token`;
+            btn.textContent = "OK";
+            btn.disabled = true;
+
+            // update balances/quotes if wallet connected
+            if(networkOk){
+              await refreshAll().catch(()=>{});
+            }else{
+              // still refresh list view
+              await renderTokenList(q, false);
+            }
+          }catch(e){
+            console.error(e);
+            metaEl.innerHTML = `<b>Erreur</b>Import`;
           }
-        }
-        if(symKey){
-          const sel = card.querySelector(side === "from" ? ".from" : ".to");
-          sel.value = symKey;
-        }
+        };
       }
-
-      closeTokenModal();
-      if(tokenModalTarget?.card){
-        await refreshCardBalance(tokenModalTarget.card).catch(()=>{});
-        await updateQuote(tokenModalTarget.card).catch(()=>{});
-      }
-    });
+    }catch(e){
+      console.error(e);
+      metaEl.innerHTML = `<b>Import impossible</b><div class="tmMeta mono">RPC indisponible ou token invalide</div>`;
+      btn.textContent = "Import";
+      btn.disabled = true;
+    }
   }
 
-  // Balances in modal
+  // balances (only when wallet connected)
   if(withBalances && networkOk && userAddress){
-    for(const row of listEl.querySelectorAll(".tmRow")){
+    for(const row of listEl.querySelectorAll(".tmRow[data-sym]")){
       const sym = row.dataset.sym;
-      if(!sym) continue;
       const t = TOKENS[sym];
       const balBox = row.querySelector(".tmBal");
       try{
