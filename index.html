@@ -23,13 +23,8 @@
     }
     *{box-sizing:border-box;margin:0;padding:0}
     html,body{height:100%}
+    html{ scroll-padding-top: 140px; }
 
-    /* ✅ pour que les ancres/scrollIntoView ne cachent pas le titre sous le header */
-    html{ scroll-padding-top: 130px; }
-
-    /* =========================
-       FOND (bg.png) VISIBLE + "watermark" permanent
-       ========================= */
     body{
       font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
       color:var(--text);
@@ -44,7 +39,7 @@
         radial-gradient(1200px 700px at 20% 0%, rgba(11,16,42,.78) 0%, rgba(5,8,22,.86) 55%, rgba(2,6,23,.92) 100%),
         url("./bg.png");
       background-size: cover;
-      background-position: 85% center;
+      background-position: center;
       background-repeat:no-repeat;
       filter: saturate(1.15) contrast(1.05);
       opacity:.40;
@@ -62,115 +57,50 @@
     a{color:inherit;text-decoration:none}
     .wrap{max-width:1200px;margin:0 auto;padding:22px 14px 90px}
 
-    /* =========================
-       HEADER STICKY (reste figé)
-       ========================= */
     header{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:16px;
-
-      position:sticky;
-      top:0;
-      z-index:50;
-
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-
-      background:linear-gradient(180deg, rgba(5,8,22,.94), rgba(5,8,22,.70));
+      display:flex;align-items:center;justify-content:space-between;gap:12px;
+      position:sticky;top:0;z-index:50;
+      backdrop-filter: blur(10px);
+      background:linear-gradient(180deg, rgba(5,8,22,.92), rgba(5,8,22,.55));
       border-bottom:1px solid rgba(31,41,55,.6);
-
-      padding:18px 16px;
+      padding:14px 10px;
       margin:-22px -14px 18px;
-      min-height:130px;
-
-      box-shadow:0 18px 45px rgba(0,0,0,.45);
+      box-shadow: 0 18px 45px rgba(0,0,0,.35);
     }
 
-    /* ✅ LOGO IMAGE (trinity-logo-full.png) */
-    .brand{
-      display:flex;
-      align-items:center;
-      height:100%;
-      flex:0 0 auto;
-    }
+    .brand{display:flex;align-items:center;gap:12px;min-width:240px}
     .brand-logo{
       height:96px;
       width:auto;
       display:block;
-
-      /* ✅ boost visuel si ton PNG a du vide */
-      transform: translateY(2px) scale(1.18);
-      transform-origin:left center;
-
       filter:
         drop-shadow(0 12px 28px rgba(168,85,247,.35))
         drop-shadow(0 0 18px rgba(168,85,247,.25));
     }
 
-    /* =========================
-       RECTANGLE PANORAMA (au centre du header)
-       Fichier requis: ./header-art.png
-       ========================= */
-    .header-mid{
-      flex: 1 1 auto;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      min-width: 240px;
-      padding: 0 8px;
-    }
-    ..header-rect{
-      width: clamp(320px, 44vw, 760px);
-      height: 84px;
-      border-radius: 18px;
-      border: 1px solid rgba(31,41,55,.8);
-    
+    /* (optionnel) Rectangle header art si tu l’utilises */
+    .header-rect{
+      flex:1;
+      height:84px;
+      border-radius:18px;
+      border:1px solid rgba(31,41,55,.80);
       background-color: rgba(2,6,23,.55);
       background-image: url("header-art.png");
-      background-repeat: no-repeat;
       background-size: cover;
+      background-repeat: no-repeat;
       background-position: center;
+      box-shadow: inset 0 0 40px rgba(0,0,0,.45);
+      overflow:hidden;
     }
 
-    
-    /* ✅ glow léger au lieu d’un voile noir */
-    .header-rect::after{
-      content:"";
-      position:absolute; inset:0;
-      background:
-        radial-gradient(260px 100px at 18% 45%, rgba(168,85,247,.18), transparent 62%),
-        radial-gradient(260px 100px at 70% 55%, rgba(34,197,94,.10), transparent 65%);
-      pointer-events:none;
-    }
-
-
-    /* ✅ responsive */
     @media(max-width:980px){
-      header{
-        min-height:96px;
-        padding:14px 12px;
-      }
-      .brand-logo{
-        height:64px;
-        transform: translateY(1px) scale(1.14);
-      }
-
-      /* ✅ sur mobile on masque pour garder une UI clean */
-      .header-mid{ display:none; }
-
-      html{ scroll-padding-top: 110px; }
+      html{ scroll-padding-top: 120px; }
+      .brand-logo{ height:64px; }
+      .brand{min-width:auto}
+      .header-rect{display:none;} /* mobile: plus compact */
     }
 
-    .top-right{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      flex-wrap:wrap;
-      justify-content:flex-end;
-      flex:0 0 auto;
-    }
+    .top-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}
     .pill{
       font-size:12px;color:var(--muted);
       border:1px solid rgba(31,41,55,.9);
@@ -351,6 +281,21 @@
     }
     .tmBottom .btn2{padding:8px 12px}
     .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;}
+
+    .importTag{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid rgba(245,158,11,.35);
+      background:rgba(245,158,11,.10);
+      color:#fbbf24;
+      font-weight:900;
+      font-size:12px;
+      margin-left:10px;
+      white-space:nowrap;
+    }
   </style>
 </head>
 
@@ -360,13 +305,8 @@
   <header>
     <div class="brand">
       <img src="./trinity-logo-full.png" alt="TRINITY Swap" class="brand-logo">
+      <div class="header-rect" aria-hidden="true"></div>
     </div>
-
-    <!-- ✅ RECTANGLE PANORAMA AU CENTRE -->
-    <div class="header-mid" aria-hidden="true">
-      <div class="header-rect"></div>
-    </div>
-
     <div class="top-right">
       <div class="pill" id="netPill">Réseau : —</div>
       <div class="pill" id="walletPill">Wallet : non connecté</div>
@@ -495,7 +435,7 @@
     <div class="tmList" id="tmList"></div>
 
     <div class="tmBottom">
-      <div>Cliquer sur un token pour le sélectionner. 📋 copie l’adresse. 🦊 ajoute à MetaMask.</div>
+      <div>Coller une adresse 0x… pour importer un token (comme PulseX). 📋 copie l’adresse. 🦊 ajoute à MetaMask.</div>
       <button class="btn2" id="tmRefresh">↻ Refresh</button>
     </div>
   </div>
@@ -510,8 +450,6 @@ const WPLS_ADDR = "0xA1077a294dDE1B09bB078844df40758a5D0f9a27";
 const PLS_GAS_RESERVE = ethers.parseUnits("0.05", 18);
 
 const PULSEX_TOKENLIST_URL = "https://tokens.app.pulsex.com/pulsex-extended-v0.1.2.tokenlist.json";
-
-// ✅ Piteas: fallback logos par adresse (très utile quand tokenlist n’a pas le logo)
 const PITEAS_LOGO_BASE = "https://raw.githubusercontent.com/piteasio/app-tokens/main/token-logo/";
 
 /* ================= TES TOKENS (2 blocs) ================= */
@@ -520,47 +458,45 @@ const USER_TOKENS_BY_SYMBOL = {
   INC:  "0x2fa878Ab3F87CC1C9737Fc071108F904c0B0C95d",
   DAI:  "0xefD766cCb38EaF1dfd701853BFCe31359239F305",
   USDC: "0x15D38573d2feeb82e7ad5187aB8c1D52810B1f07",
-  USDT:"0xdAC17F958D2ee523a2206206994597C13D831ec7",
   WETH: "0x02DcdD04e3F455D838cd1249292C58f3B79e3C3C",
-  WBTC:"0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
-  HDRN:"0x3819f64f282bf135d62168C1e513280dAF905e06",
-  TEXAN:"0xcFCFfE432A48dB53F59c301422d2EdD77B2A88d7",
-  VORTEX:"0x73d8a4D01d658E565cF83068397FD39Baf386C48",
-  PHUX:"0x9663c2d75ffd5F4017310405fCe61720aF45B829",
-  LOAN:"0x9159f1D2a9f51998Fc9Ab03fbd8f265ab14A1b3B",
-  PEPE:"0x6982508145454Ce325dDbE47a25d4ec3d2311933",
-  SHIB:"0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE",
-  UNI:"0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
-  USDL:"0x0dEEd1486bc52aA0d3E6f8849cEC5adD6598A162",
   AXIS: "0x8BDB63033b02C15f113De51EA1C3a96Af9e8ecb5",
-  BANANAS:"0xC6B28B2E3Bf9fF26299D540a4D654F7ade4dFdB0",
-  CST:"0x600136dA8cc6D1Ea07449514604dc4ab7098dB82",
+  BANANAS: "0xC6B28B2E3Bf9fF26299D540a4D654F7ade4dFdB0",
+  CST: "0x600136dA8cc6D1Ea07449514604dc4ab7098dB82",
   EARN:"0xb513038BbFdF9D40B676F41606f4F61D4b02c4A2",
   ELIXIR:"0xeCd465A15fac825B0Fe69416A4c7BfE03A50c12E",
+  HDRN:"0x3819f64f282bf135d62168C1e513280dAF905e06",
   HELGO:"0x0567CA0dE35606E9C260CC2358404B11DE21DB44",
   IM:"0xBBcF895BFCb57d0f457D050bb806d1499436c0CE",
   LINK:"0x514910771AF9Ca656af840dff83E8264EcF986CA",
   pBSKR:"0x1DcbF345bC44696BbBed402367f7C62e524Fe8B5",
+  PEPE:"0x6982508145454Ce325dDbE47a25d4ec3d2311933",
+  LOAN:"0x9159f1D2a9f51998Fc9Ab03fbd8f265ab14A1b3B",
+  PHUX:"0x9663c2d75ffd5F4017310405fCe61720aF45B829",
   PRS:"0xb6B57227150a7097723e0C013752001AaD01248F",
+  pTGC:"0x94534EeEe131840b1c0F61847c572228bdfDDE93",
   PTS:"0x2A06a971fE6ffa002fd242d437E3db2b5cC5B433",
   PXDC:"0xeB6b7932Da20c6D7B3a899D5887d86dfB09A6408",
   RFX:"0xF876BDf9D6403AA7D5bF7F523E8f440A841CC596",
+  SHIB:"0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE",
   SOUNDX:"0xA301c1871Dbf414261946281C7F62213fae22CfE",
   TETRAp:"0xAeC4C07537B03E3E62fc066EC62401Aed5Fdd361",
+  TEXAN:"0xcFCFfE432A48dB53F59c301422d2EdD77B2A88d7",
   TIME:"0xCA35638A3fdDD02fEC597D8c1681198C06b23F58",
   UFO:"0x456548A9B56eFBbD89Ca0309edd17a9E20b04018",
+  UNI:"0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
+  USDL:"0x0dEEd1486bc52aA0d3E6f8849cEC5adD6598A162",
+  USDT:"0xdAC17F958D2ee523a2206206994597C13D831ec7",
+  VORTEX:"0x73d8a4D01d658E565cF83068397FD39Baf386C48",
   WATT:"0xDfdc2836FD2E63Bba9f0eE07901aD465Bff4DE71",
+  WBTC:"0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
 };
 
 const BASE_FIXED = {
   PLS:  { symbol:"PLS",  address:null, decimals:18, name:"PulseChain", logoURI:null },
   WPLS: { symbol:"WPLS", address:WPLS_ADDR, decimals:18, name:"Wrapped PLS", logoURI:null },
   PHEX: { symbol:"PHEX", address:"0x2b591e99afE9f32eAA6214f7B7629768c40Eeb39", decimals:8, name:"HEX (PulseChain)", logoURI:null },
-  EHEX: { symbol:"EHEX", address:"0x57fde0a71132198BBeC939B98976993d8D89D225", decimals:18, name:"eHEX", logoURI:null },
   PLSX: { symbol:"PLSX", address:"0x95B303987A60C71504D99Aa1b13B4DA07b0790ab", decimals:18, name:"PulseX", logoURI:null },
-  INC:  { symbol:"INC",  address:"0x2fa878Ab3F87CC1C9737Fc071108F904c0B0C95d", decimals:18, name:"Incentive", logoURI:null },
   ATROPA:{symbol:"ATROPA",address:"0xCc78A0acDF847A2C1714D2A925bB4477df5d48a6", decimals:18, name:"ATROPA", logoURI:null },
-  DAI:  { symbol:"DAI",  address:"0xefD766cCb38EaF1dfd701853BFCe31359239F305", decimals:18, name:"DAI", logoURI:null },
 };
 
 const ERC20_ABI = [
@@ -576,14 +512,16 @@ const ROUTER_ABI = [
   "function getAmountsOut(uint256 amountIn, address[] calldata path) external view returns (uint256[] memory amounts)",
   "function swapExactTokensForTokens(uint256 amountIn,uint256 amountOutMin,address[] calldata path,address to,uint256 deadline) external returns (uint256[] memory amounts)",
   "function swapExactETHForTokens(uint256 amountOutMin,address[] calldata path,address to,uint256 deadline) external payable returns (uint256[] memory amounts)",
-  "function swapExactTokensForETH(uint256 amountIn,uint256 amountOutMin,address[] calldata path,address to,uint256 deadline) external returns (uint256[] memory amounts)"
+  "function swapExactTokensForETH(uint256 amountIn,uint256 amountOutMin,address[] calldata path,address to,uint256 deadline) external returns (uint256[] memory amounts)",
+  "function swapExactTokensForETHSupportingFeeOnTransferTokens(uint256 amountIn,uint256 amountOutMin,address[] calldata path,address to,uint256 deadline) external"
 ];
 
 /* ================= HELPERS ================= */
 const $ = (id) => document.getElementById(id);
 function shortAddr(a){ return a ? (a.slice(0,6)+"…"+a.slice(-4)) : ""; }
-function isAddr(x){ return /^0x[a-fA-F0-9]{40}$/.test(x); }
+function isAddr(x){ return /^0x[a-fA-F0-9]{40}$/.test((x||"").trim()); }
 function norm(x){ return (x||"").toLowerCase(); }
+function txUrl(hash){ return `https://otter.pulsechain.com/tx/${hash}`; }
 
 function setStatus(card, txt, cls=""){
   const el = card.querySelector(".status");
@@ -596,8 +534,6 @@ function getSettings(){
   const dl = parseInt($("deadlineM").value || "10", 10);
   return { slippage: Math.max(0, sl), deadlineMin: Math.max(1, dl) };
 }
-
-function txUrl(hash){ return `https://otter.pulsechain.com/tx/${hash}`; }
 
 function safeGetAddress(a){
   try{ return ethers.getAddress(a); }catch{ return null; }
@@ -640,6 +576,9 @@ let TOKENS = { ...BASE_FIXED };
 let TOKENS_BY_ADDR = {};
 let TOKENLIST_READY = false;
 let BAL_CACHE = new Map();
+
+/* Import-by-address cache */
+const IMPORT_CACHE = new Map(); // addrLower => { status:"loading"|"ok"|"err", token?, err? }
 
 /* ================= BUILD TOKEN SET ================= */
 async function loadPulseXTokenList(){
@@ -741,12 +680,15 @@ function mergeTokenDataFromList(list){
     }
   }
 
+  rebuildTokByAddr();
+  TOKENLIST_READY = true;
+}
+
+function rebuildTokByAddr(){
   TOKENS_BY_ADDR = {};
   for(const t of Object.values(TOKENS)){
     if(t.address) TOKENS_BY_ADDR[norm(t.address)] = t;
   }
-
-  TOKENLIST_READY = true;
 }
 
 /* ================= WEB3 ================= */
@@ -774,6 +716,85 @@ async function getBalanceByToken(t){
   const bal = await getErc20(t.address, true).balanceOf(userAddress);
   BAL_CACHE.set(key, bal);
   return bal;
+}
+
+/* ================= IMPORT BY ADDRESS (PulseX-like) ================= */
+async function fetchTokenMetaByAddress(addr){
+  const a = safeGetAddress(addr);
+  if(!a) throw new Error("Adresse invalide");
+
+  if(!networkOk || !provider){
+    throw new Error("Connecte ton wallet sur PulseChain pour importer");
+  }
+
+  const c = getErc20(a, true);
+
+  // On essaie de lire symbol/decimals/name. Si ça throw => pas ERC20 / mauvais réseau.
+  const [symbolRaw, decimalsRaw, nameRaw] = await Promise.all([
+    c.symbol(),
+    c.decimals(),
+    c.name()
+  ]);
+
+  const symbol = String(symbolRaw || "").toUpperCase().trim();
+  const decimals = Number(decimalsRaw);
+  const name = String(nameRaw || "").trim() || symbol || "Token";
+
+  if(!symbol || !Number.isFinite(decimals)){
+    throw new Error("Contrat non ERC20 (ou incompatible)");
+  }
+
+  // si symbole déjà pris, on garde mais on distinguera via adresse (on utilise la clé adresse)
+  return {
+    symbol,
+    address: a,
+    decimals,
+    name,
+    logoURI: null,
+    custom: true
+  };
+}
+
+async function ensureImportCandidate(addr){
+  const key = norm(addr);
+  if(IMPORT_CACHE.has(key)) return IMPORT_CACHE.get(key);
+
+  IMPORT_CACHE.set(key, { status:"loading" });
+  try{
+    const token = await fetchTokenMetaByAddress(addr);
+    IMPORT_CACHE.set(key, { status:"ok", token });
+  }catch(e){
+    IMPORT_CACHE.set(key, { status:"err", err: (e?.message || "Import error") });
+  }
+  return IMPORT_CACHE.get(key);
+}
+
+function addCustomTokenToState(t){
+  // On garde la clé principale par symbole (UX), mais on évite d’écraser un token existant différent.
+  const addrL = norm(t.address);
+  if(TOKENS_BY_ADDR[addrL]) return; // déjà présent
+
+  const sym = t.symbol.toUpperCase();
+  if(!TOKENS[sym]){
+    TOKENS[sym] = t;
+  }else{
+    // symbole déjà existant avec autre adresse -> on crée un alias "SYM2", "SYM3"
+    let i = 2;
+    while(TOKENS[`${sym}${i}`]) i++;
+    TOKENS[`${sym}${i}`] = { ...t, symbol: `${sym}${i}` };
+  }
+
+  rebuildTokByAddr();
+
+  // refresh UI selects
+  document.querySelectorAll(".swapbox").forEach(card=>{
+    const fromSel = card.querySelector(".from");
+    const toSel = card.querySelector(".to");
+    const currentFrom = fromSel.value;
+    const currentTo = toSel.value;
+    fillSelect(fromSel, currentFrom);
+    fillSelect(toSel, currentTo);
+  });
 }
 
 /* ================= UI BUILD: 3 SWAPS ================= */
@@ -1275,9 +1296,11 @@ function renderIconHTML(t){
 function tokenMetaLine(t){
   const addr = t.address ? shortAddr(t.address) : "Native";
   const name = t.name ? ` • ${t.name}` : "";
-  return `<div class="tmMeta mono">${addr}${name}</div>`;
+  const tag = t.custom ? `<span class="importTag">⚠ Imported</span>` : "";
+  return `<div class="tmMeta mono">${addr}${name}${tag}</div>`;
 }
 
+/* Render list + Import row if q is address */
 async function renderTokenList(q, withBalances){
   const listEl = $("tmList");
   const nq = norm(q);
@@ -1289,12 +1312,17 @@ async function renderTokenList(q, withBalances){
     tokensArr.push(t);
   }
 
+  const isAddressQuery = isAddr(q);
+  const addrKey = isAddressQuery ? norm(q) : null;
+  const existsByAddr = isAddressQuery ? !!TOKENS_BY_ADDR[addrKey] : false;
+
   const filtered = tokensArr.filter(t=>{
     if(!q) return true;
-    if(isAddr(q)) return t.address && norm(t.address) === nq;
+    if(isAddressQuery) return t.address && norm(t.address) === addrKey;
     return norm(t.symbol).includes(nq) || norm(t.name||"").includes(nq);
   });
 
+  // Base rendering for existing tokens
   listEl.innerHTML = filtered.map(t=>{
     return `
       <div class="tmRow" data-sym="${t.symbol}">
@@ -1314,20 +1342,80 @@ async function renderTokenList(q, withBalances){
     `;
   }).join("");
 
+  // If user pasted an address that isn't in list, show Import row
+  if(isAddressQuery && !existsByAddr){
+    const st = await ensureImportCandidate(q);
+
+    let rowHTML = "";
+    if(st.status === "loading"){
+      rowHTML = `
+        <div class="tmRow" data-import="${q}">
+          <div class="tmIcon">⏳</div>
+          <div>
+            <div class="tmSym">Import token</div>
+            <div class="tmMeta mono">${shortAddr(q)} • lecture du contrat… <span class="importTag">⚠ Non vérifié</span></div>
+          </div>
+          <div class="tmBal"><b>—</b></div>
+          <div class="tmActions">
+            <button class="tmIconBtn" disabled>Import</button>
+          </div>
+        </div>
+      `;
+    }else if(st.status === "err"){
+      rowHTML = `
+        <div class="tmRow" data-import="${q}">
+          <div class="tmIcon">!</div>
+          <div>
+            <div class="tmSym">Import impossible</div>
+            <div class="tmMeta mono">${shortAddr(q)} • ${String(st.err).slice(0,80)} <span class="importTag">⚠ Vérifie réseau</span></div>
+          </div>
+          <div class="tmBal"><b>—</b></div>
+          <div class="tmActions">
+            <button class="tmIconBtn" disabled>Import</button>
+          </div>
+        </div>
+      `;
+    }else{
+      const t = st.token;
+      rowHTML = `
+        <div class="tmRow" data-import="${t.address}">
+          <div class="tmIcon">${fallbackIconText(t.symbol)}</div>
+          <div>
+            <div class="tmSym">Importer ${t.symbol}</div>
+            <div class="tmMeta mono">${shortAddr(t.address)} • ${t.name} <span class="importTag">⚠ Non vérifié</span></div>
+          </div>
+          <div class="tmBal"><b>—</b></div>
+          <div class="tmActions">
+            <button class="tmIconBtn tmDoImport">Import</button>
+          </div>
+        </div>
+      `;
+    }
+
+    // Put import row at top
+    listEl.insertAdjacentHTML("afterbegin", rowHTML);
+  }
+
+  // Row click to select token
   listEl.querySelectorAll(".tmRow").forEach(row=>{
     row.addEventListener("click", async (e)=>{
-      if(e.target.classList.contains("tmCopy") || e.target.classList.contains("tmAdd")) return;
+      if(e.target.classList.contains("tmCopy") || e.target.classList.contains("tmAdd") || e.target.classList.contains("tmDoImport")) return;
+
       const sym = row.dataset.sym;
+      if(!sym) return;
       if(!tokenModalTarget) return;
+
       const { card, side } = tokenModalTarget;
       const sel = card.querySelector(side === "from" ? ".from" : ".to");
       sel.value = sym;
+
       closeTokenModal();
       await refreshCardBalance(card).catch(()=>{});
       await updateQuote(card).catch(()=>{});
     });
   });
 
+  // Copy / Add buttons
   listEl.querySelectorAll(".tmCopy").forEach(btn=>{
     btn.addEventListener("click", async (e)=>{
       e.stopPropagation();
@@ -1345,9 +1433,53 @@ async function renderTokenList(q, withBalances){
     });
   });
 
+  // Import button
+  const importBtn = listEl.querySelector(".tmDoImport");
+  if(importBtn){
+    importBtn.addEventListener("click", async (e)=>{
+      e.stopPropagation();
+      const row = e.target.closest(".tmRow");
+      const addr = row?.dataset?.import;
+      if(!addr) return;
+
+      const st = IMPORT_CACHE.get(norm(addr));
+      if(!st || st.status !== "ok") return;
+
+      // Add to state
+      addCustomTokenToState(st.token);
+
+      // Select it immediately
+      if(tokenModalTarget){
+        const { card, side } = tokenModalTarget;
+        const addedAddr = norm(st.token.address);
+        const tokenObj = TOKENS_BY_ADDR[addedAddr];
+        // Find its symbol key in TOKENS (could be SYM2)
+        let symKey = null;
+        for(const [k,v] of Object.entries(TOKENS)){
+          if(v?.address && norm(v.address) === addedAddr){
+            symKey = k;
+            break;
+          }
+        }
+        if(symKey){
+          const sel = card.querySelector(side === "from" ? ".from" : ".to");
+          sel.value = symKey;
+        }
+      }
+
+      closeTokenModal();
+      if(tokenModalTarget?.card){
+        await refreshCardBalance(tokenModalTarget.card).catch(()=>{});
+        await updateQuote(tokenModalTarget.card).catch(()=>{});
+      }
+    });
+  }
+
+  // Balances in modal
   if(withBalances && networkOk && userAddress){
     for(const row of listEl.querySelectorAll(".tmRow")){
       const sym = row.dataset.sym;
+      if(!sym) continue;
       const t = TOKENS[sym];
       const balBox = row.querySelector(".tmBal");
       try{
