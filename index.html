@@ -13,7 +13,6 @@
       --border:#1f2937;
       --text:#e5e7eb;
       --muted:#9ca3af;
-      --muted2:#8a90ab;
       --accent:#a855f7;
       --accent2:#ec4899;
       --good:#22c55e;
@@ -26,7 +25,7 @@
     html,body{height:100%}
 
     /* =========================
-       FOND (bg.png) permanent
+       FOND (bg.png) VISIBLE + "watermark" permanent
        ========================= */
     body{
       font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
@@ -58,34 +57,25 @@
     }
 
     a{color:inherit;text-decoration:none}
-    .wrap{max-width:1200px;margin:0 auto;padding:22px 14px 90px; overflow: visible;}
+    .wrap{max-width:1200px;margin:0 auto;padding:22px 14px 90px}
 
-    /* =========================
-       HEADER STICKY (logo qui reste)
-       ========================= */
     header{
-      position:sticky; top:0; z-index:999;
       display:flex;align-items:center;justify-content:space-between;gap:12px;
-      backdrop-filter: blur(12px);
-      background:linear-gradient(180deg, rgba(5,8,22,.92), rgba(5,8,22,.55));
+      position:sticky;top:0;z-index:50;
+      backdrop-filter: blur(10px);
+      background:linear-gradient(180deg, rgba(5,8,22,.88), rgba(5,8,22,.52));
       border-bottom:1px solid rgba(31,41,55,.6);
-      padding:26px 16px;
-      margin:-22px -14px 18px;
+      padding:14px 10px;margin:-22px -14px 18px;
     }
 
-    .brand{display:flex;align-items:center;gap:12px;font-weight:900;letter-spacing:.4px}
-    .brand img{
-      height:128px;
+    /* ✅ LOGO IMAGE (trinity-logo-full.png) */
+    .brand{display:flex;align-items:center}
+    .brand-logo{
+      height:44px;
       width:auto;
       display:block;
-      border-radius:20px;
-      padding:8px;
-      background:rgba(2,6,23,.55);
-      border:1px solid rgba(168,85,247,.32);
-      filter: drop-shadow(0 22px 46px rgba(168,85,247,.42));
+      filter: drop-shadow(0 10px 20px rgba(168,85,247,.18));
     }
-    @media(max-width:1100px){ .brand img{height:108px;} }
-    @media(max-width:520px){ .brand img{height:86px;} }
 
     .top-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}
     .pill{
@@ -224,7 +214,6 @@
       background:rgba(2,6,23,.70); border:1px solid rgba(34,197,94,.35); color:#e5e7eb;
     }
     .tmList{margin-top:10px; max-height:520px; overflow:auto; padding-right:6px;}
-
     .tmRow{
       display:grid;
       grid-template-columns: 44px 1fr 120px 120px;
@@ -277,7 +266,7 @@
 
   <header>
     <div class="brand">
-      <img src="./trinity-logo-full.png" alt="TRINITY Swap" />
+      <img src="./trinity-logo-full.png" alt="TRINITY Swap" class="brand-logo">
     </div>
     <div class="top-right">
       <div class="pill" id="netPill">Réseau : —</div>
@@ -358,7 +347,7 @@
         Si une quote échoue, c’est souvent un manque de liquidité sur la paire.
       </p>
       <div class="hr"></div>
-      <div class="warnbox">Tip : si un token n’a pas de logo dans la tokenlist PulseX → TRINITY affiche un fallback (PLS inclus).</div>
+      <div class="warnbox">Tip : si un token n’a pas de logo dans la tokenlist PulseX → TRINITY affiche un fallback.</div>
     </div>
 
     <div class="card">
@@ -421,13 +410,12 @@ const PULSEX_ROUTER = "0x98bf93ebf5c380C0e6Ae8e192A7e2AE08edAcc02";
 const WPLS_ADDR = "0xA1077a294dDE1B09bB078844df40758a5D0f9a27";
 const PLS_GAS_RESERVE = ethers.parseUnits("0.05", 18);
 
-// Tokenlist PulseX
 const PULSEX_TOKENLIST_URL = "https://tokens.app.pulsex.com/pulsex-extended-v0.1.2.tokenlist.json";
 
-/* ================= TES TOKENS =================
-   NB: tu avais mis plusieurs adresses Ethereum mainnet : on les garde, mais
-   elles n'auront pas de liquidité PulseX si elles ne sont pas bridgées/exists sur PulseChain.
-*/
+// ✅ Piteas: fallback logos par adresse (très utile quand tokenlist n’a pas le logo)
+const PITEAS_LOGO_BASE = "https://raw.githubusercontent.com/piteasio/app-tokens/main/token-logo/";
+
+/* ================= TES TOKENS (2 blocs) ================= */
 const USER_TOKENS_BY_SYMBOL = {
   EHEX: "0x57fde0a71132198BBeC939B98976993d8D89D225",
   INC:  "0x2fa878Ab3F87CC1C9737Fc071108F904c0B0C95d",
@@ -466,18 +454,12 @@ const USER_TOKENS_BY_SYMBOL = {
   WBTC:"0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
 };
 
-// tokens “natif” et essentiels PulseChain
 const BASE_FIXED = {
   PLS:  { symbol:"PLS",  address:null, decimals:18, name:"PulseChain", logoURI:null },
   WPLS: { symbol:"WPLS", address:WPLS_ADDR, decimals:18, name:"Wrapped PLS", logoURI:null },
   PHEX: { symbol:"PHEX", address:"0x2b591e99afE9f32eAA6214f7B7629768c40Eeb39", decimals:8, name:"HEX (PulseChain)", logoURI:null },
   PLSX: { symbol:"PLSX", address:"0x95B303987A60C71504D99Aa1b13B4DA07b0790ab", decimals:18, name:"PulseX", logoURI:null },
   ATROPA:{symbol:"ATROPA",address:"0xCc78A0acDF847A2C1714D2A925bB4477df5d48a6", decimals:18, name:"ATROPA", logoURI:null },
-};
-
-/* Fallback logo uniquement pour PLS natif (car pas dans tokenlist) */
-const FALLBACK_LOGOS = {
-  PLS: "./trinity-logo-full.png"  // tu peux remplacer plus tard par un vrai pls.png si tu veux
 };
 
 const ERC20_ABI = [
@@ -529,15 +511,37 @@ function formatAmountWithDec(decimals, raw){
   return num.toLocaleString(undefined, { maximumFractionDigits: 6 });
 }
 
+/* ✅ LOGO utils */
+function normalizeLogoUri(uri){
+  if(!uri) return null;
+  if(uri.startsWith("ipfs://")){
+    return "https://cloudflare-ipfs.com/ipfs/" + uri.replace("ipfs://","");
+  }
+  return uri;
+}
+function buildLogoCandidates(t){
+  const out = [];
+  const u = normalizeLogoUri(t.logoURI);
+  if(u && (u.startsWith("http://") || u.startsWith("https://"))) out.push(u);
+
+  if(t.address){
+    out.push(PITEAS_LOGO_BASE + ethers.getAddress(t.address) + ".png");
+    out.push(PITEAS_LOGO_BASE + norm(t.address) + ".png");
+  }else if(t.symbol === "PLS"){
+    // PLS natif : fallback remote
+    out.push("https://assets.coingecko.com/coins/images/26304/large/pulsechain.png");
+  }
+  return out;
+}
+
 /* ================= STATE ================= */
 let provider, signer, userAddress, networkOk = false;
-
-// TOKENS_MAP: symbol -> token object {symbol,address,decimals,name,logoURI}
 let TOKENS = { ...BASE_FIXED };
-let TOKENS_BY_ADDR = {}; // addrLower -> token
+let TOKENS_BY_ADDR = {};
+let TOKENLIST_READY = false;
 let BAL_CACHE = new Map();
 
-/* ================= BUILD TOKEN SET (PulseX tokenlist + tes tokens) ================= */
+/* ================= BUILD TOKEN SET ================= */
 async function loadPulseXTokenList(){
   try{
     const r = await fetch(PULSEX_TOKENLIST_URL, { cache: "no-store" });
@@ -551,8 +555,11 @@ async function loadPulseXTokenList(){
 }
 
 function dedupeTokens(tokens){
-  const wantedAddrSet = new Set(Object.values(USER_TOKENS_BY_SYMBOL).map(a => norm(a)).filter(Boolean));
-  const best = new Map(); // sym -> token
+  const wantedAddrSet = new Set(
+    Object.values(USER_TOKENS_BY_SYMBOL).map(a => norm(a)).filter(Boolean)
+  );
+
+  const best = new Map();
   for(const t of tokens){
     const sym = (t.symbol || "").toUpperCase().trim();
     if(!sym) continue;
@@ -561,8 +568,10 @@ function dedupeTokens(tokens){
     const hasLogo = !!t.logoURI;
     const isWanted = addr && wantedAddrSet.has(addr);
 
-    if(!best.has(sym)){ best.set(sym, t); continue; }
-
+    if(!best.has(sym)){
+      best.set(sym, t);
+      continue;
+    }
     const cur = best.get(sym);
     const curAddr = cur.address ? norm(cur.address) : null;
     const curHasLogo = !!cur.logoURI;
@@ -590,26 +599,26 @@ function mergeTokenDataFromList(list){
     });
   }
 
-  // enrich BASE_FIXED
   for(const sym of Object.keys(TOKENS)){
     const base = TOKENS[sym];
     if(!base.address) continue;
     const hit = byAddr.get(norm(base.address));
-    if(hit) TOKENS[sym] = { ...base, ...hit, symbol:sym };
+    if(hit){
+      TOKENS[sym] = { ...base, ...hit, symbol:sym };
+    }
   }
 
-  // add tokenlist tokens into TOKENS
   for(const t of byAddr.values()){
     const sym = t.symbol;
     if(!sym) continue;
-    if(!TOKENS[sym]) TOKENS[sym] = t;
-    else{
+    if(!TOKENS[sym]){
+      TOKENS[sym] = t;
+    }else{
       const cur = TOKENS[sym];
       if(!cur.logoURI && t.logoURI) TOKENS[sym] = { ...cur, ...t };
     }
   }
 
-  // add USER TOKENS
   for(const [symRaw, addr] of Object.entries(USER_TOKENS_BY_SYMBOL)){
     const sym = symRaw.toUpperCase();
     const a = safeGetAddress(addr);
@@ -618,15 +627,16 @@ function mergeTokenDataFromList(list){
     const hit = byAddr.get(norm(a));
     const merged = hit ? hit : { symbol:sym, address:a, decimals:18, name:sym, logoURI:null };
 
-    if(!TOKENS[sym]) TOKENS[sym] = merged;
-    else{
+    if(!TOKENS[sym]){
+      TOKENS[sym] = merged;
+    }else{
       const cur = TOKENS[sym];
       const curAddr = cur.address ? norm(cur.address) : "";
       const wantedAddr = norm(a);
-      if(curAddr === wantedAddr) TOKENS[sym] = { ...cur, ...merged };
-      else{
-        // on ne crée pas de doublon : on garde la version existante
-        // (si tu veux forcer certaines adresses, on pourra le faire ensuite)
+      if(curAddr !== wantedAddr){
+        if(merged.logoURI) TOKENS[sym] = merged;
+      }else{
+        TOKENS[sym] = { ...cur, ...merged };
       }
     }
   }
@@ -635,6 +645,8 @@ function mergeTokenDataFromList(list){
   for(const t of Object.values(TOKENS)){
     if(t.address) TOKENS_BY_ADDR[norm(t.address)] = t;
   }
+
+  TOKENLIST_READY = true;
 }
 
 /* ================= WEB3 ================= */
@@ -654,7 +666,9 @@ async function getBalance(sym){
 
 async function getBalanceByToken(t){
   if(!networkOk || !userAddress) return null;
-  if(!t.address) return await provider.getBalance(userAddress);
+  if(!t.address){
+    return await provider.getBalance(userAddress);
+  }
   const key = norm(t.address);
   if(BAL_CACHE.has(key)) return BAL_CACHE.get(key);
   const bal = await getErc20(t.address, true).balanceOf(userAddress);
@@ -783,7 +797,9 @@ function setConnectedUI(isOk){
     if(!isOk) setStatus(card, "Ready (connect wallet)", "");
   });
 
-  if(!isOk) $("plsPill").textContent = "PLS : —";
+  if(!isOk){
+    $("plsPill").textContent = "PLS : —";
+  }
 }
 
 /* ================= PATH ================= */
@@ -795,6 +811,7 @@ function buildPath(symIn, symOut){
 
   if(symIn === "PLS") return [WPLS_ADDR, ethers.getAddress(outT.address)];
   if(symOut === "PLS") return [ethers.getAddress(inT.address), WPLS_ADDR];
+
   return [ethers.getAddress(inT.address), ethers.getAddress(outT.address)];
 }
 
@@ -886,6 +903,7 @@ async function checkAllowance(symIn, amountRaw){
   if(symIn === "PLS") return true;
   const t = TOKENS[symIn];
   if(!t?.address) return true;
+
   const allowance = await getErc20(t.address, true).allowance(userAddress, PULSEX_ROUTER);
   return allowance >= amountRaw;
 }
@@ -1002,7 +1020,7 @@ async function executeSwap(card){
     const amounts = await routerRead.getAmountsOut(amountIn, path);
     const outRaw  = amounts[amounts.length - 1];
 
-    const bps = Math.round(slippage * 100); // 2.0% => 200 bps
+    const bps = Math.round(slippage * 100);
     const minOut = outRaw * BigInt(10000 - bps) / 10000n;
     const deadline = Math.floor(Date.now()/1000) + (deadlineMin * 60);
 
@@ -1122,21 +1140,36 @@ async function addTokenToMetaMask(sym){
 
 function fallbackIconText(sym){ return (sym||"?").slice(0,1).toUpperCase(); }
 
-function resolveLogoURI(t){
-  // 1) tokenlist logoURI
-  if(t.logoURI) return t.logoURI;
-  // 2) fallback local (PLS)
-  if(FALLBACK_LOGOS[t.symbol]) return FALLBACK_LOGOS[t.symbol];
-  return "";
-}
-
 function renderIconHTML(t){
-  const logo = resolveLogoURI(t);
-  if(logo){
-    return `<div class="tmIcon"><img src="${logo}" alt="${t.symbol}" referrerpolicy="no-referrer"
-      onerror="this.onerror=null;this.parentElement.textContent='${fallbackIconText(t.symbol)}'"></div>`;
+  const candidates = buildLogoCandidates(t);
+  if(!candidates.length){
+    return `<div class="tmIcon">${fallbackIconText(t.symbol)}</div>`;
   }
-  return `<div class="tmIcon">${fallbackIconText(t.symbol)}</div>`;
+  const payload = encodeURIComponent(JSON.stringify(candidates));
+  const sym = (t.symbol||"").replace(/'/g,"");
+  return `
+    <div class="tmIcon">
+      <img
+        src="${candidates[0]}"
+        alt="${sym}"
+        data-cands="${payload}"
+        data-idx="0"
+        referrerpolicy="no-referrer"
+        onerror="
+          try{
+            const c=JSON.parse(decodeURIComponent(this.dataset.cands));
+            let i=parseInt(this.dataset.idx||'0',10)+1;
+            if(i<c.length){
+              this.dataset.idx=String(i);
+              this.src=c[i];
+              return;
+            }
+          }catch(e){}
+          this.parentElement.textContent='${fallbackIconText(sym)}';
+        "
+      />
+    </div>
+  `;
 }
 
 function tokenMetaLine(t){
@@ -1228,7 +1261,6 @@ async function renderTokenList(q, withBalances){
   }
 }
 
-/* Hook : ouvrir modal au clic sur les selects */
 document.querySelectorAll(".swapbox").forEach(card=>{
   const fromSel = card.querySelector(".from");
   const toSel   = card.querySelector(".to");
@@ -1236,9 +1268,10 @@ document.querySelectorAll(".swapbox").forEach(card=>{
   toSel.addEventListener("mousedown", (e)=>{ e.preventDefault(); openTokenModal(card,"to"); });
 });
 
-$("openTokensBtn").addEventListener("click", ()=> openTokenModal($("swap1"), "from"));
+$("openTokensBtn").addEventListener("click", ()=>{
+  openTokenModal($("swap1"), "from");
+});
 
-/* ================= SCROLL BTN ================= */
 $("openMultiBtn").addEventListener("click", ()=>{
   $("multiswap").scrollIntoView({behavior:"smooth", block:"start"});
   window.scrollBy(0, -90);
@@ -1307,6 +1340,7 @@ $("refreshBtn").addEventListener("click", ()=> refreshAll());
   mergeTokenDataFromList(tokenlist);
 
   initCardsDefaults();
+
   document.querySelectorAll(".swapbox").forEach(card => updateQuote(card).catch(()=>{}));
 })();
 </script>
