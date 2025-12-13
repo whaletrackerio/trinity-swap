@@ -61,7 +61,7 @@
     .wrap{max-width:1200px;margin:0 auto;padding:22px 14px 90px; overflow: visible;}
 
     /* =========================
-       HEADER STICKY (logo qui reste)
+       HEADER STICKY (logo gros -> compact au scroll)
        ========================= */
     header{
       position:sticky; top:0; z-index:999;
@@ -69,13 +69,18 @@
       backdrop-filter: blur(12px);
       background:linear-gradient(180deg, rgba(5,8,22,.92), rgba(5,8,22,.55));
       border-bottom:1px solid rgba(31,41,55,.6);
-      padding:26px 16px;
+      padding:18px 16px;
       margin:-22px -14px 18px;
+      transition: padding .2s ease, background .2s ease;
+    }
+    header.compact{
+      padding:10px 16px;
+      background:linear-gradient(180deg, rgba(5,8,22,.96), rgba(5,8,22,.78));
     }
 
     .brand{display:flex;align-items:center;gap:12px;font-weight:900;letter-spacing:.4px}
     .brand img{
-      height:128px;
+      height:110px;
       width:auto;
       display:block;
       border-radius:20px;
@@ -83,9 +88,16 @@
       background:rgba(2,6,23,.55);
       border:1px solid rgba(168,85,247,.32);
       filter: drop-shadow(0 22px 46px rgba(168,85,247,.42));
+      transition: height .2s ease, filter .2s ease;
     }
-    @media(max-width:1100px){ .brand img{height:108px;} }
-    @media(max-width:520px){ .brand img{height:86px;} }
+    header.compact .brand img{
+      height:64px; /* taille en scroll */
+      filter: drop-shadow(0 12px 26px rgba(168,85,247,.30));
+    }
+    @media(max-width:520px){
+      .brand img{height:86px;}
+      header.compact .brand img{height:54px;}
+    }
 
     .top-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}
     .pill{
@@ -475,9 +487,9 @@ const BASE_FIXED = {
   ATROPA:{symbol:"ATROPA",address:"0xCc78A0acDF847A2C1714D2A925bB4477df5d48a6", decimals:18, name:"ATROPA", logoURI:null },
 };
 
-/* Fallback logo uniquement pour PLS natif (car pas dans tokenlist) */
+/* Fallback logo uniquement pour PLS natif */
 const FALLBACK_LOGOS = {
-  PLS: "./trinity-logo-full.png"  // tu peux remplacer plus tard par un vrai pls.png si tu veux
+  PLS: "./trinity-logo-full.png"
 };
 
 const ERC20_ABI = [
@@ -624,10 +636,6 @@ function mergeTokenDataFromList(list){
       const curAddr = cur.address ? norm(cur.address) : "";
       const wantedAddr = norm(a);
       if(curAddr === wantedAddr) TOKENS[sym] = { ...cur, ...merged };
-      else{
-        // on ne crée pas de doublon : on garde la version existante
-        // (si tu veux forcer certaines adresses, on pourra le faire ensuite)
-      }
     }
   }
 
@@ -1123,9 +1131,7 @@ async function addTokenToMetaMask(sym){
 function fallbackIconText(sym){ return (sym||"?").slice(0,1).toUpperCase(); }
 
 function resolveLogoURI(t){
-  // 1) tokenlist logoURI
   if(t.logoURI) return t.logoURI;
-  // 2) fallback local (PLS)
   if(FALLBACK_LOGOS[t.symbol]) return FALLBACK_LOGOS[t.symbol];
   return "";
 }
@@ -1308,6 +1314,18 @@ $("refreshBtn").addEventListener("click", ()=> refreshAll());
 
   initCardsDefaults();
   document.querySelectorAll(".swapbox").forEach(card => updateQuote(card).catch(()=>{}));
+})();
+
+/* ================= HEADER SHRINK ON SCROLL ================= */
+(function headerShrinkOnScroll(){
+  const h = document.querySelector("header");
+  const threshold = 60; // pixels avant de réduire
+  function onScroll(){
+    if(window.scrollY > threshold) h.classList.add("compact");
+    else h.classList.remove("compact");
+  }
+  window.addEventListener("scroll", onScroll, { passive:true });
+  onScroll();
 })();
 </script>
 </body>
