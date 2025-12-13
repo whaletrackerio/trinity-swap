@@ -23,6 +23,7 @@
     }
     *{box-sizing:border-box;margin:0;padding:0}
     html,body{height:100%}
+
     body{
       font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
       color:var(--text);
@@ -185,7 +186,9 @@
     .linkBtn{padding:8px 12px;border-radius:999px}
     footer{margin-top:26px;text-align:center;color:var(--muted);font-size:11px;line-height:1.6}
 
-    /* ========================= TOKEN MODAL ========================= */
+    /* =========================
+       TOKEN MODAL (PulseX-like)
+       ========================= */
     #tokenModal{display:none; position:fixed; inset:0; z-index:9999;}
     #tmBackdrop{position:absolute; inset:0; background:rgba(0,0,0,.65);}
     .tmBox{
@@ -229,11 +232,6 @@
       user-select:none;
     }
     .tmIcon img{width:100%;height:100%;object-fit:cover;display:block}
-    .tmIcon.plsNative{
-      background:linear-gradient(135deg,var(--accent),var(--accent2));
-      color:#fff; border:none;
-      box-shadow:0 10px 25px rgba(168,85,247,.25);
-    }
     .tmSym{font-weight:900;font-size:16px}
     .tmMeta{color:var(--muted);font-size:12px;margin-top:2px}
     .tmBal{
@@ -341,9 +339,7 @@
         Si une quote échoue, c’est souvent un manque de liquidité sur la paire.
       </p>
       <div class="hr"></div>
-      <div class="warnbox">
-        Logos : on prend d’abord la tokenlist PulseX, sinon on fallback sur le CDN PLS369 (pas besoin d’uploader des .png). 
-      </div>
+      <div class="warnbox">Tip : si un token n’a pas de logo (ou si une source tombe), TRINITY affiche un fallback.</div>
     </div>
 
     <div class="card">
@@ -401,7 +397,7 @@
 <script>
 /* ================= CONFIG ================= */
 const PULSECHAIN_ID = 369;
-const PULSECHAIN_HEX = "0x171";
+const PULSECHAIN_HEX = "0x171"; // 369
 const PULSEX_ROUTER = "0x98bf93ebf5c380C0e6Ae8e192A7e2AE08edAcc02";
 const WPLS_ADDR = "0xA1077a294dDE1B09bB078844df40758a5D0f9a27";
 const PLS_GAS_RESERVE = ethers.parseUnits("0.05", 18);
@@ -409,25 +405,11 @@ const PLS_GAS_RESERVE = ethers.parseUnits("0.05", 18);
 // tokenlist PulseX
 const PULSEX_TOKENLIST_URL = "https://tokens.app.pulsex.com/pulsex-extended-v0.1.2.tokenlist.json";
 
-// CDN logos PulseChain (PLS369) — hotlink recommandé :contentReference[oaicite:1]{index=1}
-function pls369LogoURL(addr){
-  // IMPORTANT : PLS369 stocke les png par adresse checksummée
-  const cs = ethers.getAddress(addr);
-  return "https://cdn.jsdelivr.net/gh/PLS369/pulsechain-tokens-flat@main/pulsechain/" + cs + ".png";
-}
-
-// IPFS normalisation (beaucoup de tokenlists ont ipfs://)
-function normalizeLogoURI(uri){
-  if(!uri) return null;
-  const u = String(uri).trim();
-  if(!u) return null;
-  if(u.startsWith("ipfs://")){
-    const cid = u.replace("ipfs://","").replace(/^ipfs\//,"");
-    // Cloudflare IPFS généralement stable
-    return "https://cloudflare-ipfs.com/ipfs/" + cid;
-  }
-  return u;
-}
+/* ✅ LOGOS : on évite le “pack png à uploader”
+   Source principale: tokenlist (logoURI)
+   Source fallback: piteasio/app-tokens (png par adresse)
+*/
+const PITEAS_LOGO_BASE = "https://raw.githubusercontent.com/piteasio/app-tokens/main/token-logo/";
 
 /* ================= TES TOKENS ================= */
 const USER_TOKENS_BY_SYMBOL = {
@@ -468,7 +450,7 @@ const USER_TOKENS_BY_SYMBOL = {
   WBTC:"0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
 };
 
-// tokens essentiels
+// tokens essentiels PulseChain
 const BASE_FIXED = {
   PLS:  { symbol:"PLS",  address:null, decimals:18, name:"PulseChain", logoURI:null },
   WPLS: { symbol:"WPLS", address:WPLS_ADDR, decimals:18, name:"Wrapped PLS", logoURI:null },
@@ -526,14 +508,26 @@ function formatAmountWithDec(decimals, raw){
   return num.toLocaleString(undefined, { maximumFractionDigits: 6 });
 }
 
+/* ✅ logoURI: convert ipfs:// -> https */
+function normalizeLogoUri(uri){
+  if(!uri) return null;
+  if(uri.startsWith("ipfs://")){
+    const h = uri.replace("ipfs://", "");
+    return "https://cloudflare-ipfs.com/ipfs/" + h;
+  }
+  return uri;
+}
+
 /* ================= STATE ================= */
 let provider, signer, userAddress, networkOk = false;
+
+// TOKENS_MAP: symbol -> token object {symbol,address,decimals,name,logoURI}
 let TOKENS = { ...BASE_FIXED };
-let TOKENS_BY_ADDR = {};
+let TOKENS_BY_ADDR = {}; // addrLower -> token
 let TOKENLIST_READY = false;
 let BAL_CACHE = new Map();
 
-/* ================= TOKENLIST + MERGE ================= */
+/* ================= BUILD TOKEN SET (PulseX tokenlist + tes tokens) ================= */
 async function loadPulseXTokenList(){
   try{
     const r = await fetch(PULSEX_TOKENLIST_URL, { cache: "no-store" });
@@ -550,7 +544,8 @@ function dedupeTokens(tokens){
   const wantedAddrSet = new Set(
     Object.values(USER_TOKENS_BY_SYMBOL).map(a => norm(a)).filter(Boolean)
   );
-  const best = new Map();
+
+  const best = new Map(); // sym -> token
   for(const t of tokens){
     const sym = (t.symbol || "").toUpperCase().trim();
     if(!sym) continue;
@@ -586,10 +581,11 @@ function mergeTokenDataFromList(list){
       address: safeGetAddress(t.address),
       decimals: Number(t.decimals ?? 18),
       name: t.name || t.symbol || "Token",
-      logoURI: normalizeLogoURI(t.logoURI) || null
+      logoURI: normalizeLogoUri(t.logoURI) || null
     });
   }
 
+  // 1) enrich BASE_FIXED
   for(const sym of Object.keys(TOKENS)){
     const base = TOKENS[sym];
     if(!base.address) continue;
@@ -599,6 +595,7 @@ function mergeTokenDataFromList(list){
     }
   }
 
+  // 2) add ALL tokenlist tokens
   for(const t of byAddr.values()){
     const sym = t.symbol;
     if(!sym) continue;
@@ -610,6 +607,7 @@ function mergeTokenDataFromList(list){
     }
   }
 
+  // 3) add USER TOKENS
   for(const [symRaw, addr] of Object.entries(USER_TOKENS_BY_SYMBOL)){
     const sym = symRaw.toUpperCase();
     const a = safeGetAddress(addr);
@@ -624,9 +622,7 @@ function mergeTokenDataFromList(list){
       const cur = TOKENS[sym];
       const curAddr = cur.address ? norm(cur.address) : "";
       const wantedAddr = norm(a);
-      if(curAddr !== wantedAddr){
-        if(merged.logoURI) TOKENS[sym] = merged;
-      }else{
+      if(curAddr === wantedAddr){
         TOKENS[sym] = { ...cur, ...merged };
       }
     }
@@ -636,6 +632,7 @@ function mergeTokenDataFromList(list){
   for(const t of Object.values(TOKENS)){
     if(t.address) TOKENS_BY_ADDR[norm(t.address)] = t;
   }
+
   TOKENLIST_READY = true;
 }
 
@@ -1129,59 +1126,60 @@ async function addTokenToMetaMask(sym){
 
 function fallbackIconText(sym){ return (sym||"?").slice(0,1).toUpperCase(); }
 
-// --- image failover: essaye plusieurs URLs dans l’ordre ---
-window.__trinityImgFail = function(imgEl){
-  try{
-    const list = (imgEl.dataset.fallbacks || "").split("|").filter(Boolean);
-    let idx = parseInt(imgEl.dataset.idx || "0", 10);
-    idx += 1;
-    imgEl.dataset.idx = String(idx);
-
-    if(list[idx]){
-      imgEl.src = list[idx];
-      return;
-    }
-    const parent = imgEl.parentElement;
-    if(parent) parent.textContent = imgEl.dataset.fallbackChar || "?";
-  }catch(_){
-    const parent = imgEl.parentElement;
-    if(parent) parent.textContent = "?";
-  }
-};
-
+/* ✅ ICONS: tente plusieurs URLs (tokenlist -> piteas) */
 function buildLogoCandidates(t){
-  const urls = [];
-  if(t.logoURI) urls.push(normalizeLogoURI(t.logoURI));
-  if(t.address) urls.push(pls369LogoURL(t.address)); // fallback PLS369 :contentReference[oaicite:2]{index=2}
-  return urls.filter(Boolean);
+  const out = [];
+
+  // 1) tokenlist logoURI
+  const u = normalizeLogoUri(t.logoURI);
+  if(u && (u.startsWith("http://") || u.startsWith("https://"))) out.push(u);
+
+  // 2) piteas raw github (si address)
+  if(t.address){
+    out.push(PITEAS_LOGO_BASE + ethers.getAddress(t.address) + ".png");
+    out.push(PITEAS_LOGO_BASE + norm(t.address) + ".png"); // au cas où
+  }
+
+  return out;
 }
 
+/* onerror inline: essaie la prochaine URL, sinon lettre */
 function renderIconHTML(t){
-  if(!t.address){
-    // PLS natif : icône propre, pas besoin d’image
-    return `<div class="tmIcon plsNative">PLS</div>`;
+  // PLS natif: badge propre (pas d'URL)
+  if(!t.address && t.symbol === "PLS"){
+    return `<div class="tmIcon" style="background:linear-gradient(135deg,var(--accent),var(--accent2));color:white;border:none">PLS</div>`;
   }
 
   const candidates = buildLogoCandidates(t);
-  if(candidates.length){
-    const fc = fallbackIconText(t.symbol);
-    const first = candidates[0];
-    const all = candidates.join("|").replace(/"/g,"&quot;");
-    return `
-      <div class="tmIcon">
-        <img
-          src="${first}"
-          alt="${t.symbol}"
-          referrerpolicy="no-referrer"
-          data-fallbacks="${all}"
-          data-idx="0"
-          data-fallback-char="${fc}"
-          onerror="window.__trinityImgFail(this)"
-        />
-      </div>
-    `;
+  if(!candidates.length){
+    return `<div class="tmIcon">${fallbackIconText(t.symbol)}</div>`;
   }
-  return `<div class="tmIcon">${fallbackIconText(t.symbol)}</div>`;
+
+  const payload = encodeURIComponent(JSON.stringify(candidates));
+  const sym = (t.symbol||"").replace(/'/g,"");
+  return `
+    <div class="tmIcon">
+      <img
+        src="${candidates[0]}"
+        alt="${sym}"
+        data-cands="${payload}"
+        data-idx="0"
+        referrerpolicy="no-referrer"
+        onerror="
+          try{
+            const c=JSON.parse(decodeURIComponent(this.dataset.cands));
+            let i=parseInt(this.dataset.idx||'0',10)+1;
+            if(i<c.length){
+              this.dataset.idx=String(i);
+              this.src=c[i];
+              return;
+            }
+          }catch(e){}
+          this.parentElement.textContent='${fallbackIconText(sym)}';
+        "
+      />
+    </div>
+  `;
 }
 
 function tokenMetaLine(t){
@@ -1273,7 +1271,7 @@ async function renderTokenList(q, withBalances){
   }
 }
 
-/* Hook : ouvrir modal au clic sur les selects */
+/* Hook : ouvrir modal au clic sur les selects (PulseX-like) */
 document.querySelectorAll(".swapbox").forEach(card=>{
   const fromSel = card.querySelector(".from");
   const toSel   = card.querySelector(".to");
@@ -1354,6 +1352,7 @@ $("refreshBtn").addEventListener("click", ()=> refreshAll());
   mergeTokenDataFromList(tokenlist);
 
   initCardsDefaults();
+
   document.querySelectorAll(".swapbox").forEach(card => updateQuote(card).catch(()=>{}));
 })();
 </script>
