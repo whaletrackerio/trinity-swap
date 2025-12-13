@@ -4,8 +4,6 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>TRINITY Swap — PulseChain</title>
-
-  <!-- Ethers v6 -->
   <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.2/dist/ethers.umd.min.js"></script>
 
   <style>
@@ -26,20 +24,38 @@
     *{box-sizing:border-box;margin:0;padding:0}
     html,body{height:100%}
 
-    /* ✅ Fond image visible + overlay */
+    /* =========================
+       FOND (bg.png) VISIBLE + "watermark" permanent
+       ========================= */
     body{
       font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
       color:var(--text);
-      min-height:100vh;
-      background:
-        radial-gradient(1200px 700px at 20% 0%, rgba(11,16,42,.72) 0%, rgba(5,8,22,.78) 55%, rgba(2,6,23,.88) 100%),
-        linear-gradient(180deg, rgba(0,0,0,.18), rgba(0,0,0,.55)),
-        url("./bg.png");
-      background-size:cover;
-      background-position:center;
-      background-repeat:no-repeat;
-      background-attachment:fixed;
+      background: radial-gradient(1200px 700px at 20% 0%, #0b102a 0%, var(--bg) 55%, #020617 100%);
       overflow-x:hidden;
+    }
+    /* image fixe, toujours visible, sans “disparaitre” derrière les cards */
+    body::before{
+      content:"";
+      position:fixed;
+      inset:0;
+      background:
+        radial-gradient(1200px 700px at 20% 0%, rgba(11,16,42,.78) 0%, rgba(5,8,22,.86) 55%, rgba(2,6,23,.92) 100%),
+        url("./bg.png");
+      background-size: cover;
+      background-position: center;
+      background-repeat:no-repeat;
+      filter: saturate(1.15) contrast(1.05);
+      opacity:.40;              /* <- augmente à .55 si tu veux + visible */
+      z-index:-2;
+    }
+    /* léger voile sombre global pour lisibilité */
+    body::after{
+      content:"";
+      position:fixed;
+      inset:0;
+      background: linear-gradient(180deg, rgba(0,0,0,.25), rgba(0,0,0,.70));
+      z-index:-1;
+      pointer-events:none;
     }
 
     a{color:inherit;text-decoration:none}
@@ -49,7 +65,7 @@
       display:flex;align-items:center;justify-content:space-between;gap:12px;
       position:sticky;top:0;z-index:50;
       backdrop-filter: blur(10px);
-      background:linear-gradient(180deg, rgba(5,8,22,.85), rgba(5,8,22,.45));
+      background:linear-gradient(180deg, rgba(5,8,22,.88), rgba(5,8,22,.52));
       border-bottom:1px solid rgba(31,41,55,.6);
       padding:14px 10px;margin:-22px -14px 18px;
     }
@@ -63,7 +79,7 @@
     .pill{
       font-size:12px;color:var(--muted);
       border:1px solid rgba(31,41,55,.9);
-      background:rgba(2,6,23,.55);
+      background:rgba(2,6,23,.60);
       padding:8px 10px;border-radius:999px;
     }
     .btn{
@@ -77,7 +93,7 @@
     .btn2{
       cursor:pointer;border:1px solid rgba(31,41,55,.9);
       padding:10px 14px;border-radius:999px;
-      background:rgba(2,6,23,.55);
+      background:rgba(2,6,23,.60);
       color:var(--text);font-weight:900;
     }
 
@@ -98,7 +114,7 @@
     .chip{
       font-size:12px;color:var(--text);
       border:1px solid rgba(31,41,55,.9);
-      background:rgba(2,6,23,.55);
+      background:rgba(2,6,23,.60);
       padding:7px 10px;border-radius:999px;
       display:flex;align-items:center;gap:8px;
     }
@@ -125,7 +141,7 @@
     input,select{
       width:100%;margin-top:6px;
       padding:10px 11px;border-radius:14px;
-      background:rgba(2,6,23,.65);
+      background:rgba(2,6,23,.70);
       border:1px solid rgba(31,41,55,.9);
       color:var(--text);outline:none;
     }
@@ -136,7 +152,7 @@
     .switch{display:flex;justify-content:center;margin:10px 0;}
     .switch button{
       border:1px solid rgba(31,41,55,.9);
-      background:rgba(2,6,23,.55);
+      background:rgba(2,6,23,.60);
       color:var(--text);border-radius:12px;
       padding:7px 10px;cursor:pointer;
     }
@@ -144,7 +160,7 @@
     .balText{font-size:12px;color:var(--muted)}
     .maxBtn,.pctBtn{
       border:1px solid rgba(31,41,55,.9);
-      background:rgba(2,6,23,.55);
+      background:rgba(2,6,23,.60);
       color:var(--text);
       border-radius:999px;
       padding:6px 10px;
@@ -167,7 +183,7 @@
       display:flex;align-items:center;justify-content:space-between;gap:10px;
       padding:12px;border-radius:16px;
       border:1px solid rgba(31,41,55,.9);
-      background:rgba(2,6,23,.45);
+      background:rgba(2,6,23,.50);
       margin-top:10px;
     }
     .linkItem b{font-size:13px}
@@ -175,58 +191,72 @@
     .linkBtn{padding:8px 12px;border-radius:999px}
     footer{margin-top:26px;text-align:center;color:var(--muted);font-size:11px;line-height:1.6}
 
-    /* TOKEN MODAL */
+    /* =========================
+       TOKEN MODAL (PulseX-like)
+       ========================= */
     #tokenModal{display:none; position:fixed; inset:0; z-index:9999;}
     #tmBackdrop{position:absolute; inset:0; background:rgba(0,0,0,.65);}
     .tmBox{
-      position:relative; max-width:720px; margin:4vh auto;
+      position:relative; max-width:760px; width:calc(100% - 24px);
+      margin:6vh auto;
       background:rgba(15,23,42,.96);
       border:1px solid rgba(31,41,55,.9);
       border-radius:18px; box-shadow:0 18px 45px rgba(0,0,0,.55);
       padding:14px;
-    }
-    .tmTop{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px;}
-    .tmClose{cursor:pointer; border:none; background:transparent; color:#22c55e; font-size:22px; font-weight:900;}
-    .tmSearch{
-      width:100%; padding:12px 12px; border-radius:14px; outline:none;
-      background:rgba(2,6,23,.65); border:1px solid rgba(34,197,94,.45); color:#e5e7eb;
-    }
-    .tmList{margin-top:10px; max-height:520px; overflow:auto; padding-right:6px;}
-    .tmRow{
-      display:flex; align-items:center; justify-content:space-between; gap:10px;
-      padding:12px; border-radius:16px; margin-bottom:10px;
-      border:1px solid rgba(31,41,55,.9); background:rgba(2,6,23,.45);
-      cursor:pointer;
-    }
-    .tmRow:hover{border-color:rgba(168,85,247,.45)}
-    .tmLeft{display:flex;align-items:center;gap:12px;min-width:0}
-    .tmIcon{
-      width:36px;height:36px;border-radius:999px;flex:0 0 auto;
-      border:1px solid rgba(31,41,55,.9);
-      background:rgba(2,6,23,.65);
-      display:grid;place-items:center;
       overflow:hidden;
     }
+    .tmTop{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px;}
+    .tmClose{cursor:pointer; border:none; background:transparent; color:#22c55e; font-size:26px; font-weight:900; line-height:1;}
+    .tmSearch{
+      width:100%; padding:12px 12px; border-radius:14px; outline:none;
+      background:rgba(2,6,23,.70); border:1px solid rgba(34,197,94,.35); color:#e5e7eb;
+    }
+    .tmList{margin-top:10px; max-height:520px; overflow:auto; padding-right:6px;}
+
+    .tmRow{
+      display:grid;
+      grid-template-columns: 44px 1fr 120px 120px;
+      gap:10px;
+      align-items:center;
+      padding:12px; border-radius:16px; margin-bottom:10px;
+      border:1px solid rgba(31,41,55,.9); background:rgba(2,6,23,.50);
+      cursor:pointer;
+    }
+    @media(max-width:650px){
+      .tmRow{grid-template-columns: 44px 1fr 110px; }
+      .tmActions{display:none;}
+    }
+    .tmIcon{
+      width:40px;height:40px;border-radius:14px;
+      border:1px solid rgba(31,41,55,.9);
+      background:rgba(2,6,23,.55);
+      overflow:hidden;
+      display:flex;align-items:center;justify-content:center;
+      font-weight:900;
+      color:#cbd5e1;
+      user-select:none;
+    }
     .tmIcon img{width:100%;height:100%;object-fit:cover;display:block}
-    .tmSym{font-weight:900}
-    .tmMeta{
-      color:var(--muted);font-size:12px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:360px
+    .tmSym{font-weight:900;font-size:16px}
+    .tmMeta{color:var(--muted);font-size:12px;margin-top:2px}
+    .tmBal{
+      text-align:right;
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.3;
     }
-    .tmMid{
-      display:flex;flex-direction:column;align-items:flex-end;gap:2px;min-width:120px
-    }
-    .tmBalLabel{color:var(--muted);font-size:12px}
-    .tmBal{font-weight:900}
-    .tmActions{display:flex; gap:8px; align-items:center;}
+    .tmBal b{display:block;color:#e5e7eb;font-size:13px}
+    .tmActions{display:flex; gap:8px; align-items:center; justify-content:flex-end;}
     .tmIconBtn{
-      border:1px solid rgba(31,41,55,.9); background:rgba(2,6,23,.55);
+      border:1px solid rgba(31,41,55,.9); background:rgba(2,6,23,.60);
       color:#e5e7eb; border-radius:12px; padding:8px 10px; cursor:pointer;
     }
-    .tmBottomBar{
-      margin-top:10px;
-      display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
-      color:#9ca3af;font-size:12px;
+    .tmBottom{
+      display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:space-between;
+      margin-top:10px; color:#9ca3af; font-size:12px;
     }
+    .tmBottom .btn2{padding:8px 12px}
+    .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;}
   </style>
 </head>
 
@@ -238,6 +268,7 @@
     <div class="top-right">
       <div class="pill" id="netPill">Réseau : —</div>
       <div class="pill" id="walletPill">Wallet : non connecté</div>
+      <div class="pill" id="plsPill">PLS : —</div>
       <button class="btn" id="connectBtn">Connect Wallet</button>
     </div>
   </header>
@@ -252,9 +283,9 @@
 
       <div class="chips">
         <div class="chip"><span class="okdot"></span>3 swaps indépendants</div>
-        <div class="chip"><span class="okdot"></span>Tokenlist PulseX</div>
-        <div class="chip"><span class="okdot"></span>Soldes partout</div>
+        <div class="chip"><span class="okdot"></span>Quotes live</div>
         <div class="chip"><span class="okdot"></span>Approve auto</div>
+        <div class="chip"><span class="okdot"></span>MAX + balances</div>
       </div>
 
       <div class="ctaRow">
@@ -288,13 +319,12 @@
       <div class="hr"></div>
 
       <div class="warnbox">
-        Tokenlist : <a class="txlink" target="_blank" rel="noreferrer" href="https://tokens.app.pulsex.com/pulsex-extended-v0.1.2.tokenlist.json">PulseX extended</a>
-        • Explorer : <a class="txlink" target="_blank" rel="noreferrer" href="https://otter.pulsechain.com/">otter.pulsechain.com</a>
+        Explorer : <a class="txlink" target="_blank" rel="noreferrer" href="https://otter.pulsechain.com/">otter.pulsechain.com</a>
       </div>
 
       <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap">
         <button class="btn2" id="refreshBtn">↻ Refresh balances/quotes</button>
-        <button class="btn2" id="openTokenListBtn">🪙 Ouvrir la liste tokens</button>
+        <button class="btn2" id="openTokensBtn">🪙 Ouvrir la liste tokens</button>
       </div>
     </div>
   </section>
@@ -314,7 +344,7 @@
         Si une quote échoue, c’est souvent un manque de liquidité sur la paire.
       </p>
       <div class="hr"></div>
-      <div class="warnbox">Astuce : utilise “Refresh” si tu viens de changer de wallet / réseau.</div>
+      <div class="warnbox">Tip : si un token n’a pas de logo dans la tokenlist PulseX → TRINITY affiche un fallback.</div>
     </div>
 
     <div class="card">
@@ -354,7 +384,7 @@
   <div id="tmBackdrop"></div>
   <div class="tmBox">
     <div class="tmTop">
-      <div style="font-weight:900;font-size:18px;">Select a token</div>
+      <div style="font-weight:900;font-size:22px;">Select a token</div>
       <button class="tmClose" id="tmClose">✕</button>
     </div>
 
@@ -362,9 +392,9 @@
 
     <div class="tmList" id="tmList"></div>
 
-    <div class="tmBottomBar">
+    <div class="tmBottom">
+      <div>Cliquer sur un token pour le sélectionner. 📋 copie l’adresse. 🦊 ajoute à MetaMask.</div>
       <button class="btn2" id="tmRefresh">↻ Refresh</button>
-      <div>📋 copie l’adresse • 🦊 ajoute à MetaMask • <b>Balance</b> = ton solde</div>
     </div>
   </div>
 </div>
@@ -373,12 +403,65 @@
 /* ================= CONFIG ================= */
 const PULSECHAIN_ID = 369;
 const PULSECHAIN_HEX = "0x171"; // 369
-const TOKENLIST_URL = "https://tokens.app.pulsex.com/pulsex-extended-v0.1.2.tokenlist.json";
-
 const PULSEX_ROUTER = "0x98bf93ebf5c380C0e6Ae8e192A7e2AE08edAcc02";
-const WPLS_ADDRESS  = "0xA1077a294dDE1B09bB078844df40758a5D0f9a27";
-
+const WPLS_ADDR = "0xA1077a294dDE1B09bB078844df40758a5D0f9a27";
 const PLS_GAS_RESERVE = ethers.parseUnits("0.05", 18);
+
+// tokenlist PulseX (CORS OK, tu l’as confirmé)
+const PULSEX_TOKENLIST_URL = "https://tokens.app.pulsex.com/pulsex-extended-v0.1.2.tokenlist.json";
+
+/* ================= TES TOKENS (2 blocs) =================
+   NB: certaines adresses que tu as données sont Ethereum mainnet,
+   mais on les garde parce que tu veux les avoir dans la liste.
+*/
+const USER_TOKENS_BY_SYMBOL = {
+  // Core / déjà présents
+  EHEX: "0x57fde0a71132198BBeC939B98976993d8D89D225",
+  INC:  "0x2fa878Ab3F87CC1C9737Fc071108F904c0B0C95d",
+  DAI:  "0xefD766cCb38EaF1dfd701853BFCe31359239F305",
+  USDC: "0x15D38573d2feeb82e7ad5187aB8c1D52810B1f07",
+  WETH: "0x02DcdD04e3F455D838cd1249292C58f3B79e3C3C",
+  AXIS: "0x8BDB63033b02C15f113De51EA1C3a96Af9e8ecb5",
+  BANANAS: "0xC6B28B2E3Bf9fF26299D540a4D654F7ade4dFdB0",
+  CST: "0x600136dA8cc6D1Ea07449514604dc4ab7098dB82",
+  EARN:"0xb513038BbFdF9D40B676F41606f4F61D4b02c4A2",
+  ELIXIR:"0xeCd465A15fac825B0Fe69416A4c7BfE03A50c12E",
+  HDRN:"0x3819f64f282bf135d62168C1e513280dAF905e06",
+  HELGO:"0x0567CA0dE35606E9C260CC2358404B11DE21DB44",
+  IM:"0xBBcF895BFCb57d0f457D050bb806d1499436c0CE",
+  LINK:"0x514910771AF9Ca656af840dff83E8264EcF986CA",
+  pBSKR:"0x1DcbF345bC44696BbBed402367f7C62e524Fe8B5",
+  PEPE:"0x6982508145454Ce325dDbE47a25d4ec3d2311933",
+
+  LOAN:"0x9159f1D2a9f51998Fc9Ab03fbd8f265ab14A1b3B",
+  PHUX:"0x9663c2d75ffd5F4017310405fCe61720aF45B829",
+  PRS:"0xb6B57227150a7097723e0C013752001AaD01248F",
+  pTGC:"0x94534EeEe131840b1c0F61847c572228bdfDDE93",
+  PTS:"0x2A06a971fE6ffa002fd242d437E3db2b5cC5B433",
+  PXDC:"0xeB6b7932Da20c6D7B3a899D5887d86dfB09A6408",
+  RFX:"0xF876BDf9D6403AA7D5bF7F523E8f440A841CC596",
+  SHIB:"0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE",
+  SOUNDX:"0xA301c1871Dbf414261946281C7F62213fae22CfE",
+  TETRAp:"0xAeC4C07537B03E3E62fc066EC62401Aed5Fdd361",
+  TEXAN:"0xcFCFfE432A48dB53F59c301422d2EdD77B2A88d7",
+  TIME:"0xCA35638A3fdDD02fEC597D8c1681198C06b23F58",
+  UFO:"0x456548A9B56eFBbD89Ca0309edd17a9E20b04018",
+  UNI:"0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
+  USDL:"0x0dEEd1486bc52aA0d3E6f8849cEC5adD6598A162",
+  USDT:"0xdAC17F958D2ee523a2206206994597C13D831ec7",
+  VORTEX:"0x73d8a4D01d658E565cF83068397FD39Baf386C48",
+  WATT:"0xDfdc2836FD2E63Bba9f0eE07901aD465Bff4DE71",
+  WBTC:"0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
+};
+
+// tokens “natif” et essentiels PulseChain
+const BASE_FIXED = {
+  PLS:  { symbol:"PLS",  address:null, decimals:18, name:"PulseChain", logoURI:null },
+  WPLS: { symbol:"WPLS", address:WPLS_ADDR, decimals:18, name:"Wrapped PLS", logoURI:null },
+  PHEX: { symbol:"PHEX", address:"0x2b591e99afE9f32eAA6214f7B7629768c40Eeb39", decimals:8, name:"HEX (PulseChain)", logoURI:null },
+  PLSX: { symbol:"PLSX", address:"0x95B303987A60C71504D99Aa1b13B4DA07b0790ab", decimals:18, name:"PulseX", logoURI:null },
+  ATROPA:{symbol:"ATROPA",address:"0xCc78A0acDF847A2C1714D2A925bB4477df5d48a6", decimals:18, name:"ATROPA", logoURI:null },
+};
 
 const ERC20_ABI = [
   "function approve(address spender,uint256 amount) external returns (bool)",
@@ -388,6 +471,7 @@ const ERC20_ABI = [
   "function symbol() external view returns (string)",
   "function name() external view returns (string)"
 ];
+
 const ROUTER_ABI = [
   "function getAmountsOut(uint256 amountIn, address[] calldata path) external view returns (uint256[] memory amounts)",
   "function swapExactTokensForTokens(uint256 amountIn,uint256 amountOutMin,address[] calldata path,address to,uint256 deadline) external returns (uint256[] memory amounts)",
@@ -395,126 +479,178 @@ const ROUTER_ABI = [
   "function swapExactTokensForETH(uint256 amountIn,uint256 amountOutMin,address[] calldata path,address to,uint256 deadline) external returns (uint256[] memory amounts)"
 ];
 
-/* ================= TES TOKENS CUSTOM (2 blocs) =================
-   => Ajoutés en plus de la tokenlist PulseX
-   (Si PulseX les a déjà, on garde l’entrée PulseX.)
-*/
-const CUSTOM_TOKENS = [
-  // bloc 1
-  { symbol:"EHEX", address:"0x57fde0a71132198BBeC939B98976993d8D89D225" },
-  { symbol:"INC",  address:"0x2fa878Ab3F87CC1C9737Fc071108F904c0B0C95d" },
-  { symbol:"DAI",  address:"0xefD766cCb38EaF1dfd701853BFCe31359239F305" },
-  { symbol:"USDC", address:"0x15D38573d2feeb82e7ad5187aB8c1D52810B1f07" },
-  { symbol:"WETH", address:"0x02DcdD04e3F455D838cd1249292C58f3B79e3C3C" },
-  { symbol:"AXIS", address:"0x8BDB63033b02C15f113De51EA1C3a96Af9e8ecb5" },
-  { symbol:"BANANAS", address:"0xC6B28B2E3Bf9fF26299D540a4D654F7ade4dFdB0" },
-  { symbol:"CST", address:"0x600136dA8cc6D1Ea07449514604dc4ab7098dB82" },
-  { symbol:"EARN", address:"0xb513038BbFdF9D40B676F41606f4F61D4b02c4A2" },
-  { symbol:"ELIXIR", address:"0xeCd465A15fac825B0Fe69416A4c7BfE03A50c12E" },
-  { symbol:"HDRN", address:"0x3819f64f282bf135d62168C1e513280dAF905e06" },
-  { symbol:"HELGO", address:"0x0567CA0dE35606E9C260CC2358404B11DE21DB44" },
-  { symbol:"IM", address:"0xBBcF895BFCb57d0f457D050bb806d1499436c0CE" },
-  { symbol:"LINK", address:"0x514910771AF9Ca656af840dff83E8264EcF986CA" },
-  { symbol:"pBSKR", address:"0x1DcbF345bC44696BbBed402367f7C62e524Fe8B5" },
-  { symbol:"PEPE", address:"0x6982508145454Ce325dDbE47a25d4ec3d2311933" },
-
-  // bloc 2
-  { symbol:"LOAN", address:"0x9159f1D2a9f51998Fc9Ab03fbd8f265ab14A1b3B" },
-  { symbol:"PHUX", address:"0x9663c2d75ffd5F4017310405fCe61720aF45B829" },
-  { symbol:"PRS", address:"0xb6B57227150a7097723e0C013752001AaD01248F" },
-  { symbol:"pTGC", address:"0x94534EeEe131840b1c0F61847c572228bdfDDE93" },
-  { symbol:"PTS", address:"0x2A06a971fE6ffa002fd242d437E3db2b5cC5B433" },
-  { symbol:"PXDC", address:"0xeB6b7932Da20c6D7B3a899D5887d86dfB09A6408" },
-  { symbol:"RFX", address:"0xF876BDf9D6403AA7D5bF7F523E8f440A841CC596" },
-  { symbol:"SHIB", address:"0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE" },
-  { symbol:"SOUNDX", address:"0xA301c1871Dbf414261946281C7F62213fae22CfE" },
-  { symbol:"TETRAp", address:"0xAeC4C07537B03E3E62fc066EC62401Aed5Fdd361" },
-  { symbol:"TEXAN", address:"0xcFCFfE432A48dB53F59c301422d2EdD77B2A88d7" },
-  { symbol:"TIME", address:"0xCA35638A3fdDD02fEC597D8c1681198C06b23F58" },
-  { symbol:"UFO", address:"0x456548A9B56eFBbD89Ca0309edd17a9E20b04018" },
-  { symbol:"UNI", address:"0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984" },
-  { symbol:"USDL", address:"0x0dEEd1486bc52aA0d3E6f8849cEC5adD6598A162" },
-  { symbol:"USDT", address:"0xdAC17F958D2ee523a2206206994597C13D831ec7" },
-  { symbol:"VORTEX", address:"0x73d8a4D01d658E565cF83068397FD39Baf386C48" },
-  { symbol:"WATT", address:"0xDfdc2836FD2E63Bba9f0eE07901aD465Bff4DE71" },
-  { symbol:"WBTC", address:"0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599" },
-];
-
 /* ================= HELPERS ================= */
 const $ = (id) => document.getElementById(id);
 function shortAddr(a){ return a ? (a.slice(0,6)+"…"+a.slice(-4)) : ""; }
-function nowTs(){ return Math.floor(Date.now()/1000); }
+function isAddr(x){ return /^0x[a-fA-F0-9]{40}$/.test(x); }
+function norm(x){ return (x||"").toLowerCase(); }
 
-function normalizeLogo(uri){
-  if(!uri) return "";
-  // ipfs://CID/... => gateway
-  if(uri.startsWith("ipfs://")){
-    return "https://ipfs.io/ipfs/" + uri.replace("ipfs://","").replace(/^ipfs\//,"");
-  }
-  return uri;
-}
-function safeAddr(a){
-  try { return ethers.getAddress(a); } catch { return null; }
-}
 function setStatus(card, txt, cls=""){
   const el = card.querySelector(".status");
   el.className = "status" + (cls ? " "+cls : "");
   el.textContent = txt;
 }
+
 function getSettings(){
   const sl = parseFloat($("slippage").value || "2");
   const dl = parseInt($("deadlineM").value || "10", 10);
   return { slippage: Math.max(0, sl), deadlineMin: Math.max(1, dl) };
 }
+
 function txUrl(hash){ return `https://otter.pulsechain.com/tx/${hash}`; }
 
-function formatUnitsSmart(raw, decimals){
-  try{
-    const s = ethers.formatUnits(raw, decimals);
-    const num = Number(s);
-    if(!isFinite(num)) return s;
-    if(num === 0) return "0";
-    if(num < 0.0001) return num.toExponential(3);
-    return num.toLocaleString(undefined, { maximumFractionDigits: 6 });
-  }catch{
-    return "—";
-  }
+function safeGetAddress(a){
+  try{ return ethers.getAddress(a); }catch{ return null; }
+}
+
+function formatAmountWithDec(decimals, raw){
+  const s = ethers.formatUnits(raw, decimals);
+  const num = Number(s);
+  if(!isFinite(num)) return s;
+  if(num === 0) return "0";
+  if(num < 0.0001) return num.toExponential(3);
+  return num.toLocaleString(undefined, { maximumFractionDigits: 6 });
 }
 
 /* ================= STATE ================= */
 let provider, signer, userAddress, networkOk = false;
 
-/* TOKENS STORE
-   key by addressLower (ERC20) + special key "native:PLS"
-*/
-const TOKENS = new Map(); // key -> token
-function keyForToken(t){
-  if(t.isNative) return "native:PLS";
-  return (t.address||"").toLowerCase();
-}
-function upsertToken(t){
-  const k = keyForToken(t);
-  const prev = TOKENS.get(k);
-  // Priorité à PulseX tokenlist si logoURI existant etc.
-  // Si prev vient de PulseX (source="pulsex") on ne l’écrase pas par custom.
-  if(prev && prev.source === "pulsex" && t.source === "custom") return;
-  TOKENS.set(k, { ...prev, ...t });
-}
-function getTokenBySymbol(sym){
-  sym = (sym||"").toUpperCase();
-  if(sym === "PLS") return TOKENS.get("native:PLS");
-  for(const t of TOKENS.values()){
-    if((t.symbol||"").toUpperCase() === sym) return t;
+// TOKENS_MAP: symbol -> token object {symbol,address,decimals,name,logoURI}
+let TOKENS = { ...BASE_FIXED };
+
+// index par adresse pour trouver logo/infos vite
+let TOKENS_BY_ADDR = {}; // addrLower -> token
+let TOKENLIST_READY = false;
+
+// cache balances (addrLower -> bigint)
+let BAL_CACHE = new Map();
+
+/* ================= BUILD TOKEN SET (PulseX tokenlist + tes tokens) ================= */
+async function loadPulseXTokenList(){
+  try{
+    const r = await fetch(PULSEX_TOKENLIST_URL, { cache: "no-store" });
+    const j = await r.json();
+    const list = Array.isArray(j.tokens) ? j.tokens : [];
+    return list;
+  }catch(e){
+    console.warn("Tokenlist fetch failed:", e);
+    return [];
   }
-  return null;
-}
-function getTokenByAddress(addr){
-  const a = (addr||"").toLowerCase();
-  return TOKENS.get(a) || null;
 }
 
-const balanceCache = new Map(); // key -> { raw: bigint, ts: number }
-const decimalsCache = new Map(); // addressLower -> decimals
+function dedupeTokens(tokens){
+  // règle: dédupe par SYMBOL (uppercase), on garde la meilleure:
+  // - priorité à celles avec logoURI
+  // - priorité à celles présentes dans USER_TOKENS_BY_SYMBOL (adresse match)
+  // - sinon première rencontrée
+  const wantedAddrSet = new Set(
+    Object.values(USER_TOKENS_BY_SYMBOL).map(a => norm(a)).filter(Boolean)
+  );
+
+  const best = new Map(); // sym -> token
+  for(const t of tokens){
+    const sym = (t.symbol || "").toUpperCase().trim();
+    if(!sym) continue;
+
+    const addr = t.address ? norm(t.address) : null;
+    const hasLogo = !!t.logoURI;
+    const isWanted = addr && wantedAddrSet.has(addr);
+
+    if(!best.has(sym)){
+      best.set(sym, t);
+      continue;
+    }
+    const cur = best.get(sym);
+    const curAddr = cur.address ? norm(cur.address) : null;
+    const curHasLogo = !!cur.logoURI;
+    const curWanted = curAddr && wantedAddrSet.has(curAddr);
+
+    // priorité wanted > logo > sinon
+    const score = (isWanted?100:0) + (hasLogo?10:0);
+    const curScore = (curWanted?100:0) + (curHasLogo?10:0);
+    if(score > curScore) best.set(sym, t);
+  }
+  return Array.from(best.values());
+}
+
+function mergeTokenDataFromList(list){
+  // list tokens structure: {chainId,address,decimals,symbol,name,logoURI}
+  const cleaned = dedupeTokens(list.filter(t => Number(t.chainId) === PULSECHAIN_ID && isAddr(t.address)));
+
+  // map by address
+  const byAddr = new Map();
+  for(const t of cleaned){
+    const addrL = norm(t.address);
+    byAddr.set(addrL, {
+      symbol: (t.symbol||"").toUpperCase(),
+      address: safeGetAddress(t.address),
+      decimals: Number(t.decimals ?? 18),
+      name: t.name || t.symbol || "Token",
+      logoURI: t.logoURI || null
+    });
+  }
+
+  // 1) enrich BASE_FIXED with logo/decimals/name if tokenlist has it
+  for(const sym of Object.keys(TOKENS)){
+    const base = TOKENS[sym];
+    if(!base.address) continue;
+    const hit = byAddr.get(norm(base.address));
+    if(hit){
+      TOKENS[sym] = { ...base, ...hit, symbol:sym };
+    }
+  }
+
+  // 2) add ALL tokenlist tokens (deduped) into TOKENS
+  for(const t of byAddr.values()){
+    const sym = t.symbol;
+    if(!sym) continue;
+    // si déjà existe, on garde celui qui a un logo
+    if(!TOKENS[sym]){
+      TOKENS[sym] = t;
+    }else{
+      const cur = TOKENS[sym];
+      if(!cur.logoURI && t.logoURI) TOKENS[sym] = { ...cur, ...t };
+    }
+  }
+
+  // 3) add USER TOKENS (si pas déjà, ou si adresse correspond)
+  for(const [symRaw, addr] of Object.entries(USER_TOKENS_BY_SYMBOL)){
+    const sym = symRaw.toUpperCase();
+    const a = safeGetAddress(addr);
+    if(!a) continue;
+
+    const hit = byAddr.get(norm(a));
+    const merged = hit ? hit : { symbol:sym, address:a, decimals:18, name:sym, logoURI:null };
+
+    // si TOKENS[sym] existe mais adresse différente → on garde celle avec logo OU celle du user si c’est celle qu’il veut
+    if(!TOKENS[sym]){
+      TOKENS[sym] = merged;
+    }else{
+      const cur = TOKENS[sym];
+      const curAddr = cur.address ? norm(cur.address) : "";
+      const wantedAddr = norm(a);
+      if(curAddr !== wantedAddr){
+        // si le tokenlist a le wantedAddr et a un logo, on remplace.
+        if(merged.logoURI) TOKENS[sym] = merged;
+        else{
+          // sinon, on garde cur mais on crée une entrée alternative en suffix (rare)
+          // (mais tu voulais pas de doublons → on ne crée pas de ligne en plus)
+        }
+      }else{
+        // même adresse : enrich
+        TOKENS[sym] = { ...cur, ...merged };
+      }
+    }
+  }
+
+  // rebuild TOKENS_BY_ADDR
+  TOKENS_BY_ADDR = {};
+  for(const t of Object.values(TOKENS)){
+    if(t.address) TOKENS_BY_ADDR[norm(t.address)] = t;
+  }
+
+  TOKENLIST_READY = true;
+}
 
 /* ================= WEB3 ================= */
 function getRouter(readOnly=true){
@@ -524,149 +660,27 @@ function getErc20(tokenAddr, readOnly=true){
   return new ethers.Contract(ethers.getAddress(tokenAddr), ERC20_ABI, readOnly ? provider : signer);
 }
 
-/* ================= TOKENLIST LOAD (PulseX) ================= */
-async function loadTokenList(){
-  // Native PLS
-  upsertToken({
-    isNative:true,
-    symbol:"PLS",
-    name:"PulseChain",
-    decimals:18,
-    logoURI:"", // pas dans tokenlist
-    source:"native"
-  });
-
-  // WPLS (important)
-  upsertToken({
-    address: WPLS_ADDRESS,
-    symbol:"WPLS",
-    name:"Wrapped PLS",
-    decimals:18,
-    logoURI:"",
-    source:"native"
-  });
-
-  // Custom tokens (en attente de merge)
-  for(const ct of CUSTOM_TOKENS){
-    const a = safeAddr(ct.address);
-    if(!a) continue;
-    upsertToken({
-      address:a,
-      symbol:(ct.symbol||"").trim(),
-      name:ct.symbol,
-      decimals:null, // on récupère on-chain si besoin
-      logoURI:"",
-      source:"custom"
-    });
-  }
-
-  // PulseX tokenlist
-  try{
-    const r = await fetch(TOKENLIST_URL, { cache:"no-store" });
-    const j = await r.json();
-    const list = Array.isArray(j.tokens) ? j.tokens : [];
-    const seen = new Set(); // dedupe by address lower
-
-    for(const it of list){
-      if(!it || !it.address) continue;
-      // certaines tokenlists contiennent chainId, on garde PulseChain si présent
-      if(it.chainId && Number(it.chainId) !== PULSECHAIN_ID) continue;
-
-      const addr = safeAddr(it.address);
-      if(!addr) continue;
-      const key = addr.toLowerCase();
-      if(seen.has(key)) continue; // ✅ plus de doubles lignes
-      seen.add(key);
-
-      upsertToken({
-        address: addr,
-        symbol: (it.symbol || "").trim(),
-        name: (it.name || it.symbol || "").trim(),
-        decimals: (typeof it.decimals === "number" ? it.decimals : null),
-        logoURI: normalizeLogo(it.logoURI || ""),
-        source:"pulsex"
-      });
-
-      // Si c’est WPLS on met bien l’adresse (au cas où)
-      if(addr.toLowerCase() === WPLS_ADDRESS.toLowerCase()){
-        // ok
-      }
-    }
-
-  }catch(e){
-    console.error("Tokenlist load error:", e);
-  }
-
-  // si WPLS n’a pas de logo, tente de le récupérer via tokenlist par adresse
-  const wpls = getTokenByAddress(WPLS_ADDRESS);
-  if(wpls && !wpls.logoURI){
-    // nothing
-  }
-
-  renderAllSelects();
-  renderTokenList("");
+async function getBalance(sym){
+  if(sym === "PLS") return await provider.getBalance(userAddress);
+  const t = TOKENS[sym];
+  if(!t?.address) return 0n;
+  return await getErc20(t.address, true).balanceOf(userAddress);
 }
 
-/* ================= BALANCES / DECIMALS ================= */
-async function getDecimalsFor(token){
-  if(token.isNative) return 18;
-  const k = token.address.toLowerCase();
-  if(typeof token.decimals === "number") return token.decimals;
-  if(decimalsCache.has(k)) return decimalsCache.get(k);
-
-  // lecture on-chain
-  try{
-    const erc = getErc20(token.address, true);
-    const d = await erc.decimals();
-    const dn = Number(d);
-    if(Number.isFinite(dn)){
-      decimalsCache.set(k, dn);
-      token.decimals = dn;
-      upsertToken(token);
-      return dn;
-    }
-  }catch(e){
-    // si token non ERC20 / pas sur chain => fallback 18
+async function getBalanceByToken(t){
+  if(!networkOk || !userAddress) return null;
+  if(!t.address){
+    return await provider.getBalance(userAddress);
   }
-  decimalsCache.set(k, 18);
-  token.decimals = 18;
-  upsertToken(token);
-  return 18;
+  const key = norm(t.address);
+  if(BAL_CACHE.has(key)) return BAL_CACHE.get(key);
+  const bal = await getErc20(t.address, true).balanceOf(userAddress);
+  BAL_CACHE.set(key, bal);
+  return bal;
 }
 
-async function getBalanceRaw(token){
-  if(!networkOk || !userAddress || !provider) return null;
-
-  const k = keyForToken(token);
-  const cached = balanceCache.get(k);
-  if(cached && (Date.now() - cached.ts) < 8000) return cached.raw;
-
-  try{
-    let raw;
-    if(token.isNative){
-      raw = await provider.getBalance(userAddress);
-    }else{
-      const erc = getErc20(token.address, true);
-      raw = await erc.balanceOf(userAddress);
-    }
-    balanceCache.set(k, { raw, ts: Date.now() });
-    return raw;
-  }catch(e){
-    // token pas sur PulseChain ou autre => null
-    return null;
-  }
-}
-
-async function getBalanceFormatted(token){
-  const raw = await getBalanceRaw(token);
-  if(raw === null) return "—";
-  const d = await getDecimalsFor(token);
-  return formatUnitsSmart(raw, d);
-}
-
-/* ================= UI BUILD SWAPS ================= */
+/* ================= UI BUILD: 3 SWAPS ================= */
 const swapsEl = $("swaps");
-
 function swapCardTemplate(i, label){
   return `
     <div class="card swapbox" id="swap${i}">
@@ -682,7 +696,7 @@ function swapCardTemplate(i, label){
       </div>
 
       <div class="balRow">
-        <div class="balText">Balance: <span class="balIn">—</span></div>
+        <div class="balText">Balance: <span class="balIn">Connect wallet</span></div>
         <button class="maxBtn" type="button" disabled>MAX</button>
       </div>
 
@@ -717,43 +731,34 @@ function swapCardTemplate(i, label){
     </div>
   `;
 }
-
 swapsEl.insertAdjacentHTML("beforeend", swapCardTemplate(1,"Swap A"));
 swapsEl.insertAdjacentHTML("beforeend", swapCardTemplate(2,"Swap B"));
 swapsEl.insertAdjacentHTML("beforeend", swapCardTemplate(3,"Swap C"));
 
-function tokenOptionsSorted(){
-  const arr = Array.from(TOKENS.values());
-  // PLS en premier, WPLS ensuite, puis tri alpha symbol
-  arr.sort((a,b)=>{
-    const sa = (a.symbol||"").toUpperCase();
-    const sb = (b.symbol||"").toUpperCase();
-    const rank = (t)=>{
-      if(t.isNative) return 0;
-      if((t.address||"").toLowerCase() === WPLS_ADDRESS.toLowerCase()) return 1;
-      return 2;
-    };
-    const ra = rank(a), rb = rank(b);
-    if(ra !== rb) return ra - rb;
-    return sa.localeCompare(sb);
-  });
-  return arr;
+function listSymbolsForUI(){
+  // on garde un ordre “important” puis le reste en alpha
+  const pinned = ["PLS","WPLS","PHEX","EHEX","PLSX","INC","DAI","USDC","USDT","WETH","WBTC","HDRN","TEXAN","VORTEX","PHUX","LOAN","PEPE","SHIB","UNI","USDL","PTS","PRS","PXDC","RFX","WATT","SOUNDX","TETRAP","AXIS","BANANAS","CST","EARN","ELIXIR","HELGO","IM","LINK","PBSKR","UFO","TIME","ATROPA"];
+  const all = Object.keys(TOKENS).map(s=>s.toUpperCase());
+  const set = new Set(all);
+  const ordered = [];
+  for(const p of pinned){ if(set.has(p)) ordered.push(p); }
+  const rest = all.filter(s=>!ordered.includes(s)).sort((a,b)=>a.localeCompare(b));
+  return [...ordered, ...rest];
 }
 
-function fillSelect(sel, selectedSym){
-  const selected = (selectedSym||"").toUpperCase();
+function fillSelect(sel, selected){
+  const syms = listSymbolsForUI();
   sel.innerHTML = "";
-  const opts = tokenOptionsSorted();
-  for(const t of opts){
+  for(const k of syms){
     const opt = document.createElement("option");
-    opt.value = (t.symbol||"").toUpperCase();
-    opt.textContent = (t.symbol||"").toUpperCase();
+    opt.value = k;
+    opt.textContent = k;
     sel.appendChild(opt);
   }
-  sel.value = selected || "PLS";
+  sel.value = selected && TOKENS[selected] ? selected : syms[0];
 }
 
-function renderAllSelects(){
+function initCardsDefaults(){
   const defaults = [
     {from:"PLS",  to:"PHEX"},
     {from:"PLS",  to:"ATROPA"},
@@ -764,13 +769,6 @@ function renderAllSelects(){
     const toSel   = card.querySelector(".to");
     fillSelect(fromSel, defaults[idx].from);
     fillSelect(toSel, defaults[idx].to);
-  });
-}
-
-function initSwapEvents(){
-  document.querySelectorAll(".swapbox").forEach((card)=>{
-    const fromSel = card.querySelector(".from");
-    const toSel   = card.querySelector(".to");
 
     card.querySelector(".invert").addEventListener("click", ()=>{
       const a = fromSel.value;
@@ -781,22 +779,13 @@ function initSwapEvents(){
     });
 
     fromSel.addEventListener("change", ()=>{
-      refreshCardBalance(card).catch(()=>{});
       triggerQuote(card);
+      refreshCardBalance(card).catch(()=>{});
     });
     toSel.addEventListener("change", ()=> triggerQuote(card));
     card.querySelector(".amount").addEventListener("input", ()=> triggerQuote(card));
   });
-
-  document.querySelectorAll(".swapbox").forEach(card=>{
-    card.querySelector(".maxBtn").addEventListener("click", ()=> setAmountFromPercent(card, 100).catch(console.error));
-    card.querySelectorAll(".pctBtn").forEach(b=>{
-      b.addEventListener("click", ()=> setAmountFromPercent(card, parseInt(b.dataset.p,10)).catch(console.error));
-    });
-    card.querySelector(".swapBtn").addEventListener("click", ()=> executeSwap(card));
-  });
 }
-initSwapEvents();
 
 /* ================= CONNECT UI ================= */
 function setConnectedUI(isOk){
@@ -811,7 +800,468 @@ function setConnectedUI(isOk){
     bal.textContent = isOk ? "—" : "Connect wallet";
     if(!isOk) setStatus(card, "Ready (connect wallet)", "");
   });
+
+  if(!isOk){
+    $("plsPill").textContent = "PLS : —";
+  }
 }
+
+/* ================= PATH ================= */
+function buildPath(symIn, symOut){
+  if(symIn === symOut) return null;
+  const inT = TOKENS[symIn];
+  const outT = TOKENS[symOut];
+  if(!inT || !outT) return null;
+
+  if(symIn === "PLS") return [WPLS_ADDR, ethers.getAddress(outT.address)];
+  if(symOut === "PLS") return [ethers.getAddress(inT.address), WPLS_ADDR];
+
+  // token-token direct (PulseX fera le meilleur? ici on garde direct)
+  return [ethers.getAddress(inT.address), ethers.getAddress(outT.address)];
+}
+
+function parseAmount(sym, human){
+  const t = TOKENS[sym];
+  const dec = t?.decimals ?? 18;
+  return ethers.parseUnits(human, dec);
+}
+function formatAmount(sym, raw){
+  const t = TOKENS[sym];
+  const dec = t?.decimals ?? 18;
+  return formatAmountWithDec(dec, raw);
+}
+
+function validatePair(card){
+  const from = card.querySelector(".from").value;
+  const to = card.querySelector(".to").value;
+  if(from === to){
+    setStatus(card, "Paire invalide (tokens identiques)", "bad");
+    return false;
+  }
+  return true;
+}
+
+/* ================= BALANCES ================= */
+async function refreshHeaderPLS(){
+  if(!networkOk || !userAddress) return;
+  const b = await provider.getBalance(userAddress);
+  $("plsPill").textContent = "PLS : " + formatAmountWithDec(18, b);
+}
+
+async function refreshCardBalance(card){
+  const balEl = card.querySelector(".balIn");
+  if(!networkOk || !userAddress){
+    balEl.textContent = "Connect wallet";
+    return;
+  }
+  const from = card.querySelector(".from").value;
+  const bal = await getBalance(from);
+  balEl.textContent = formatAmount(from, bal);
+}
+
+async function refreshAll(){
+  if(!networkOk) return;
+  BAL_CACHE.clear();
+  await refreshHeaderPLS();
+
+  const cards = document.querySelectorAll(".swapbox");
+  for(const card of cards){
+    await refreshCardBalance(card);
+    await updateQuote(card);
+  }
+  // refresh modal if open
+  if($("tokenModal").style.display === "block"){
+    await renderTokenList(($("tmSearch").value||"").trim(), true);
+  }
+}
+
+/* ================= MAX + % ================= */
+async function setAmountFromPercent(card, pct){
+  if(!networkOk) return alert("Connecte ton wallet d’abord");
+  if(!validatePair(card)) return;
+
+  const from = card.querySelector(".from").value;
+  let bal = await getBalance(from);
+
+  if(from === "PLS"){
+    if(bal <= PLS_GAS_RESERVE){
+      alert("Balance PLS insuffisante pour le gas");
+      return;
+    }
+    bal = bal - PLS_GAS_RESERVE;
+  }
+
+  const amount = bal * BigInt(pct) / 100n;
+  const dec = TOKENS[from]?.decimals ?? 18;
+  card.querySelector(".amount").value = ethers.formatUnits(amount, dec);
+  await updateQuote(card);
+}
+
+document.querySelectorAll(".swapbox").forEach(card=>{
+  card.querySelector(".maxBtn").addEventListener("click", ()=> setAmountFromPercent(card, 100).catch(console.error));
+  card.querySelectorAll(".pctBtn").forEach(b=>{
+    b.addEventListener("click", ()=> setAmountFromPercent(card, parseInt(b.dataset.p,10)).catch(console.error));
+  });
+});
+
+/* ================= QUOTES + APPROVE ================= */
+async function checkAllowance(symIn, amountRaw){
+  if(symIn === "PLS") return true;
+  const t = TOKENS[symIn];
+  if(!t?.address) return true;
+
+  const allowance = await getErc20(t.address, true).allowance(userAddress, PULSEX_ROUTER);
+  return allowance >= amountRaw;
+}
+
+async function doApprove(symIn, card){
+  const t = TOKENS[symIn];
+  const erc = getErc20(t.address, false);
+  setStatus(card, "Approving… (MetaMask)", "warn");
+  const tx = await erc.approve(PULSEX_ROUTER, ethers.MaxUint256);
+  setStatus(card, "Approve pending…", "warn");
+  await tx.wait();
+  setStatus(card, "Approve OK ✅", "good");
+}
+
+let quoteTimer = null;
+function triggerQuote(card){
+  if(quoteTimer) clearTimeout(quoteTimer);
+  quoteTimer = setTimeout(()=> updateQuote(card).catch(()=>{}), 250);
+}
+
+async function updateQuote(card){
+  const from = card.querySelector(".from").value;
+  const to = card.querySelector(".to").value;
+  const amt = (card.querySelector(".amount").value || "").trim();
+
+  const outInp = card.querySelector(".out");
+  const quoteText = card.querySelector(".quoteText");
+  const approveBtn = card.querySelector(".approveBtn");
+
+  outInp.value = "";
+  quoteText.textContent = "—";
+  approveBtn.style.display = "none";
+
+  if(!networkOk || !userAddress){
+    setStatus(card, "Ready (connect wallet)", "");
+    return;
+  }
+  if(!amt || Number(amt) <= 0){
+    setStatus(card, "Ready ✅", "good");
+    return;
+  }
+  if(!validatePair(card)) return;
+
+  try{
+    setStatus(card, "Quoting…", "warn");
+    const amountIn = parseAmount(from, amt);
+    const path = buildPath(from, to);
+    if(!path) throw new Error("Invalid path");
+
+    const router = getRouter(true);
+    const amounts = await router.getAmountsOut(amountIn, path);
+    const outRaw = amounts[amounts.length - 1];
+
+    outInp.value = formatAmount(to, outRaw);
+    quoteText.textContent = `${amt} ${from} → ~${formatAmount(to, outRaw)} ${to}`;
+
+    if(from !== "PLS"){
+      const ok = await checkAllowance(from, amountIn);
+      if(!ok){
+        approveBtn.style.display = "inline-flex";
+        approveBtn.disabled = false;
+        approveBtn.textContent = "Approve " + from;
+        approveBtn.onclick = async ()=>{
+          try{
+            await doApprove(from, card);
+            await updateQuote(card);
+          }catch(e){
+            console.error(e);
+            setStatus(card, "Approve error", "bad");
+          }
+        };
+        setStatus(card, "Allowance insuffisante → Approve requis", "warn");
+        return;
+      }
+    }
+
+    setStatus(card, "Ready ✅", "good");
+  }catch(e){
+    console.error(e);
+    setStatus(card, "Quote error (liquidité/pair ?)", "bad");
+  }
+}
+
+/* ================= SWAP EXECUTION ================= */
+async function executeSwap(card){
+  if(!networkOk || !userAddress) return alert("Connecte ton wallet sur PulseChain");
+
+  const from = card.querySelector(".from").value;
+  const to   = card.querySelector(".to").value;
+  const amt  = (card.querySelector(".amount").value || "").trim();
+  const txLink = card.querySelector(".txA");
+  txLink.style.display = "none";
+
+  if(!validatePair(card)) return;
+  if(!amt || Number(amt) <= 0){
+    setStatus(card, "Montant manquant", "bad");
+    return;
+  }
+
+  const { slippage, deadlineMin } = getSettings();
+
+  try{
+    const routerWrite = getRouter(false);
+    const routerRead  = getRouter(true);
+    const amountIn = parseAmount(from, amt);
+    const path = buildPath(from, to);
+
+    if(from !== "PLS"){
+      const ok = await checkAllowance(from, amountIn);
+      if(!ok) await doApprove(from, card);
+    }
+
+    setStatus(card, "Calcul minOut…", "warn");
+    const amounts = await routerRead.getAmountsOut(amountIn, path);
+    const outRaw  = amounts[amounts.length - 1];
+
+    const bps = Math.round(slippage * 100); // 2.0% => 200 bps
+    const minOut = outRaw * BigInt(10000 - bps) / 10000n;
+    const deadline = Math.floor(Date.now()/1000) + (deadlineMin * 60);
+
+    let tx;
+    setStatus(card, "Signature (MetaMask)…", "warn");
+
+    if(from === "PLS"){
+      tx = await routerWrite.swapExactETHForTokens(minOut, path, userAddress, deadline, { value: amountIn });
+    }else if(to === "PLS"){
+      tx = await routerWrite.swapExactTokensForETH(amountIn, minOut, path, userAddress, deadline);
+    }else{
+      tx = await routerWrite.swapExactTokensForTokens(amountIn, minOut, path, userAddress, deadline);
+    }
+
+    setStatus(card, "Pending…", "warn");
+    txLink.href = txUrl(tx.hash);
+    txLink.textContent = "Voir TX";
+    txLink.style.display = "inline-flex";
+
+    await tx.wait();
+
+    setStatus(card, "Success ✅", "good");
+    await refreshAll();
+
+  }catch(e){
+    console.error(e);
+    setStatus(card, "Swap error (cancel ? liquidité ?)", "bad");
+  }
+}
+document.querySelectorAll(".swapbox").forEach(card=>{
+  card.querySelector(".swapBtn").addEventListener("click", ()=> executeSwap(card));
+});
+
+/* ================= EXECUTE TRINITY (A→B→C) ================= */
+$("execTrinityBtn").addEventListener("click", async ()=>{
+  if(!networkOk) return alert("Connecte ton wallet sur PulseChain");
+  const cards = [ $("swap1"), $("swap2"), $("swap3") ];
+
+  $("multiswap").scrollIntoView({behavior:"smooth", block:"start"});
+  window.scrollBy(0, -90);
+
+  for(const card of cards){
+    const amt = (card.querySelector(".amount").value || "").trim();
+    const from = card.querySelector(".from").value;
+    const to = card.querySelector(".to").value;
+
+    if(!amt || Number(amt) <= 0){
+      setStatus(card, "Skip (montant vide)", "");
+      continue;
+    }
+    if(from === to){
+      setStatus(card, "Skip (tokens identiques)", "bad");
+      continue;
+    }
+
+    await executeSwap(card);
+
+    const st = (card.querySelector(".status").textContent || "").toLowerCase();
+    if(st.includes("error")){
+      alert("TRINITY stoppé (erreur sur un swap).");
+      break;
+    }
+  }
+});
+
+/* ================= TOKEN MODAL ================= */
+let tokenModalTarget = null;
+
+function openTokenModal(card, side){
+  tokenModalTarget = { card, side };
+  $("tokenModal").style.display = "block";
+  $("tmSearch").value = "";
+  renderTokenList("", true);
+  setTimeout(()=>$("tmSearch").focus(), 50);
+}
+function closeTokenModal(){
+  $("tokenModal").style.display = "none";
+  tokenModalTarget = null;
+}
+$("tmClose").onclick = closeTokenModal;
+$("tmBackdrop").onclick = closeTokenModal;
+
+$("tmSearch").addEventListener("input", (e)=> renderTokenList((e.target.value||"").trim(), false));
+$("tmRefresh").addEventListener("click", ()=> refreshAll());
+
+async function copyText(txt){
+  try{ await navigator.clipboard.writeText(txt); }
+  catch{
+    const ta=document.createElement("textarea");
+    ta.value=txt; document.body.appendChild(ta);
+    ta.select(); document.execCommand("copy");
+    document.body.removeChild(ta);
+  }
+}
+
+async function addTokenToMetaMask(sym){
+  const t = TOKENS[sym];
+  if(!window.ethereum) return alert("MetaMask requis");
+  if(!t.address) return alert("PLS = token natif (pas ERC20)");
+
+  try{
+    const wasAdded = await window.ethereum.request({
+      method: "wallet_watchAsset",
+      params: {
+        type: "ERC20",
+        options: { address: t.address, symbol: sym, decimals: t.decimals }
+      }
+    });
+    alert(wasAdded ? "Token ajouté ✅" : "Ajout refusé (cancel)");
+  }catch(e){
+    console.error(e);
+    try{ await copyText(t.address); }catch(_){}
+    alert("Impossible d’ajouter automatiquement.\n✅ Adresse copiée.\n➡️ Ajoute-la via Import token dans MetaMask.");
+    window.open("https://otter.pulsechain.com/address/" + t.address, "_blank");
+  }
+}
+
+function fallbackIconText(sym){ return (sym||"?").slice(0,1).toUpperCase(); }
+
+function renderIconHTML(t){
+  if(t.logoURI){
+    const safe = t.logoURI;
+    return `<div class="tmIcon"><img src="${safe}" alt="${t.symbol}" onerror="this.parentElement.textContent='${fallbackIconText(t.symbol)}'"></div>`;
+  }
+  return `<div class="tmIcon">${fallbackIconText(t.symbol)}</div>`;
+}
+
+function tokenMetaLine(t){
+  const addr = t.address ? shortAddr(t.address) : "Native";
+  const name = t.name ? ` • ${t.name}` : "";
+  return `<div class="tmMeta mono">${addr}${name}</div>`;
+}
+
+async function renderTokenList(q, withBalances){
+  const listEl = $("tmList");
+  const nq = norm(q);
+
+  // build array
+  const tokensArr = [];
+  for(const sym of listSymbolsForUI()){
+    const t = TOKENS[sym];
+    if(!t) continue;
+    tokensArr.push(t);
+  }
+
+  // filter
+  const filtered = tokensArr.filter(t=>{
+    if(!q) return true;
+    if(isAddr(q)) return t.address && norm(t.address) === nq;
+    return norm(t.symbol).includes(nq) || norm(t.name||"").includes(nq);
+  });
+
+  // render skeleton first
+  listEl.innerHTML = filtered.map(t=>{
+    return `
+      <div class="tmRow" data-sym="${t.symbol}">
+        ${renderIconHTML(t)}
+        <div>
+          <div class="tmSym">${t.symbol}</div>
+          ${tokenMetaLine(t)}
+        </div>
+        <div class="tmBal"><b>—</b>Balance</div>
+        <div class="tmActions">
+          ${t.address ? `
+            <button class="tmIconBtn tmCopy" title="Copy address">📋</button>
+            <button class="tmIconBtn tmAdd" title="Add to MetaMask">🦊</button>
+          ` : `<span style="color:var(--muted)">—</span>`}
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  // click select
+  listEl.querySelectorAll(".tmRow").forEach(row=>{
+    row.addEventListener("click", async (e)=>{
+      if(e.target.classList.contains("tmCopy") || e.target.classList.contains("tmAdd")) return;
+      const sym = row.dataset.sym;
+      if(!tokenModalTarget) return;
+      const { card, side } = tokenModalTarget;
+      const sel = card.querySelector(side === "from" ? ".from" : ".to");
+      sel.value = sym;
+      closeTokenModal();
+      await refreshCardBalance(card).catch(()=>{});
+      await updateQuote(card).catch(()=>{});
+    });
+  });
+
+  // actions
+  listEl.querySelectorAll(".tmCopy").forEach(btn=>{
+    btn.addEventListener("click", async (e)=>{
+      e.stopPropagation();
+      const sym = btn.closest(".tmRow").dataset.sym;
+      await copyText(TOKENS[sym].address);
+      btn.textContent="✅";
+      setTimeout(()=>btn.textContent="📋", 700);
+    });
+  });
+  listEl.querySelectorAll(".tmAdd").forEach(btn=>{
+    btn.addEventListener("click", async (e)=>{
+      e.stopPropagation();
+      const sym = btn.closest(".tmRow").dataset.sym;
+      await addTokenToMetaMask(sym);
+    });
+  });
+
+  // balances (optional)
+  if(withBalances && networkOk && userAddress){
+    // limitation: on rafraîchit seulement les tokens visibles (filtered) pour éviter 200 requêtes
+    for(const row of listEl.querySelectorAll(".tmRow")){
+      const sym = row.dataset.sym;
+      const t = TOKENS[sym];
+      const balBox = row.querySelector(".tmBal");
+      try{
+        const bal = await getBalanceByToken(t);
+        const dec = t.address ? (t.decimals ?? 18) : 18;
+        balBox.innerHTML = `<b>${formatAmountWithDec(dec, bal)}</b>Balance`;
+      }catch{
+        balBox.innerHTML = `<b>—</b>Balance`;
+      }
+    }
+  }
+}
+
+/* Hook : ouvrir modal au clic sur les selects (PulseX-like) */
+document.querySelectorAll(".swapbox").forEach(card=>{
+  const fromSel = card.querySelector(".from");
+  const toSel   = card.querySelector(".to");
+  fromSel.addEventListener("mousedown", (e)=>{ e.preventDefault(); openTokenModal(card,"from"); });
+  toSel.addEventListener("mousedown", (e)=>{ e.preventDefault(); openTokenModal(card,"to"); });
+});
+
+$("openTokensBtn").addEventListener("click", ()=>{
+  // ouvre sur swap1/from par défaut
+  openTokenModal($("swap1"), "from");
+});
 
 /* ================= SCROLL BTN ================= */
 $("openMultiBtn").addEventListener("click", ()=>{
@@ -819,7 +1269,7 @@ $("openMultiBtn").addEventListener("click", ()=>{
   window.scrollBy(0, -90);
 });
 
-/* ================= WEB3 CONNECT ================= */
+/* ================= CONNECT WALLET ================= */
 async function connectWallet(){
   if(!window.ethereum){
     alert("Wallet requis : MetaMask");
@@ -871,503 +1321,24 @@ async function connectWallet(){
   window.ethereum.on?.("accountsChanged", ()=> location.reload());
   window.ethereum.on?.("chainChanged", ()=> location.reload());
 }
+
 $("connectBtn").addEventListener("click", connectWallet);
 $("refreshBtn").addEventListener("click", ()=> refreshAll());
-$("openTokenListBtn").addEventListener("click", ()=>{
-  openTokenModal(null, null); // mode “liste”
-});
-
-/* ================= BALANCES IN SWAPS ================= */
-async function refreshCardBalance(card){
-  const balEl = card.querySelector(".balIn");
-  if(!networkOk || !userAddress){
-    balEl.textContent = "Connect wallet";
-    return;
-  }
-  const fromSym = (card.querySelector(".from").value||"PLS").toUpperCase();
-  const t = getTokenBySymbol(fromSym);
-  if(!t){
-    balEl.textContent = "—";
-    return;
-  }
-  balEl.textContent = await getBalanceFormatted(t);
-}
-
-async function refreshAll(){
-  balanceCache.clear();
-  // balances swaps
-  const cards = document.querySelectorAll(".swapbox");
-  for(const card of cards){
-    await refreshCardBalance(card);
-    await updateQuote(card);
-  }
-  // balances token modal si ouverte
-  if($("tokenModal").style.display === "block"){
-    await renderTokenList(($("tmSearch").value||"").trim(), true);
-  }
-}
-
-/* ================= MAX + % ================= */
-function validatePair(card){
-  const from = card.querySelector(".from").value;
-  const to = card.querySelector(".to").value;
-  if(from === to){
-    setStatus(card, "Paire invalide (tokens identiques)", "bad");
-    return false;
-  }
-  return true;
-}
-
-async function setAmountFromPercent(card, pct){
-  if(!networkOk) return alert("Connecte ton wallet d’abord");
-  if(!validatePair(card)) return;
-
-  const fromSym = (card.querySelector(".from").value||"PLS").toUpperCase();
-  const t = getTokenBySymbol(fromSym);
-  if(!t) return;
-
-  let balRaw = await getBalanceRaw(t);
-  if(balRaw === null) return alert("Impossible de lire le solde (token ?)");
-
-  // réserve gas pour PLS
-  if(t.isNative){
-    if(balRaw <= PLS_GAS_RESERVE){
-      alert("Balance PLS insuffisante pour le gas");
-      return;
-    }
-    balRaw = balRaw - PLS_GAS_RESERVE;
-  }
-
-  const amount = balRaw * BigInt(pct) / 100n;
-  const d = await getDecimalsFor(t);
-  card.querySelector(".amount").value = ethers.formatUnits(amount, d);
-  await updateQuote(card);
-}
-
-/* ================= PATH / QUOTES / SWAPS ================= */
-function buildPath(symIn, symOut){
-  symIn = (symIn||"").toUpperCase();
-  symOut = (symOut||"").toUpperCase();
-  if(symIn === symOut) return null;
-
-  const inT  = getTokenBySymbol(symIn);
-  const outT = getTokenBySymbol(symOut);
-  if(!inT || !outT) return null;
-
-  // PLS natif => WPLS
-  if(symIn === "PLS"){
-    if(outT.isNative) return null;
-    return [ ethers.getAddress(WPLS_ADDRESS), ethers.getAddress(outT.address) ];
-  }
-  if(symOut === "PLS"){
-    if(inT.isNative) return null;
-    return [ ethers.getAddress(inT.address), ethers.getAddress(WPLS_ADDRESS) ];
-  }
-  // ERC20 -> ERC20 direct
-  if(!inT.address || !outT.address) return null;
-  return [ ethers.getAddress(inT.address), ethers.getAddress(outT.address) ];
-}
-
-function parseAmount(sym, human){
-  const t = getTokenBySymbol(sym);
-  const d = (t && typeof t.decimals === "number") ? t.decimals : 18;
-  return ethers.parseUnits(human, d);
-}
-
-function formatAmount(sym, raw){
-  const t = getTokenBySymbol(sym);
-  const d = (t && typeof t.decimals === "number") ? t.decimals : 18;
-  return formatUnitsSmart(raw, d);
-}
-
-/* ================= APPROVE ================= */
-async function checkAllowance(symIn, amountRaw){
-  symIn = (symIn||"").toUpperCase();
-  if(symIn === "PLS") return true;
-  const t = getTokenBySymbol(symIn);
-  if(!t || !t.address) return false;
-  const allowance = await getErc20(t.address, true).allowance(userAddress, PULSEX_ROUTER);
-  return allowance >= amountRaw;
-}
-async function doApprove(symIn, card){
-  const t = getTokenBySymbol(symIn);
-  if(!t || !t.address) return;
-  const erc = getErc20(t.address, false);
-  setStatus(card, "Approving… (MetaMask)", "warn");
-  const tx = await erc.approve(PULSEX_ROUTER, ethers.MaxUint256);
-  setStatus(card, "Approve pending…", "warn");
-  await tx.wait();
-  setStatus(card, "Approve OK ✅", "good");
-}
-
-/* ================= QUOTE ================= */
-let quoteTimer = null;
-function triggerQuote(card){
-  if(quoteTimer) clearTimeout(quoteTimer);
-  quoteTimer = setTimeout(()=> updateQuote(card).catch(()=>{}), 250);
-}
-
-async function updateQuote(card){
-  const from = (card.querySelector(".from").value||"").toUpperCase();
-  const to   = (card.querySelector(".to").value||"").toUpperCase();
-  const amt  = (card.querySelector(".amount").value || "").trim();
-
-  const outInp = card.querySelector(".out");
-  const quoteText = card.querySelector(".quoteText");
-  const approveBtn = card.querySelector(".approveBtn");
-
-  outInp.value = "";
-  quoteText.textContent = "—";
-  approveBtn.style.display = "none";
-
-  if(!networkOk || !userAddress){
-    setStatus(card, "Ready (connect wallet)", "");
-    return;
-  }
-  if(!amt || Number(amt) <= 0){
-    setStatus(card, "Ready ✅", "good");
-    return;
-  }
-  if(!validatePair(card)) return;
-
-  try{
-    setStatus(card, "Quoting…", "warn");
-
-    // decimals assurés
-    const inT = getTokenBySymbol(from);
-    const outT = getTokenBySymbol(to);
-    if(!inT || !outT) throw new Error("token missing");
-    inT.decimals = await getDecimalsFor(inT);
-    outT.decimals = await getDecimalsFor(outT);
-
-    const amountIn = ethers.parseUnits(amt, inT.decimals);
-    const path = buildPath(from, to);
-    if(!path) throw new Error("Invalid path");
-
-    const router = getRouter(true);
-    const amounts = await router.getAmountsOut(amountIn, path);
-    const outRaw = amounts[amounts.length - 1];
-
-    outInp.value = formatUnitsSmart(outRaw, outT.decimals);
-    quoteText.textContent = `${amt} ${from} → ~${formatUnitsSmart(outRaw, outT.decimals)} ${to}`;
-
-    if(from !== "PLS"){
-      const ok = await checkAllowance(from, amountIn);
-      if(!ok){
-        approveBtn.style.display = "inline-flex";
-        approveBtn.disabled = false;
-        approveBtn.textContent = "Approve " + from;
-        approveBtn.onclick = async ()=>{
-          try{
-            await doApprove(from, card);
-            await updateQuote(card);
-          }catch(e){
-            console.error(e);
-            setStatus(card, "Approve error", "bad");
-          }
-        };
-        setStatus(card, "Allowance insuffisante → Approve requis", "warn");
-        return;
-      }
-    }
-
-    setStatus(card, "Ready ✅", "good");
-  }catch(e){
-    console.error(e);
-    setStatus(card, "Quote error (liquidité/pair ?)", "bad");
-  }
-}
-
-/* ================= SWAP EXECUTION ================= */
-async function executeSwap(card){
-  if(!networkOk || !userAddress) return alert("Connecte ton wallet sur PulseChain");
-
-  const from = (card.querySelector(".from").value||"").toUpperCase();
-  const to   = (card.querySelector(".to").value||"").toUpperCase();
-  const amt  = (card.querySelector(".amount").value || "").trim();
-  const txLink = card.querySelector(".txA");
-  txLink.style.display = "none";
-
-  if(!validatePair(card)) return;
-  if(!amt || Number(amt) <= 0){
-    setStatus(card, "Montant manquant", "bad");
-    return;
-  }
-
-  const { slippage, deadlineMin } = getSettings();
-
-  try{
-    const inT = getTokenBySymbol(from);
-    const outT = getTokenBySymbol(to);
-    if(!inT || !outT) throw new Error("token missing");
-
-    inT.decimals = await getDecimalsFor(inT);
-    outT.decimals = await getDecimalsFor(outT);
-
-    const routerWrite = getRouter(false);
-    const routerRead  = getRouter(true);
-
-    const amountIn = ethers.parseUnits(amt, inT.decimals);
-    const path = buildPath(from, to);
-
-    if(from !== "PLS"){
-      const ok = await checkAllowance(from, amountIn);
-      if(!ok) await doApprove(from, card);
-    }
-
-    setStatus(card, "Calcul minOut…", "warn");
-    const amounts = await routerRead.getAmountsOut(amountIn, path);
-    const outRaw  = amounts[amounts.length - 1];
-
-    const bps = Math.round(slippage * 100); // 2.0% => 200 bps
-    const minOut = outRaw * BigInt(10000 - bps) / 10000n;
-    const deadline = nowTs() + (deadlineMin * 60);
-
-    let tx;
-    setStatus(card, "Signature (MetaMask)…", "warn");
-
-    if(from === "PLS"){
-      tx = await routerWrite.swapExactETHForTokens(minOut, path, userAddress, deadline, { value: amountIn });
-    }else if(to === "PLS"){
-      tx = await routerWrite.swapExactTokensForETH(amountIn, minOut, path, userAddress, deadline);
-    }else{
-      tx = await routerWrite.swapExactTokensForTokens(amountIn, minOut, path, userAddress, deadline);
-    }
-
-    setStatus(card, "Pending…", "warn");
-    txLink.href = txUrl(tx.hash);
-    txLink.textContent = "Voir TX";
-    txLink.style.display = "inline-flex";
-
-    await tx.wait();
-
-    setStatus(card, "Success ✅", "good");
-    await refreshAll();
-
-  }catch(e){
-    console.error(e);
-    setStatus(card, "Swap error (cancel ? liquidité ?)", "bad");
-  }
-}
-
-/* ================= EXECUTE TRINITY (A→B→C) ================= */
-$("execTrinityBtn").addEventListener("click", async ()=>{
-  if(!networkOk) return alert("Connecte ton wallet sur PulseChain");
-  const cards = [ $("swap1"), $("swap2"), $("swap3") ];
-
-  $("multiswap").scrollIntoView({behavior:"smooth", block:"start"});
-  window.scrollBy(0, -90);
-
-  for(const card of cards){
-    const amt = (card.querySelector(".amount").value || "").trim();
-    const from = (card.querySelector(".from").value||"").toUpperCase();
-    const to = (card.querySelector(".to").value||"").toUpperCase();
-
-    if(!amt || Number(amt) <= 0){
-      setStatus(card, "Skip (montant vide)", "");
-      continue;
-    }
-    if(from === to){
-      setStatus(card, "Skip (tokens identiques)", "bad");
-      continue;
-    }
-
-    await executeSwap(card);
-
-    const st = (card.querySelector(".status").textContent || "").toLowerCase();
-    if(st.includes("error")){
-      alert("TRINITY stoppé (erreur sur un swap).");
-      break;
-    }
-  }
-});
-
-/* ================= Token modal PulseX-like ================= */
-let tokenModalTarget = null; // { card, side } ou null
-function openTokenModal(card, side){
-  tokenModalTarget = (card && side) ? { card, side } : null;
-  $("tokenModal").style.display = "block";
-  $("tmSearch").value = "";
-  renderTokenList("");
-  setTimeout(()=>$("tmSearch").focus(), 50);
-}
-function closeTokenModal(){
-  $("tokenModal").style.display = "none";
-  tokenModalTarget = null;
-}
-$("tmClose").onclick = closeTokenModal;
-$("tmBackdrop").onclick = closeTokenModal;
-$("tmSearch").addEventListener("input", (e)=> renderTokenList((e.target.value||"").trim()));
-$("tmRefresh").addEventListener("click", ()=> refreshAll());
-
-function isAddr(x){ return /^0x[a-fA-F0-9]{40}$/.test(x); }
-function norm(x){ return (x||"").toLowerCase(); }
-
-async function copyText(txt){
-  try{ await navigator.clipboard.writeText(txt); }
-  catch{
-    const ta=document.createElement("textarea");
-    ta.value=txt; document.body.appendChild(ta);
-    ta.select(); document.execCommand("copy");
-    document.body.removeChild(ta);
-  }
-}
-
-async function addTokenToMetaMask(token){
-  if(!window.ethereum) return alert("MetaMask requis");
-  if(token.isNative) return alert("PLS = token natif (pas ERC20)");
-
-  const dec = await getDecimalsFor(token);
-
-  try{
-    const wasAdded = await window.ethereum.request({
-      method: "wallet_watchAsset",
-      params: {
-        type: "ERC20",
-        options: {
-          address: token.address,
-          symbol: (token.symbol||"").slice(0,11),
-          decimals: dec,
-          image: token.logoURI || undefined
-        }
-      }
-    });
-
-    if(wasAdded){
-      alert("Token ajouté ✅");
-    }else{
-      alert("Ajout refusé (cancel)");
-    }
-  }catch(e){
-    console.error(e);
-    try{ await copyText(token.address); }catch(_){}
-    alert("Impossible d’ajouter automatiquement.\n✅ Adresse copiée.\n➡️ Ajoute-la via Import token dans MetaMask.");
-    window.open("https://otter.pulsechain.com/address/" + token.address, "_blank");
-  }
-}
-
-function tokenMatchesQuery(t, q){
-  if(!q) return true;
-  const nq = norm(q);
-  if(isAddr(q)){
-    if(t.isNative) return false;
-    return norm(t.address) === nq;
-  }
-  return norm(t.symbol).includes(nq) || norm(t.name).includes(nq);
-}
-
-async function renderTokenList(q, forceBalances=false){
-  const list = $("tmList");
-  const tokens = tokenOptionsSorted().filter(t=>tokenMatchesQuery(t,q));
-
-  list.innerHTML = tokens.map(t=>{
-    const sym = (t.symbol||"").toUpperCase();
-    const addr = t.isNative ? "Native • PulseChain" : (shortAddr(t.address) + (t.name ? " • " + t.name : ""));
-    const showBtns = !t.isNative;
-    const logo = t.logoURI ? `<img src="${t.logoURI}" alt="${sym}" onerror="this.remove();">` : `<span style="font-weight:900;color:#cbd5e1">${sym.slice(0,1)}</span>`;
-    return `
-      <div class="tmRow" data-key="${keyForToken(t)}">
-        <div class="tmLeft">
-          <div class="tmIcon">${logo}</div>
-          <div style="min-width:0">
-            <div class="tmSym">${sym}</div>
-            <div class="tmMeta">${addr}</div>
-          </div>
-        </div>
-
-        <div class="tmMid">
-          <div class="tmBalLabel">Balance</div>
-          <div class="tmBal" data-bal="${keyForToken(t)}">—</div>
-        </div>
-
-        <div class="tmActions">
-          ${showBtns ? `
-            <button class="tmIconBtn tmCopy" title="Copy address">📋</button>
-            <button class="tmIconBtn tmAdd" title="Add to MetaMask">🦊</button>
-          ` : ``}
-        </div>
-      </div>
-    `;
-  }).join("");
-
-  // events
-  list.querySelectorAll(".tmRow").forEach(row=>{
-    row.addEventListener("click", async (e)=>{
-      if(e.target.classList.contains("tmCopy") || e.target.classList.contains("tmAdd")) return;
-
-      const key = row.dataset.key;
-      const token = (key === "native:PLS") ? TOKENS.get("native:PLS") : TOKENS.get(key);
-      if(!token) return;
-
-      if(!tokenModalTarget){
-        // mode “liste” seulement
-        return;
-      }
-      const { card, side } = tokenModalTarget;
-      const sel = card.querySelector(side === "from" ? ".from" : ".to");
-      sel.value = (token.symbol||"PLS").toUpperCase();
-      closeTokenModal();
-      await refreshCardBalance(card).catch(()=>{});
-      await updateQuote(card).catch(()=>{});
-    });
-  });
-
-  list.querySelectorAll(".tmCopy").forEach(btn=>{
-    btn.addEventListener("click", async (e)=>{
-      e.stopPropagation();
-      const row = btn.closest(".tmRow");
-      const key = row.dataset.key;
-      const token = (key === "native:PLS") ? TOKENS.get("native:PLS") : TOKENS.get(key);
-      if(!token || token.isNative) return;
-      await copyText(token.address);
-      btn.textContent="✅";
-      setTimeout(()=>btn.textContent="📋", 700);
-    });
-  });
-
-  list.querySelectorAll(".tmAdd").forEach(btn=>{
-    btn.addEventListener("click", async (e)=>{
-      e.stopPropagation();
-      const row = btn.closest(".tmRow");
-      const key = row.dataset.key;
-      const token = (key === "native:PLS") ? TOKENS.get("native:PLS") : TOKENS.get(key);
-      if(!token) return;
-      await addTokenToMetaMask(token);
-    });
-  });
-
-  // balances
-  if(networkOk && userAddress){
-    // petit throttling : on affiche vite PLS/WPLS + tokens visibles
-    const balanceEls = list.querySelectorAll("[data-bal]");
-    for(const el of balanceEls){
-      const key = el.getAttribute("data-bal");
-      const token = (key === "native:PLS") ? TOKENS.get("native:PLS") : TOKENS.get(key);
-      if(!token) continue;
-      // lecture balance
-      getBalanceFormatted(token).then(v=>{ el.textContent = v; }).catch(()=>{ el.textContent = "—"; });
-    }
-  }else{
-    // pas connecté
-    list.querySelectorAll("[data-bal]").forEach(el=> el.textContent = "—");
-  }
-}
-
-// Hook : ouvrir modal au clic sur les selects (PulseX-like)
-document.querySelectorAll(".swapbox").forEach(card=>{
-  const fromSel = card.querySelector(".from");
-  const toSel   = card.querySelector(".to");
-  fromSel.addEventListener("mousedown", (e)=>{ e.preventDefault(); openTokenModal(card,"from"); });
-  toSel.addEventListener("mousedown", (e)=>{ e.preventDefault(); openTokenModal(card,"to"); });
-});
 
 /* ================= INIT ================= */
-setConnectedUI(false);
-loadTokenList().then(()=>{
-  // defaults + refresh balances placeholders
-  const cards = document.querySelectorAll(".swapbox");
-  cards.forEach(c=>{ refreshCardBalance(c).catch(()=>{}); updateQuote(c).catch(()=>{}); });
-});
+(async function boot(){
+  setConnectedUI(false);
+
+  // 1) charger tokenlist PulseX, fusionner, puis init selects
+  const tokenlist = await loadPulseXTokenList();
+  mergeTokenDataFromList(tokenlist);
+
+  // 2) init cards selects maintenant qu’on a les tokens + logos
+  initCardsDefaults();
+
+  // 3) refresh quotes (pas de wallet => just ready)
+  document.querySelectorAll(".swapbox").forEach(card => updateQuote(card).catch(()=>{}));
+})();
 </script>
 </body>
 </html>
