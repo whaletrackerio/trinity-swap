@@ -25,7 +25,7 @@
     html,body{height:100%}
 
     /* =========================
-       FOND (bg.png) VISIBLE + "watermark" permanent
+       FOND (bg.png) VISIBLE + voile
        ========================= */
     body{
       font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
@@ -65,16 +65,20 @@
       backdrop-filter: blur(10px);
       background:linear-gradient(180deg, rgba(5,8,22,.88), rgba(5,8,22,.52));
       border-bottom:1px solid rgba(31,41,55,.6);
-      padding:14px 10px;margin:-22px -14px 18px;
+      padding:14px 12px;margin:-22px -14px 18px;
     }
 
-    /* ✅ LOGO IMAGE (trinity-logo-full.png) */
-    .brand{display:flex;align-items:center}
-    .brand-logo{
-      height:44px;
+    /* ✅ LOGO + TEXTE */
+    .brand{display:flex;align-items:center;gap:12px;font-weight:900;letter-spacing:.4px}
+    .brand img{
+      height:60px;   /* 🔥 visible */
       width:auto;
       display:block;
-      filter: drop-shadow(0 10px 20px rgba(168,85,247,.18));
+      border-radius:14px;
+      filter: drop-shadow(0 14px 28px rgba(168,85,247,.28));
+    }
+    @media(max-width:520px){
+      .brand img{height:46px;}
     }
 
     .top-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}
@@ -214,6 +218,7 @@
       background:rgba(2,6,23,.70); border:1px solid rgba(34,197,94,.35); color:#e5e7eb;
     }
     .tmList{margin-top:10px; max-height:520px; overflow:auto; padding-right:6px;}
+
     .tmRow{
       display:grid;
       grid-template-columns: 44px 1fr 120px 120px;
@@ -265,9 +270,11 @@
 <div class="wrap">
 
   <header>
+    <!-- ✅ Logo + texte (ton fichier dans le repo) -->
     <div class="brand">
-      <img src="./trinity-logo-full.png" alt="TRINITY Swap" class="brand-logo">
+      <img src="./trinity-logo-full.png" alt="TRINITY Swap">
     </div>
+
     <div class="top-right">
       <div class="pill" id="netPill">Réseau : —</div>
       <div class="pill" id="walletPill">Wallet : non connecté</div>
@@ -405,15 +412,13 @@
 <script>
 /* ================= CONFIG ================= */
 const PULSECHAIN_ID = 369;
-const PULSECHAIN_HEX = "0x171";
+const PULSECHAIN_HEX = "0x171"; // 369
 const PULSEX_ROUTER = "0x98bf93ebf5c380C0e6Ae8e192A7e2AE08edAcc02";
 const WPLS_ADDR = "0xA1077a294dDE1B09bB078844df40758a5D0f9a27";
 const PLS_GAS_RESERVE = ethers.parseUnits("0.05", 18);
 
+// tokenlist PulseX (CORS OK)
 const PULSEX_TOKENLIST_URL = "https://tokens.app.pulsex.com/pulsex-extended-v0.1.2.tokenlist.json";
-
-// ✅ Piteas: fallback logos par adresse (très utile quand tokenlist n’a pas le logo)
-const PITEAS_LOGO_BASE = "https://raw.githubusercontent.com/piteasio/app-tokens/main/token-logo/";
 
 /* ================= TES TOKENS (2 blocs) ================= */
 const USER_TOKENS_BY_SYMBOL = {
@@ -454,6 +459,7 @@ const USER_TOKENS_BY_SYMBOL = {
   WBTC:"0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
 };
 
+// tokens “natif” et essentiels PulseChain
 const BASE_FIXED = {
   PLS:  { symbol:"PLS",  address:null, decimals:18, name:"PulseChain", logoURI:null },
   WPLS: { symbol:"WPLS", address:WPLS_ADDR, decimals:18, name:"Wrapped PLS", logoURI:null },
@@ -511,37 +517,20 @@ function formatAmountWithDec(decimals, raw){
   return num.toLocaleString(undefined, { maximumFractionDigits: 6 });
 }
 
-/* ✅ LOGO utils */
-function normalizeLogoUri(uri){
-  if(!uri) return null;
-  if(uri.startsWith("ipfs://")){
-    return "https://cloudflare-ipfs.com/ipfs/" + uri.replace("ipfs://","");
-  }
-  return uri;
-}
-function buildLogoCandidates(t){
-  const out = [];
-  const u = normalizeLogoUri(t.logoURI);
-  if(u && (u.startsWith("http://") || u.startsWith("https://"))) out.push(u);
-
-  if(t.address){
-    out.push(PITEAS_LOGO_BASE + ethers.getAddress(t.address) + ".png");
-    out.push(PITEAS_LOGO_BASE + norm(t.address) + ".png");
-  }else if(t.symbol === "PLS"){
-    // PLS natif : fallback remote
-    out.push("https://assets.coingecko.com/coins/images/26304/large/pulsechain.png");
-  }
-  return out;
-}
-
 /* ================= STATE ================= */
 let provider, signer, userAddress, networkOk = false;
+
+// TOKENS_MAP: symbol -> token object {symbol,address,decimals,name,logoURI}
 let TOKENS = { ...BASE_FIXED };
+
+// index par adresse
 let TOKENS_BY_ADDR = {};
 let TOKENLIST_READY = false;
+
+// cache balances
 let BAL_CACHE = new Map();
 
-/* ================= BUILD TOKEN SET ================= */
+/* ================= BUILD TOKEN SET (PulseX tokenlist + tes tokens) ================= */
 async function loadPulseXTokenList(){
   try{
     const r = await fetch(PULSEX_TOKENLIST_URL, { cache: "no-store" });
@@ -559,7 +548,7 @@ function dedupeTokens(tokens){
     Object.values(USER_TOKENS_BY_SYMBOL).map(a => norm(a)).filter(Boolean)
   );
 
-  const best = new Map();
+  const best = new Map(); // sym -> token
   for(const t of tokens){
     const sym = (t.symbol || "").toUpperCase().trim();
     if(!sym) continue;
@@ -599,6 +588,7 @@ function mergeTokenDataFromList(list){
     });
   }
 
+  // enrich BASE_FIXED with tokenlist data
   for(const sym of Object.keys(TOKENS)){
     const base = TOKENS[sym];
     if(!base.address) continue;
@@ -608,6 +598,7 @@ function mergeTokenDataFromList(list){
     }
   }
 
+  // add tokenlist tokens
   for(const t of byAddr.values()){
     const sym = t.symbol;
     if(!sym) continue;
@@ -619,6 +610,7 @@ function mergeTokenDataFromList(list){
     }
   }
 
+  // add user tokens
   for(const [symRaw, addr] of Object.entries(USER_TOKENS_BY_SYMBOL)){
     const sym = symRaw.toUpperCase();
     const a = safeGetAddress(addr);
@@ -641,6 +633,7 @@ function mergeTokenDataFromList(list){
     }
   }
 
+  // rebuild TOKENS_BY_ADDR
   TOKENS_BY_ADDR = {};
   for(const t of Object.values(TOKENS)){
     if(t.address) TOKENS_BY_ADDR[norm(t.address)] = t;
@@ -1141,35 +1134,12 @@ async function addTokenToMetaMask(sym){
 function fallbackIconText(sym){ return (sym||"?").slice(0,1).toUpperCase(); }
 
 function renderIconHTML(t){
-  const candidates = buildLogoCandidates(t);
-  if(!candidates.length){
-    return `<div class="tmIcon">${fallbackIconText(t.symbol)}</div>`;
+  if(t.logoURI){
+    const safe = t.logoURI;
+    return `<div class="tmIcon"><img src="${safe}" alt="${t.symbol}" referrerpolicy="no-referrer"
+      onerror="this.parentElement.textContent='${fallbackIconText(t.symbol)}'"></div>`;
   }
-  const payload = encodeURIComponent(JSON.stringify(candidates));
-  const sym = (t.symbol||"").replace(/'/g,"");
-  return `
-    <div class="tmIcon">
-      <img
-        src="${candidates[0]}"
-        alt="${sym}"
-        data-cands="${payload}"
-        data-idx="0"
-        referrerpolicy="no-referrer"
-        onerror="
-          try{
-            const c=JSON.parse(decodeURIComponent(this.dataset.cands));
-            let i=parseInt(this.dataset.idx||'0',10)+1;
-            if(i<c.length){
-              this.dataset.idx=String(i);
-              this.src=c[i];
-              return;
-            }
-          }catch(e){}
-          this.parentElement.textContent='${fallbackIconText(sym)}';
-        "
-      />
-    </div>
-  `;
+  return `<div class="tmIcon">${fallbackIconText(t.symbol)}</div>`;
 }
 
 function tokenMetaLine(t){
@@ -1261,6 +1231,7 @@ async function renderTokenList(q, withBalances){
   }
 }
 
+/* Hook : ouvrir modal au clic sur les selects */
 document.querySelectorAll(".swapbox").forEach(card=>{
   const fromSel = card.querySelector(".from");
   const toSel   = card.querySelector(".to");
@@ -1272,6 +1243,7 @@ $("openTokensBtn").addEventListener("click", ()=>{
   openTokenModal($("swap1"), "from");
 });
 
+/* ================= SCROLL BTN ================= */
 $("openMultiBtn").addEventListener("click", ()=>{
   $("multiswap").scrollIntoView({behavior:"smooth", block:"start"});
   window.scrollBy(0, -90);
