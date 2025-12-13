@@ -1132,40 +1132,41 @@ async function addTokenToMetaMask(sym){
 function renderIconHTML(t){
   if(!t) return `<div class="tmIcon">?</div>`;
 
-  // petit style “badge” pour PLS natif (pas d’adresse)
+  // Cas PLS natif
   if(!t.address){
-    return `<div class="tmIcon" style="background:linear-gradient(135deg,#a855f7,#ec4899);color:#fff;border:none">PLS</div>`;
+    return `<div class="tmIcon" style="
+      background:linear-gradient(135deg,#a855f7,#ec4899);
+      color:#fff;border:none;font-weight:900">PLS</div>`;
   }
 
   const { primary, alt } = resolveLogoURLs(t);
   const fallback = fallbackIconText(t.symbol);
 
-  // si primary échoue, on essaie alt; si alt échoue -> lettre
-  const src = primary || alt || "";
-  const altSrc = primary && alt ? alt : "";
+  // priorité claire : primary → alt → lettre
+  const trySrc = primary || alt;
 
-  if(!src){
+  if(!trySrc){
     return `<div class="tmIcon">${fallback}</div>`;
   }
 
   return `
     <div class="tmIcon">
       <img
-        src="${src}"
-        ${altSrc ? `data-alt="${altSrc}"` : ``}
+        src="${trySrc}"
         referrerpolicy="no-referrer"
         alt="${t.symbol}"
         onerror="
-          if(this.dataset.alt && this.src !== this.dataset.alt){
-            this.src = this.dataset.alt;
-            return;
+          if('${alt || ""}' && this.src !== '${alt || ""}'){
+            this.src='${alt || ""}';
+          } else {
+            this.parentElement.textContent='${fallback}';
           }
-          this.parentElement.textContent='${fallback}';
         "
       />
     </div>
   `;
 }
+
 
 function tokenMetaLine(t){
   const addr = t.address ? shortAddr(t.address) : "Native";
