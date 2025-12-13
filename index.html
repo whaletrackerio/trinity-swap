@@ -13,7 +13,6 @@
       --border:#1f2937;
       --text:#e5e7eb;
       --muted:#9ca3af;
-      --muted2:#8a90ab;
       --accent:#a855f7;
       --accent2:#ec4899;
       --good:#22c55e;
@@ -21,13 +20,11 @@
       --warn:#f59e0b;
       --radius:18px;
       --shadow:0 18px 45px rgba(0,0,0,.55);
+      --headerH: 150px; /* hauteur header desktop */
     }
     *{box-sizing:border-box;margin:0;padding:0}
     html,body{height:100%}
 
-    /* =========================
-       FOND (bg.png) permanent
-       ========================= */
     body{
       font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
       color:var(--text);
@@ -58,52 +55,49 @@
     }
 
     a{color:inherit;text-decoration:none}
-    .wrap{max-width:1200px;margin:0 auto;padding:22px 14px 90px; overflow: visible;}
+
+    /* IMPORTANT: laisser la place au header fixed */
+    .wrap{
+      max-width:1200px;
+      margin:0 auto;
+      padding: calc(var(--headerH) + 22px) 14px 90px;
+    }
 
     /* =========================
-       HEADER STICKY (anti-tremblement)
+       HEADER FIXE
        ========================= */
     header{
-      position:sticky; top:0; z-index:999;
+      position:fixed;
+      top:0; left:0; right:0;
+      z-index:999;
       display:flex;align-items:center;justify-content:space-between;gap:12px;
-
       backdrop-filter: blur(12px);
       background:linear-gradient(180deg, rgba(5,8,22,.92), rgba(5,8,22,.55));
       border-bottom:1px solid rgba(31,41,55,.6);
-
-      padding:18px 16px;
-      margin:-22px -14px 18px;
-
-      transition: padding .2s ease, background .2s ease;
-      will-change: padding;
-      transform: translateZ(0);
+      padding:16px 18px;
     }
-    header.compact{
-      padding:10px 16px;
-      background:linear-gradient(180deg, rgba(5,8,22,.96), rgba(5,8,22,.78));
+    .headerInner{
+      max-width:1200px;
+      margin:0 auto;
+      width:100%;
+      display:flex;align-items:center;justify-content:space-between;gap:12px;
     }
 
-    .brand{display:flex;align-items:center;gap:12px;font-weight:900;letter-spacing:.4px}
+    .brand{
+      display:flex;align-items:center;gap:14px;
+      font-weight:900;letter-spacing:.4px;
+    }
 
-    /* ✅ IMPORTANT : pas de height qui change (sinon tremblement). On fait scale() */
-    .brand img{
-      height:110px;
+    /* Logo image */
+    .brandLogo{
+      height:118px; /* PLUS GROS */
       width:auto;
       display:block;
-      border-radius:20px;
-      padding:8px;
+      border-radius:22px;
+      padding:10px;
       background:rgba(2,6,23,.55);
       border:1px solid rgba(168,85,247,.32);
-      filter: drop-shadow(0 22px 46px rgba(168,85,247,.42));
-
-      transform-origin: left center;
-      transform: translateZ(0) scale(1);
-      will-change: transform, filter;
-      transition: transform .18s ease, filter .18s ease;
-    }
-    header.compact .brand img{
-      transform: translateZ(0) scale(.58); /* ~110 -> ~64 visuel */
-      filter: drop-shadow(0 12px 26px rgba(168,85,247,.30));
+      box-shadow:0 18px 45px rgba(168,85,247,.20);
     }
 
     .top-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}
@@ -112,15 +106,13 @@
       border:1px solid rgba(31,41,55,.9);
       background:rgba(2,6,23,.60);
       padding:8px 10px;border-radius:999px;
-      white-space:nowrap;
     }
     .btn{
       cursor:pointer;border:none;
-      padding:10px 14px;border-radius:999px;
+      padding:12px 16px;border-radius:999px;
       background:linear-gradient(120deg,var(--accent),var(--accent2));
       color:#fff;font-weight:900;
       box-shadow:0 12px 30px rgba(236,72,153,.15);
-      white-space:nowrap;
     }
     .btn:disabled{opacity:.55;cursor:not-allowed}
     .btn2{
@@ -128,38 +120,18 @@
       padding:10px 14px;border-radius:999px;
       background:rgba(2,6,23,.60);
       color:var(--text);font-weight:900;
-      white-space:nowrap;
     }
 
-    /* =========================
-       MOBILE: header propre + compact
-       ========================= */
-    @media(max-width:820px){
-      header{ align-items:flex-start; }
-      .top-right{
-        display:grid;
-        grid-template-columns: 1fr 1fr;
-        gap:8px;
-        justify-items:end;
-      }
-      .top-right .pill{
-        width:100%;
-        text-align:center;
-        padding:7px 10px;
-        font-size:12px;
-      }
-      #connectBtn{
-        grid-column: 1 / -1;
-        width:100%;
-        justify-self:stretch;
-      }
+    /* Responsive: header moins haut mobile */
+    @media(max-width:720px){
+      :root{ --headerH: 120px; }
+      .brandLogo{ height:92px; padding:8px; border-radius:18px; }
+      header{ padding:12px 14px; }
     }
-    @media(max-width:520px){
-      .brand img{ height:86px; }
-      header.compact .brand img{ transform: translateZ(0) scale(.63); } /* ~54 visuel */
-      header{ padding:14px 12px; }
-      header.compact{ padding:9px 12px; }
-      .wrap{ padding:18px 12px 80px; }
+    @media(max-width:420px){
+      :root{ --headerH: 108px; }
+      .brandLogo{ height:82px; }
+      .pill{ display:none; } /* garde de la place sur petit écran */
     }
 
     .grid2{display:grid;grid-template-columns:1.25fr .75fr;gap:14px;align-items:stretch}
@@ -173,8 +145,6 @@
       padding:16px;
     }
     h1{font-size:34px;line-height:1.05}
-    @media(max-width:520px){ h1{font-size:28px;} }
-
     .sub{margin-top:10px;color:var(--muted);font-size:13px;line-height:1.55}
     .hr{height:1px;background:rgba(31,41,55,.7);margin:14px 0}
     .chips{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
@@ -328,19 +298,23 @@
 </head>
 
 <body>
-<div class="wrap">
 
-  <header>
+<header>
+  <div class="headerInner">
     <div class="brand">
-      <img src="./trinity-logo-full.png" alt="TRINITY Swap" />
+      <img class="brandLogo" src="./trinity-logo-full.png" alt="TRINITY Swap">
     </div>
+
     <div class="top-right">
       <div class="pill" id="netPill">Réseau : —</div>
       <div class="pill" id="walletPill">Wallet : non connecté</div>
       <div class="pill" id="plsPill">PLS : —</div>
       <button class="btn" id="connectBtn">Connect Wallet</button>
     </div>
-  </header>
+  </div>
+</header>
+
+<div class="wrap">
 
   <section class="grid2">
     <div class="card">
@@ -471,15 +445,12 @@
 <script>
 /* ================= CONFIG ================= */
 const PULSECHAIN_ID = 369;
-const PULSECHAIN_HEX = "0x171";
+const PULSECHAIN_HEX = "0x171"; // 369
 const PULSEX_ROUTER = "0x98bf93ebf5c380C0e6Ae8e192A7e2AE08edAcc02";
 const WPLS_ADDR = "0xA1077a294dDE1B09bB078844df40758a5D0f9a27";
 const PLS_GAS_RESERVE = ethers.parseUnits("0.05", 18);
-
-// Tokenlist PulseX
 const PULSEX_TOKENLIST_URL = "https://tokens.app.pulsex.com/pulsex-extended-v0.1.2.tokenlist.json";
 
-/* ================= TES TOKENS ================= */
 const USER_TOKENS_BY_SYMBOL = {
   EHEX: "0x57fde0a71132198BBeC939B98976993d8D89D225",
   INC:  "0x2fa878Ab3F87CC1C9737Fc071108F904c0B0C95d",
@@ -518,18 +489,12 @@ const USER_TOKENS_BY_SYMBOL = {
   WBTC:"0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
 };
 
-// tokens “natif” et essentiels PulseChain
 const BASE_FIXED = {
-  PLS:  { symbol:"PLS",  address:null, decimals:18, name:"PulseChain", logoURI:null },
+  PLS:  { symbol:"PLS",  address:null, decimals:18, name:"PulseChain", logoURI:"https://assets.coingecko.com/coins/images/4319/large/pulsechain.png" },
   WPLS: { symbol:"WPLS", address:WPLS_ADDR, decimals:18, name:"Wrapped PLS", logoURI:null },
   PHEX: { symbol:"PHEX", address:"0x2b591e99afE9f32eAA6214f7B7629768c40Eeb39", decimals:8, name:"HEX (PulseChain)", logoURI:null },
   PLSX: { symbol:"PLSX", address:"0x95B303987A60C71504D99Aa1b13B4DA07b0790ab", decimals:18, name:"PulseX", logoURI:null },
   ATROPA:{symbol:"ATROPA",address:"0xCc78A0acDF847A2C1714D2A925bB4477df5d48a6", decimals:18, name:"ATROPA", logoURI:null },
-};
-
-/* Fallback logo uniquement pour PLS natif */
-const FALLBACK_LOGOS = {
-  PLS: "./trinity-logo-full.png"
 };
 
 const ERC20_ABI = [
@@ -548,7 +513,6 @@ const ROUTER_ABI = [
   "function swapExactTokensForETH(uint256 amountIn,uint256 amountOutMin,address[] calldata path,address to,uint256 deadline) external returns (uint256[] memory amounts)"
 ];
 
-/* ================= HELPERS ================= */
 const $ = (id) => document.getElementById(id);
 function shortAddr(a){ return a ? (a.slice(0,6)+"…"+a.slice(-4)) : ""; }
 function isAddr(x){ return /^0x[a-fA-F0-9]{40}$/.test(x); }
@@ -559,19 +523,15 @@ function setStatus(card, txt, cls=""){
   el.className = "status" + (cls ? " "+cls : "");
   el.textContent = txt;
 }
-
 function getSettings(){
   const sl = parseFloat($("slippage").value || "2");
   const dl = parseInt($("deadlineM").value || "10", 10);
   return { slippage: Math.max(0, sl), deadlineMin: Math.max(1, dl) };
 }
-
 function txUrl(hash){ return `https://otter.pulsechain.com/tx/${hash}`; }
-
 function safeGetAddress(a){
   try{ return ethers.getAddress(a); }catch{ return null; }
 }
-
 function formatAmountWithDec(decimals, raw){
   const s = ethers.formatUnits(raw, decimals);
   const num = Number(s);
@@ -581,35 +541,14 @@ function formatAmountWithDec(decimals, raw){
   return num.toLocaleString(undefined, { maximumFractionDigits: 6 });
 }
 
-/* ================= LOGOS: IPFS -> HTTPS (FIX DEFINITIF) ================= */
-function fixLogoURI(u){
-  if(!u) return "";
-  u = String(u).trim();
-
-  // ipfs://<cid> ou ipfs://ipfs/<cid>
-  if(u.startsWith("ipfs://")){
-    const p = u.replace("ipfs://", "");
-    const cid = p.startsWith("ipfs/") ? p.slice(5) : p;
-    return "https://cloudflare-ipfs.com/ipfs/" + cid;
-  }
-
-  // ipfs/<cid>
-  if(u.startsWith("ipfs/")){
-    return "https://cloudflare-ipfs.com/" + u;
-  }
-
-  return u;
-}
-
 /* ================= STATE ================= */
 let provider, signer, userAddress, networkOk = false;
-
-// TOKENS_MAP: symbol -> token object {symbol,address,decimals,name,logoURI}
 let TOKENS = { ...BASE_FIXED };
 let TOKENS_BY_ADDR = {};
+let TOKENLIST_READY = false;
 let BAL_CACHE = new Map();
 
-/* ================= BUILD TOKEN SET (PulseX tokenlist + tes tokens) ================= */
+/* ================= TOKENLIST ================= */
 async function loadPulseXTokenList(){
   try{
     const r = await fetch(PULSEX_TOKENLIST_URL, { cache: "no-store" });
@@ -623,12 +562,13 @@ async function loadPulseXTokenList(){
 }
 
 function dedupeTokens(tokens){
-  const wantedAddrSet = new Set(Object.values(USER_TOKENS_BY_SYMBOL).map(a => norm(a)).filter(Boolean));
-  const best = new Map(); // sym -> token
+  const wantedAddrSet = new Set(
+    Object.values(USER_TOKENS_BY_SYMBOL).map(a => norm(a)).filter(Boolean)
+  );
+  const best = new Map();
   for(const t of tokens){
     const sym = (t.symbol || "").toUpperCase().trim();
     if(!sym) continue;
-
     const addr = t.address ? norm(t.address) : null;
     const hasLogo = !!t.logoURI;
     const isWanted = addr && wantedAddrSet.has(addr);
@@ -649,7 +589,6 @@ function dedupeTokens(tokens){
 
 function mergeTokenDataFromList(list){
   const cleaned = dedupeTokens(list.filter(t => Number(t.chainId) === PULSECHAIN_ID && isAddr(t.address)));
-
   const byAddr = new Map();
   for(const t of cleaned){
     const addrL = norm(t.address);
@@ -658,11 +597,10 @@ function mergeTokenDataFromList(list){
       address: safeGetAddress(t.address),
       decimals: Number(t.decimals ?? 18),
       name: t.name || t.symbol || "Token",
-      logoURI: t.logoURI ? fixLogoURI(t.logoURI) : null // ✅ FIX ICI
+      logoURI: t.logoURI || null
     });
   }
 
-  // enrich BASE_FIXED
   for(const sym of Object.keys(TOKENS)){
     const base = TOKENS[sym];
     if(!base.address) continue;
@@ -670,7 +608,6 @@ function mergeTokenDataFromList(list){
     if(hit) TOKENS[sym] = { ...base, ...hit, symbol:sym };
   }
 
-  // add tokenlist tokens into TOKENS
   for(const t of byAddr.values()){
     const sym = t.symbol;
     if(!sym) continue;
@@ -681,7 +618,6 @@ function mergeTokenDataFromList(list){
     }
   }
 
-  // add USER TOKENS
   for(const [symRaw, addr] of Object.entries(USER_TOKENS_BY_SYMBOL)){
     const sym = symRaw.toUpperCase();
     const a = safeGetAddress(addr);
@@ -696,6 +632,9 @@ function mergeTokenDataFromList(list){
       const curAddr = cur.address ? norm(cur.address) : "";
       const wantedAddr = norm(a);
       if(curAddr === wantedAddr) TOKENS[sym] = { ...cur, ...merged };
+      else{
+        if(merged.logoURI) TOKENS[sym] = merged;
+      }
     }
   }
 
@@ -703,6 +642,7 @@ function mergeTokenDataFromList(list){
   for(const t of Object.values(TOKENS)){
     if(t.address) TOKENS_BY_ADDR[norm(t.address)] = t;
   }
+  TOKENLIST_READY = true;
 }
 
 /* ================= WEB3 ================= */
@@ -712,14 +652,12 @@ function getRouter(readOnly=true){
 function getErc20(tokenAddr, readOnly=true){
   return new ethers.Contract(ethers.getAddress(tokenAddr), ERC20_ABI, readOnly ? provider : signer);
 }
-
 async function getBalance(sym){
   if(sym === "PLS") return await provider.getBalance(userAddress);
   const t = TOKENS[sym];
   if(!t?.address) return 0n;
   return await getErc20(t.address, true).balanceOf(userAddress);
 }
-
 async function getBalanceByToken(t){
   if(!networkOk || !userAddress) return null;
   if(!t.address) return await provider.getBalance(userAddress);
@@ -851,7 +789,9 @@ function setConnectedUI(isOk){
     if(!isOk) setStatus(card, "Ready (connect wallet)", "");
   });
 
-  if(!isOk) $("plsPill").textContent = "PLS : —";
+  if(!isOk){
+    $("plsPill").textContent = "PLS : —";
+  }
 }
 
 /* ================= PATH ================= */
@@ -876,7 +816,6 @@ function formatAmount(sym, raw){
   const dec = t?.decimals ?? 18;
   return formatAmountWithDec(dec, raw);
 }
-
 function validatePair(card){
   const from = card.querySelector(".from").value;
   const to = card.querySelector(".to").value;
@@ -893,7 +832,6 @@ async function refreshHeaderPLS(){
   const b = await provider.getBalance(userAddress);
   $("plsPill").textContent = "PLS : " + formatAmountWithDec(18, b);
 }
-
 async function refreshCardBalance(card){
   const balEl = card.querySelector(".balIn");
   if(!networkOk || !userAddress){
@@ -904,7 +842,6 @@ async function refreshCardBalance(card){
   const bal = await getBalance(from);
   balEl.textContent = formatAmount(from, bal);
 }
-
 async function refreshAll(){
   if(!networkOk) return;
   BAL_CACHE.clear();
@@ -941,7 +878,6 @@ async function setAmountFromPercent(card, pct){
   card.querySelector(".amount").value = ethers.formatUnits(amount, dec);
   await updateQuote(card);
 }
-
 document.querySelectorAll(".swapbox").forEach(card=>{
   card.querySelector(".maxBtn").addEventListener("click", ()=> setAmountFromPercent(card, 100).catch(console.error));
   card.querySelectorAll(".pctBtn").forEach(b=>{
@@ -957,7 +893,6 @@ async function checkAllowance(symIn, amountRaw){
   const allowance = await getErc20(t.address, true).allowance(userAddress, PULSEX_ROUTER);
   return allowance >= amountRaw;
 }
-
 async function doApprove(symIn, card){
   const t = TOKENS[symIn];
   const erc = getErc20(t.address, false);
@@ -967,13 +902,11 @@ async function doApprove(symIn, card){
   await tx.wait();
   setStatus(card, "Approve OK ✅", "good");
 }
-
 let quoteTimer = null;
 function triggerQuote(card){
   if(quoteTimer) clearTimeout(quoteTimer);
   quoteTimer = setTimeout(()=> updateQuote(card).catch(()=>{}), 250);
 }
-
 async function updateQuote(card){
   const from = card.querySelector(".from").value;
   const to = card.querySelector(".to").value;
@@ -1029,7 +962,6 @@ async function updateQuote(card){
         return;
       }
     }
-
     setStatus(card, "Ready ✅", "good");
   }catch(e){
     console.error(e);
@@ -1094,7 +1026,6 @@ async function executeSwap(card){
 
     setStatus(card, "Success ✅", "good");
     await refreshAll();
-
   }catch(e){
     console.error(e);
     setStatus(card, "Swap error (cancel ? liquidité ?)", "bad");
@@ -1110,7 +1041,7 @@ $("execTrinityBtn").addEventListener("click", async ()=>{
   const cards = [ $("swap1"), $("swap2"), $("swap3") ];
 
   $("multiswap").scrollIntoView({behavior:"smooth", block:"start"});
-  window.scrollBy(0, -90);
+  window.scrollBy(0, -180);
 
   for(const card of cards){
     const amt = (card.querySelector(".amount").value || "").trim();
@@ -1190,21 +1121,10 @@ async function addTokenToMetaMask(sym){
 
 function fallbackIconText(sym){ return (sym||"?").slice(0,1).toUpperCase(); }
 
-function resolveLogoURI(t){
-  // 1) tokenlist logoURI (déjà fixé IPFS -> HTTPS)
-  if(t.logoURI) return t.logoURI;
-
-  // 2) fallback local (PLS)
-  if(FALLBACK_LOGOS[t.symbol]) return FALLBACK_LOGOS[t.symbol];
-
-  return "";
-}
-
 function renderIconHTML(t){
-  const logo = resolveLogoURI(t);
-  if(logo){
-    return `<div class="tmIcon"><img src="${logo}" alt="${t.symbol}" referrerpolicy="no-referrer"
-      onerror="this.onerror=null;this.parentElement.textContent='${fallbackIconText(t.symbol)}'"></div>`;
+  if(t.logoURI){
+    const safe = t.logoURI;
+    return `<div class="tmIcon"><img src="${safe}" alt="${t.symbol}" referrerpolicy="no-referrer" onerror="this.parentElement.textContent='${fallbackIconText(t.symbol)}'"></div>`;
   }
   return `<div class="tmIcon">${fallbackIconText(t.symbol)}</div>`;
 }
@@ -1298,7 +1218,6 @@ async function renderTokenList(q, withBalances){
   }
 }
 
-/* Hook : ouvrir modal au clic sur les selects */
 document.querySelectorAll(".swapbox").forEach(card=>{
   const fromSel = card.querySelector(".from");
   const toSel   = card.querySelector(".to");
@@ -1308,10 +1227,9 @@ document.querySelectorAll(".swapbox").forEach(card=>{
 
 $("openTokensBtn").addEventListener("click", ()=> openTokenModal($("swap1"), "from"));
 
-/* ================= SCROLL BTN ================= */
 $("openMultiBtn").addEventListener("click", ()=>{
   $("multiswap").scrollIntoView({behavior:"smooth", block:"start"});
-  window.scrollBy(0, -90);
+  window.scrollBy(0, -180);
 });
 
 /* ================= CONNECT WALLET ================= */
@@ -1379,30 +1297,7 @@ $("refreshBtn").addEventListener("click", ()=> refreshAll());
   initCardsDefaults();
   document.querySelectorAll(".swapbox").forEach(card => updateQuote(card).catch(()=>{}));
 })();
-
-/* ================= HEADER SHRINK ON SCROLL (anti-tremblement) ================= */
-(function headerShrinkOnScroll(){
-  const h = document.querySelector("header");
-  const DOWN = 90;
-  const UP   = 40;
-  let ticking = false;
-
-  function update(){
-    const y = window.scrollY || 0;
-    if(!h.classList.contains("compact") && y > DOWN) h.classList.add("compact");
-    else if(h.classList.contains("compact") && y < UP) h.classList.remove("compact");
-    ticking = false;
-  }
-
-  function onScroll(){
-    if(ticking) return;
-    ticking = true;
-    requestAnimationFrame(update);
-  }
-
-  window.addEventListener("scroll", onScroll, { passive:true });
-  update();
-})();
 </script>
+
 </body>
 </html>
