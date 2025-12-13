@@ -78,19 +78,13 @@
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
 
-      background:linear-gradient(
-        180deg,
-        rgba(5,8,22,.94),
-        rgba(5,8,22,.70)
-      );
-
+      background:linear-gradient(180deg, rgba(5,8,22,.94), rgba(5,8,22,.70));
       border-bottom:1px solid rgba(31,41,55,.6);
 
       padding:18px 16px;
       margin:-22px -14px 18px;
-
-      /* ✅ header moins vide, mais premium */
       min-height:112px;
+
       box-shadow:0 18px 45px rgba(0,0,0,.45);
     }
 
@@ -99,20 +93,59 @@
       display:flex;
       align-items:center;
       height:100%;
-      padding-left:6px;
+      flex:0 0 auto;
     }
     .brand-logo{
       height:96px;
       width:auto;
       display:block;
 
-      /* ✅ boost visuel même si le PNG a du vide autour */
-      transform: translateY(2px) scale(1.22);
+      /* ✅ boost visuel si ton PNG a du vide */
+      transform: translateY(2px) scale(1.18);
       transform-origin:left center;
 
       filter:
         drop-shadow(0 12px 28px rgba(168,85,247,.35))
         drop-shadow(0 0 18px rgba(168,85,247,.25));
+    }
+
+    /* =========================
+       RECTANGLE PANORAMA (au centre du header)
+       Fichier requis: ./header-art.png
+       ========================= */
+    .header-mid{
+      flex: 1 1 auto;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      min-width: 240px;
+      padding: 0 8px;
+    }
+    .header-rect{
+      width: clamp(320px, 44vw, 760px);
+      height: 84px;
+      border-radius: 18px;
+      border:1px solid rgba(31,41,55,.80);
+      background:
+        linear-gradient(180deg, rgba(0,0,0,.12), rgba(0,0,0,.55)),
+        url("./header-art.png");
+      background-size: cover;
+      background-position: center;
+      background-repeat:no-repeat;
+
+      opacity: .78;
+      filter: saturate(1.12) contrast(1.06);
+      box-shadow: 0 16px 40px rgba(0,0,0,.35);
+      position:relative;
+      overflow:hidden;
+    }
+    .header-rect::after{
+      content:"";
+      position:absolute; inset:0;
+      background:
+        radial-gradient(220px 90px at 20% 35%, rgba(168,85,247,.18), transparent 62%),
+        radial-gradient(240px 90px at 75% 55%, rgba(34,197,94,.10), transparent 65%);
+      pointer-events:none;
     }
 
     /* ✅ responsive */
@@ -123,12 +156,23 @@
       }
       .brand-logo{
         height:64px;
-        transform: translateY(1px) scale(1.18);
+        transform: translateY(1px) scale(1.14);
       }
+
+      /* ✅ sur mobile on masque pour garder une UI clean */
+      .header-mid{ display:none; }
+
       html{ scroll-padding-top: 110px; }
     }
 
-    .top-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+    .top-right{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
+      flex:0 0 auto;
+    }
     .pill{
       font-size:12px;color:var(--muted);
       border:1px solid rgba(31,41,55,.9);
@@ -319,6 +363,12 @@
     <div class="brand">
       <img src="./trinity-logo-full.png" alt="TRINITY Swap" class="brand-logo">
     </div>
+
+    <!-- ✅ RECTANGLE PANORAMA AU CENTRE -->
+    <div class="header-mid" aria-hidden="true">
+      <div class="header-rect"></div>
+    </div>
+
     <div class="top-right">
       <div class="pill" id="netPill">Réseau : —</div>
       <div class="pill" id="walletPill">Wallet : non connecté</div>
@@ -472,45 +522,47 @@ const USER_TOKENS_BY_SYMBOL = {
   INC:  "0x2fa878Ab3F87CC1C9737Fc071108F904c0B0C95d",
   DAI:  "0xefD766cCb38EaF1dfd701853BFCe31359239F305",
   USDC: "0x15D38573d2feeb82e7ad5187aB8c1D52810B1f07",
+  USDT:"0xdAC17F958D2ee523a2206206994597C13D831ec7",
   WETH: "0x02DcdD04e3F455D838cd1249292C58f3B79e3C3C",
+  WBTC:"0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
+  HDRN:"0x3819f64f282bf135d62168C1e513280dAF905e06",
+  TEXAN:"0xcFCFfE432A48dB53F59c301422d2EdD77B2A88d7",
+  VORTEX:"0x73d8a4D01d658E565cF83068397FD39Baf386C48",
+  PHUX:"0x9663c2d75ffd5F4017310405fCe61720aF45B829",
+  LOAN:"0x9159f1D2a9f51998Fc9Ab03fbd8f265ab14A1b3B",
+  PEPE:"0x6982508145454Ce325dDbE47a25d4ec3d2311933",
+  SHIB:"0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE",
+  UNI:"0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
+  USDL:"0x0dEEd1486bc52aA0d3E6f8849cEC5adD6598A162",
   AXIS: "0x8BDB63033b02C15f113De51EA1C3a96Af9e8ecb5",
-  BANANAS: "0xC6B28B2E3Bf9fF26299D540a4D654F7ade4dFdB0",
-  CST: "0x600136dA8cc6D1Ea07449514604dc4ab7098dB82",
+  BANANAS:"0xC6B28B2E3Bf9fF26299D540a4D654F7ade4dFdB0",
+  CST:"0x600136dA8cc6D1Ea07449514604dc4ab7098dB82",
   EARN:"0xb513038BbFdF9D40B676F41606f4F61D4b02c4A2",
   ELIXIR:"0xeCd465A15fac825B0Fe69416A4c7BfE03A50c12E",
-  HDRN:"0x3819f64f282bf135d62168C1e513280dAF905e06",
   HELGO:"0x0567CA0dE35606E9C260CC2358404B11DE21DB44",
   IM:"0xBBcF895BFCb57d0f457D050bb806d1499436c0CE",
   LINK:"0x514910771AF9Ca656af840dff83E8264EcF986CA",
   pBSKR:"0x1DcbF345bC44696BbBed402367f7C62e524Fe8B5",
-  PEPE:"0x6982508145454Ce325dDbE47a25d4ec3d2311933",
-  LOAN:"0x9159f1D2a9f51998Fc9Ab03fbd8f265ab14A1b3B",
-  PHUX:"0x9663c2d75ffd5F4017310405fCe61720aF45B829",
   PRS:"0xb6B57227150a7097723e0C013752001AaD01248F",
-  pTGC:"0x94534EeEe131840b1c0F61847c572228bdfDDE93",
   PTS:"0x2A06a971fE6ffa002fd242d437E3db2b5cC5B433",
   PXDC:"0xeB6b7932Da20c6D7B3a899D5887d86dfB09A6408",
   RFX:"0xF876BDf9D6403AA7D5bF7F523E8f440A841CC596",
-  SHIB:"0x95aD61b0a150d79219dCF64E1E6Cc01f0B64C4cE",
   SOUNDX:"0xA301c1871Dbf414261946281C7F62213fae22CfE",
   TETRAp:"0xAeC4C07537B03E3E62fc066EC62401Aed5Fdd361",
-  TEXAN:"0xcFCFfE432A48dB53F59c301422d2EdD77B2A88d7",
   TIME:"0xCA35638A3fdDD02fEC597D8c1681198C06b23F58",
   UFO:"0x456548A9B56eFBbD89Ca0309edd17a9E20b04018",
-  UNI:"0x1f9840a85d5aF5bf1D1762F925BDADdC4201F984",
-  USDL:"0x0dEEd1486bc52aA0d3E6f8849cEC5adD6598A162",
-  USDT:"0xdAC17F958D2ee523a2206206994597C13D831ec7",
-  VORTEX:"0x73d8a4D01d658E565cF83068397FD39Baf386C48",
   WATT:"0xDfdc2836FD2E63Bba9f0eE07901aD465Bff4DE71",
-  WBTC:"0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
 };
 
 const BASE_FIXED = {
   PLS:  { symbol:"PLS",  address:null, decimals:18, name:"PulseChain", logoURI:null },
   WPLS: { symbol:"WPLS", address:WPLS_ADDR, decimals:18, name:"Wrapped PLS", logoURI:null },
   PHEX: { symbol:"PHEX", address:"0x2b591e99afE9f32eAA6214f7B7629768c40Eeb39", decimals:8, name:"HEX (PulseChain)", logoURI:null },
+  EHEX: { symbol:"EHEX", address:"0x57fde0a71132198BBeC939B98976993d8D89D225", decimals:18, name:"eHEX", logoURI:null },
   PLSX: { symbol:"PLSX", address:"0x95B303987A60C71504D99Aa1b13B4DA07b0790ab", decimals:18, name:"PulseX", logoURI:null },
+  INC:  { symbol:"INC",  address:"0x2fa878Ab3F87CC1C9737Fc071108F904c0B0C95d", decimals:18, name:"Incentive", logoURI:null },
   ATROPA:{symbol:"ATROPA",address:"0xCc78A0acDF847A2C1714D2A925bB4477df5d48a6", decimals:18, name:"ATROPA", logoURI:null },
+  DAI:  { symbol:"DAI",  address:"0xefD766cCb38EaF1dfd701853BFCe31359239F305", decimals:18, name:"DAI", logoURI:null },
 };
 
 const ERC20_ABI = [
