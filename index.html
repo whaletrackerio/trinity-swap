@@ -79,14 +79,15 @@
       width:auto;
       display:block;
       filter: drop-shadow(0 14px 26px rgba(168,85,247,.22));
+      user-select:none;
     }
 
-    /* ✅ GRAND RECTANGLE ART (évite le “petit carré”) */
+    /* ✅ GRAND RECTANGLE ART (reste rectangle, jamais carré) */
     .header-rect{
-      flex:1 1 auto;                 /* ✅ prend la place dispo */
-      min-width:420px;               /* ✅ empêche de s’écraser */
+      flex:1 1 auto;
+      min-width:420px;
       max-width:760px;
-      height:110px;                  /* ✅ hauteur fixe = plus carré */
+      height:110px;
       border-radius:18px;
       border:1px solid rgba(31,41,55,.80);
       background-color: rgba(2,6,23,.55);
@@ -94,8 +95,8 @@
       background-size: cover;
       background-repeat:no-repeat;
 
-      /* ✅ on “remonte” l’image pour voir la tête de la baleine */
-      background-position: 50% 35%;
+      /* ✅ réglage “tête de la baleine” (plus visible) */
+      background-position: 72% 62%;
 
       filter: saturate(1.20) contrast(1.12) brightness(1.10);
       box-shadow: 0 18px 45px rgba(0,0,0,.45);
@@ -107,49 +108,26 @@
       flex:0 0 auto;
     }
 
-    @media(max-width:980px){
+    /* ✅ MOBILE */
+    @media (max-width:980px){
       header{flex-wrap:wrap; align-items:flex-start}
-      .brand-logo{ height:80px; }
       html{ scroll-padding-top: 120px; }
+      .brand-logo{ height:80px; }
 
-      /* GRAND RECTANGLE ART */
       .header-rect{
-        flex:1 1 auto;
-        min-width:420px;
-        max-width:760px;
-      
-        height:120px;              /* un peu + haut pour voir la tête */
-        border-radius:18px;
-        border:1px solid rgba(31,41,55,.80);
-      
-        background-color: rgba(2,6,23,.55);
-        background-image: url("./header-art.png");
-        background-size: cover;
-        background-repeat: no-repeat;
-      
-        /* ✅ on décale vers la gauche + un peu vers le bas pour montrer la tête */
-        background-position: 62% 78%;
-      
-        opacity:1;
-        filter: saturate(1.15) contrast(1.08) brightness(1.08);
+        order:3;
+        width:100%;
+        max-width:none;
+        min-width:0;
+        height:170px;
+        margin-top:10px;
+
+        /* ✅ sur mobile on recadre un poil pour voir la baleine */
+        background-position: 70% 70%;
       }
 
-/* MOBILE */
-@media (max-width:980px){
-  .header-rect{
-    order:3;
-    width:100%;
-    max-width:none;
-    min-width:0;
-
-    height:170px;            /* plus haut sur mobile */
-    margin-top:10px;
-
-    /* ✅ encore un peu plus bas pour la tête */
-    background-position: 60% 82%;
-  }
-}
-
+      .top-right{order:2; width:100%;}
+    }
 
     .pill{
       font-size:12px;color:var(--muted);
@@ -333,24 +311,10 @@
     .tmBottom .btn2{padding:8px 12px}
     .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;}
 
-    /* ✅ Import row style */
     .tmImport{
       border:1px solid rgba(168,85,247,.45) !important;
       background: rgba(168,85,247,.08) !important;
       cursor:default;
-    }
-    .badge{
-      display:inline-flex;align-items:center;gap:6px;
-      padding:6px 10px;border-radius:999px;
-      border:1px solid rgba(245,158,11,.35);
-      background:rgba(245,158,11,.08);
-      color:#fbbf24;font-weight:900;font-size:12px;
-      white-space:nowrap;
-    }
-    .badge.ok{
-      border:1px solid rgba(34,197,94,.35);
-      background:rgba(34,197,94,.08);
-      color:#34d399;
     }
   </style>
 </head>
@@ -363,7 +327,6 @@
       <img src="./trinity-logo-full.png" alt="TRINITY Swap" class="brand-logo">
     </div>
 
-    <!-- ✅ ton grand rectangle art -->
     <div class="header-rect" aria-label="Header art"></div>
 
     <div class="top-right">
@@ -519,8 +482,7 @@ const RPCS = [
 
 function makeReadProvider(){
   for(const url of RPCS){
-    try{ return new ethers.JsonRpcProvider(url, PULSECHAIN_ID); }
-    catch(e){}
+    try{ return new ethers.JsonRpcProvider(url, PULSECHAIN_ID); }catch(e){}
   }
   return null;
 }
@@ -738,7 +700,6 @@ function mergeTokenDataFromList(list){
     });
   }
 
-  // base fixed override
   for(const sym of Object.keys(TOKENS)){
     const base = TOKENS[sym];
     if(!base.address) continue;
@@ -748,7 +709,6 @@ function mergeTokenDataFromList(list){
     }
   }
 
-  // add missing from list
   for(const t of byAddr.values()){
     const sym = t.symbol;
     if(!sym) continue;
@@ -760,7 +720,6 @@ function mergeTokenDataFromList(list){
     }
   }
 
-  // force your tokens list
   for(const [symRaw, addr] of Object.entries(USER_TOKENS_BY_SYMBOL)){
     const sym = symRaw.toUpperCase();
     const a = safeGetAddress(addr);
@@ -783,7 +742,6 @@ function mergeTokenDataFromList(list){
     }
   }
 
-  // add imported from localStorage
   const imported = loadImportedTokens();
   for(const t of imported){
     const sym = (t.symbol||"").toUpperCase();
@@ -1333,7 +1291,6 @@ function tokenMetaLine(t){
 async function resolveTokenByAddress(addr){
   const a = safeGetAddress(addr);
   if(!a) throw new Error("Bad address");
-  // if known already
   const known = TOKENS_BY_ADDR[norm(a)];
   if(known) return known;
 
@@ -1346,19 +1303,16 @@ async function resolveTokenByAddress(addr){
     c.decimals()
   ]);
 
-  const t = {
+  return {
     symbol: String(sym).toUpperCase().slice(0,11),
     address: a,
     decimals: Number(dec),
     name: String(name).slice(0,64),
     logoURI: null
   };
-
-  return t;
 }
 
 function addTokenToRuntime(t){
-  // if symbol collision, keep unique key
   let sym = (t.symbol||"").toUpperCase().trim();
   if(!sym) sym = "TOKEN";
   let key = sym;
@@ -1385,17 +1339,14 @@ async function renderTokenList(q, withBalances){
 
   const wantAddr = isAddr(q) ? safeGetAddress(q) : null;
 
-  // filtered tokens
   const filtered = tokensArr.filter(t=>{
     if(!q) return true;
     if(wantAddr) return t.address && norm(t.address) === norm(wantAddr);
     return norm(t.symbol).includes(nq) || norm(t.name||"").includes(nq);
   });
 
-  // build HTML
   let html = "";
 
-  // ✅ Import row when address pasted
   if(wantAddr){
     html += `
       <div class="tmRow tmImport" id="tmImportRow">
@@ -1433,7 +1384,6 @@ async function renderTokenList(q, withBalances){
 
   listEl.innerHTML = html;
 
-  // click select token
   listEl.querySelectorAll(".tmRow[data-sym]").forEach(row=>{
     row.addEventListener("click", async (e)=>{
       if(e.target.classList.contains("tmCopy") || e.target.classList.contains("tmAdd")) return;
@@ -1442,7 +1392,6 @@ async function renderTokenList(q, withBalances){
       const { card, side } = tokenModalTarget;
       const sel = card.querySelector(side === "from" ? ".from" : ".to");
 
-      // refresh options before selecting (in case new import)
       fillSelect(sel, sym);
       sel.value = sym;
 
@@ -1452,7 +1401,6 @@ async function renderTokenList(q, withBalances){
     });
   });
 
-  // copy + add metamask
   listEl.querySelectorAll(".tmCopy").forEach(btn=>{
     btn.addEventListener("click", async (e)=>{
       e.stopPropagation();
@@ -1470,7 +1418,6 @@ async function renderTokenList(q, withBalances){
     });
   });
 
-  // ✅ Import logic row
   if(wantAddr){
     const metaEl = $("tmImportMeta");
     const btn = $("tmImportBtn");
@@ -1481,7 +1428,6 @@ async function renderTokenList(q, withBalances){
     try{
       const t = await resolveTokenByAddress(wantAddr);
 
-      // already known ?
       const already = TOKENS_BY_ADDR[norm(t.address)];
       if(already){
         metaEl.innerHTML = `<b>${already.symbol}</b>${already.name ? " "+already.name : ""}`;
@@ -1494,11 +1440,9 @@ async function renderTokenList(q, withBalances){
 
         btn.onclick = async ()=>{
           try{
-            // add to runtime + localStorage
             addTokenToRuntime(t);
             addImportedToken(t);
 
-            // refresh selects globally (so token appears)
             document.querySelectorAll(".swapbox").forEach(card=>{
               const fromSel = card.querySelector(".from");
               const toSel = card.querySelector(".to");
@@ -1508,12 +1452,9 @@ async function renderTokenList(q, withBalances){
               fillSelect(toSel, curTo);
             });
 
-            // auto-select imported in the targeted select
             if(tokenModalTarget){
               const { card, side } = tokenModalTarget;
               const sel = card.querySelector(side === "from" ? ".from" : ".to");
-
-              // find the actual key we stored (could be SYMBOL_2)
               const just = TOKENS_BY_ADDR[norm(t.address)];
               if(just){
                 fillSelect(sel, just.symbol);
@@ -1525,11 +1466,9 @@ async function renderTokenList(q, withBalances){
             btn.textContent = "OK";
             btn.disabled = true;
 
-            // update balances/quotes if wallet connected
             if(networkOk){
               await refreshAll().catch(()=>{});
             }else{
-              // still refresh list view
               await renderTokenList(q, false);
             }
           }catch(e){
@@ -1546,7 +1485,6 @@ async function renderTokenList(q, withBalances){
     }
   }
 
-  // balances (only when wallet connected)
   if(withBalances && networkOk && userAddress){
     for(const row of listEl.querySelectorAll(".tmRow[data-sym]")){
       const sym = row.dataset.sym;
@@ -1566,8 +1504,14 @@ async function renderTokenList(q, withBalances){
 document.querySelectorAll(".swapbox").forEach(card=>{
   const fromSel = card.querySelector(".from");
   const toSel   = card.querySelector(".to");
-  fromSel.addEventListener("mousedown", (e)=>{ e.preventDefault(); openTokenModal(card,"from"); });
-  toSel.addEventListener("mousedown", (e)=>{ e.preventDefault(); openTokenModal(card,"to"); });
+
+  const openFrom = (e)=>{ e.preventDefault(); openTokenModal(card,"from"); };
+  const openTo   = (e)=>{ e.preventDefault(); openTokenModal(card,"to"); };
+
+  fromSel.addEventListener("mousedown", openFrom);
+  toSel.addEventListener("mousedown", openTo);
+  fromSel.addEventListener("touchstart", openFrom, {passive:false});
+  toSel.addEventListener("touchstart", openTo, {passive:false});
 });
 
 $("openTokensBtn").addEventListener("click", ()=>{
