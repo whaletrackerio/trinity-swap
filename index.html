@@ -121,20 +121,19 @@
       min-width: 240px;
       padding: 0 8px;
     }
-    .header-rect{
-      flex:1;
-      height:120px;
-      border-radius:18px;
+    ..header-rect{
+      width: clamp(320px, 44vw, 760px);
+      height: 84px;
+      border-radius: 18px;
+      border: 1px solid rgba(31,41,55,.8);
     
+      background-color: rgba(2,6,23,.55);
       background-image: url("header-art.png");
+      background-repeat: no-repeat;
       background-size: cover;
       background-position: center;
-      background-repeat: no-repeat;
-
-    
-      box-shadow: inset 0 0 40px rgba(0,0,0,.45);
     }
-    
+
     
     /* ✅ glow léger au lieu d’un voile noir */
     .header-rect::after{
