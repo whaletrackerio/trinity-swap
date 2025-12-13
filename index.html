@@ -186,7 +186,7 @@
     .linkBtn{padding:8px 12px;border-radius:999px}
     footer{margin-top:26px;text-align:center;color:var(--muted);font-size:11px;line-height:1.6}
 
-    /* TOKEN MODAL */
+    /* ========================= TOKEN MODAL ========================= */
     #tokenModal{display:none; position:fixed; inset:0; z-index:9999;}
     #tmBackdrop{position:absolute; inset:0; background:rgba(0,0,0,.65);}
     .tmBox{
@@ -337,7 +337,7 @@
         Si une quote échoue, c’est souvent un manque de liquidité sur la paire.
       </p>
       <div class="hr"></div>
-      <div class="warnbox">Tip : si un token n’a pas de logo → TRINITY affiche un fallback propre.</div>
+      <div class="warnbox">Tip : si un token n’a pas de logo dans la tokenlist PulseX → TRINITY affiche un fallback.</div>
     </div>
 
     <div class="card">
@@ -382,6 +382,7 @@
     </div>
 
     <input class="tmSearch" id="tmSearch" placeholder="Search name or paste address" />
+
     <div class="tmList" id="tmList"></div>
 
     <div class="tmBottom">
@@ -394,44 +395,17 @@
 <script>
 /* ================= CONFIG ================= */
 const PULSECHAIN_ID = 369;
-const PULSECHAIN_HEX = "0x171";
+const PULSECHAIN_HEX = "0x171"; // 369
 const PULSEX_ROUTER = "0x98bf93ebf5c380C0e6Ae8e192A7e2AE08edAcc02";
 const WPLS_ADDR = "0xA1077a294dDE1B09bB078844df40758a5D0f9a27";
 const PLS_GAS_RESERVE = ethers.parseUnits("0.05", 18);
+
+// tokenlist PulseX
 const PULSEX_TOKENLIST_URL = "https://tokens.app.pulsex.com/pulsex-extended-v0.1.2.tokenlist.json";
 
-/* ===== LOGOS "ZERO FICHIERS" =====
-   - priorité 1 : tokenlist (logoURI)
-   - priorité 2 : mapping URL par adresse (TrustWallet raw github)
-   - priorité 3 : logo SVG auto (PLS natif) ou fallback lettre
-*/
-const LOGO_BY_ADDRESS = {
-  // PulseChain core
-  "0xa1077a294dde1b09bb078844df40758a5d0f9a27": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/pulsechain/assets/0xA1077a294dDE1B09bB078844df40758a5D0f9a27/logo.png",
-  "0x95b303987a60c71504d99aa1b13b4da07b0790ab": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/pulsechain/assets/0x95B303987A60C71504D99Aa1b13B4DA07b0790ab/logo.png",
-  "0x2b591e99afe9f32eaa6214f7b7629768c40eeb39": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/pulsechain/assets/0x2b591e99afE9f32eAA6214f7B7629768c40Eeb39/logo.png",
-  "0xcc78a0acdf847a2c1714d2a925bb4477df5d48a6": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/pulsechain/assets/0xCc78A0acDF847A2C1714D2A925bB4477df5d48a6/logo.png",
-  // WETH (souvent ERC20 bridgé -> on garde au moins un fallback connu)
-  "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2": "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/ethereum/assets/0xC02aaA39b223FE8D0A0E5C4F27eAD9083C756Cc2/logo.png",
-};
-
-function svgTokenLogo(sym){
-  // logo "propre" généré (aucun fichier)
-  const text = (sym || "?").toUpperCase().slice(0,5);
-  const svg = `
-  <svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
-    <defs>
-      <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0" stop-color="#a855f7"/>
-        <stop offset="1" stop-color="#ec4899"/>
-      </linearGradient>
-    </defs>
-    <rect rx="34" ry="34" x="8" y="8" width="112" height="112" fill="url(#g)"/>
-    <text x="64" y="74" font-family="system-ui,Segoe UI,Roboto,Arial" font-size="36" font-weight="900"
-          fill="white" text-anchor="middle">${text}</text>
-  </svg>`;
-  return "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(svg.trim());
-}
+/* ✅ Logos fallback (hotlink) via PLS369 (pas de fichiers à mettre dans ton repo)
+   Le repo recommande jsDelivr pour hotlink les images. */
+const PLS369_CDN = "https://cdn.jsdelivr.net/gh/PLS369/pulsechain-tokens-flat@main/pulsechain/";
 
 /* ================= TES TOKENS ================= */
 const USER_TOKENS_BY_SYMBOL = {
@@ -472,16 +446,14 @@ const USER_TOKENS_BY_SYMBOL = {
   WBTC:"0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599",
 };
 
-/* ===== TOKENS ESSENTIELS (PRIORITÉ ABSOLUE, ne disparaissent jamais) ===== */
 const BASE_FIXED = {
   PLS:  { symbol:"PLS",  address:null, decimals:18, name:"PulseChain", logoURI:null },
   WPLS: { symbol:"WPLS", address:WPLS_ADDR, decimals:18, name:"Wrapped PLS", logoURI:null },
-  PHEX: { symbol:"PHEX", address:"0x2b591e99afE9f32eAA6214f7B7629768c40Eeb39", decimals:8,  name:"HEX (PulseChain)", logoURI:null },
+  PHEX: { symbol:"PHEX", address:"0x2b591e99afE9f32eAA6214f7B7629768c40Eeb39", decimals:8, name:"HEX (PulseChain)", logoURI:null },
   PLSX: { symbol:"PLSX", address:"0x95B303987A60C71504D99Aa1b13B4DA07b0790ab", decimals:18, name:"PulseX", logoURI:null },
-  ATROPA:{ symbol:"ATROPA",address:"0xCc78A0acDF847A2C1714D2A925bB4477df5d48a6", decimals:18, name:"ATROPA", logoURI:null },
+  ATROPA:{symbol:"ATROPA",address:"0xCc78A0acDF847A2C1714D2A925bB4477df5d48a6", decimals:18, name:"ATROPA", logoURI:null },
 };
 
-/* ================= ABIs ================= */
 const ERC20_ABI = [
   "function approve(address spender,uint256 amount) external returns (bool)",
   "function allowance(address owner,address spender) external view returns (uint256)",
@@ -503,34 +475,6 @@ const $ = (id) => document.getElementById(id);
 function shortAddr(a){ return a ? (a.slice(0,6)+"…"+a.slice(-4)) : ""; }
 function isAddr(x){ return /^0x[a-fA-F0-9]{40}$/.test(x); }
 function norm(x){ return (x||"").toLowerCase(); }
-function safeGetAddress(a){ try{ return ethers.getAddress(a); }catch{ return null; } }
-
-function resolveLogoURI(uri){
-  if(!uri) return "";
-  const u = String(uri).trim();
-  if(!u) return "";
-  if(u.startsWith("ipfs://")) return "https://ipfs.io/ipfs/" + u.slice("ipfs://".length);
-  return u;
-}
-
-function fallbackIconText(sym){ return (sym||"?").slice(0,1).toUpperCase(); }
-
-function getTokenLogo(t){
-  // priorité 1 : tokenlist
-  const fromList = resolveLogoURI(t?.logoURI);
-  if(fromList) return fromList;
-
-  // priorité 2 : mapping par adresse (si on connaît)
-  const a = t?.address ? norm(t.address) : "";
-  if(a && LOGO_BY_ADDRESS[a]) return LOGO_BY_ADDRESS[a];
-
-  // priorité 3 : PLS natif => svg
-  const sym = (t?.symbol || "").toUpperCase();
-  if(sym === "PLS" && !t?.address) return svgTokenLogo("PLS");
-
-  // sinon rien => lettre fallback
-  return "";
-}
 
 function setStatus(card, txt, cls=""){
   const el = card.querySelector(".status");
@@ -543,7 +487,12 @@ function getSettings(){
   const dl = parseInt($("deadlineM").value || "10", 10);
   return { slippage: Math.max(0, sl), deadlineMin: Math.max(1, dl) };
 }
+
 function txUrl(hash){ return `https://otter.pulsechain.com/tx/${hash}`; }
+
+function safeGetAddress(a){
+  try{ return ethers.getAddress(a); }catch{ return null; }
+}
 
 function formatAmountWithDec(decimals, raw){
   const s = ethers.formatUnits(raw, decimals);
@@ -554,124 +503,131 @@ function formatAmountWithDec(decimals, raw){
   return num.toLocaleString(undefined, { maximumFractionDigits: 6 });
 }
 
+/* ✅ LOGO RESOLVER */
+function normalizeLogoURI(uri){
+  if(!uri) return null;
+  if(uri.startsWith("ipfs://")) return "https://ipfs.io/ipfs/" + uri.slice("ipfs://".length);
+  return uri;
+}
+function pls369LogoByAddress(addr){
+  if(!addr) return null;
+  const a = safeGetAddress(addr);
+  if(!a) return null;
+  return `${PLS369_CDN}${a}.png`;
+}
+function resolveLogoURLs(t){
+  // primary = tokenlist (ou ipfs gateway), alt = PLS369
+  const primary = normalizeLogoURI(t?.logoURI);
+  const alt = t?.address ? pls369LogoByAddress(t.address) : null;
+  if(primary && alt && primary === alt) return { primary, alt: null };
+  return { primary, alt };
+}
+
+function fallbackIconText(sym){ return (sym||"?").slice(0,1).toUpperCase(); }
+
 /* ================= STATE ================= */
 let provider, signer, userAddress, networkOk = false;
-let TOKENS = {};
+let TOKENS = { ...BASE_FIXED };
 let TOKENS_BY_ADDR = {};
+let TOKENLIST_READY = false;
 let BAL_CACHE = new Map();
 
-/* ================= TOKEN BUILD (PulseX + user) ================= */
+/* ================= TOKENLIST MERGE ================= */
 async function loadPulseXTokenList(){
   try{
-    const r = await fetch(PULSEX_TOKENLIST_URL, { cache:"no-store" });
+    const r = await fetch(PULSEX_TOKENLIST_URL, { cache: "no-store" });
     const j = await r.json();
-    return Array.isArray(j.tokens) ? j.tokens : [];
+    const list = Array.isArray(j.tokens) ? j.tokens : [];
+    return list;
   }catch(e){
     console.warn("Tokenlist fetch failed:", e);
     return [];
   }
 }
 
-function normalizeTokenFromList(t){
-  const addr = safeGetAddress(t.address);
-  if(!addr) return null;
-  return {
-    chainId: Number(t.chainId),
-    address: addr,
-    decimals: Number(t.decimals ?? 18),
-    symbol: (t.symbol||"").toUpperCase().trim(),
-    name: t.name || (t.symbol||"Token"),
-    logoURI: t.logoURI || null,
-  };
+function dedupeTokens(tokens){
+  const wantedAddrSet = new Set(
+    Object.values(USER_TOKENS_BY_SYMBOL).map(a => norm(a)).filter(Boolean)
+  );
+
+  const best = new Map();
+  for(const t of tokens){
+    const sym = (t.symbol || "").toUpperCase().trim();
+    if(!sym) continue;
+
+    const addr = t.address ? norm(t.address) : null;
+    const hasLogo = !!t.logoURI;
+    const isWanted = addr && wantedAddrSet.has(addr);
+
+    if(!best.has(sym)){
+      best.set(sym, t);
+      continue;
+    }
+    const cur = best.get(sym);
+    const curAddr = cur.address ? norm(cur.address) : null;
+    const curHasLogo = !!cur.logoURI;
+    const curWanted = curAddr && wantedAddrSet.has(curAddr);
+
+    const score = (isWanted?100:0) + (hasLogo?10:0);
+    const curScore = (curWanted?100:0) + (curHasLogo?10:0);
+    if(score > curScore) best.set(sym, t);
+  }
+  return Array.from(best.values());
 }
 
 function mergeTokenDataFromList(list){
-  // init avec BASE_FIXED (priorité absolue)
-  TOKENS = {};
-  for(const [sym, t] of Object.entries(BASE_FIXED)){
-    TOKENS[sym] = { ...t, symbol:sym };
-  }
+  const cleaned = dedupeTokens(list.filter(t => Number(t.chainId) === PULSECHAIN_ID && isAddr(t.address)));
 
-  // map tokenlist par adresse (chain 369)
   const byAddr = new Map();
-  for(const raw of list){
-    if(Number(raw.chainId) !== PULSECHAIN_ID) continue;
-    if(!isAddr(raw.address)) continue;
-    const nt = normalizeTokenFromList(raw);
-    if(!nt || !nt.symbol) continue;
-    byAddr.set(norm(nt.address), nt);
+  for(const t of cleaned){
+    const addrL = norm(t.address);
+    byAddr.set(addrL, {
+      symbol: (t.symbol||"").toUpperCase(),
+      address: safeGetAddress(t.address),
+      decimals: Number(t.decimals ?? 18),
+      name: t.name || t.symbol || "Token",
+      logoURI: t.logoURI || null
+    });
   }
 
-  // enrich BASE_FIXED par adresse (logos tokenlist)
   for(const sym of Object.keys(TOKENS)){
     const base = TOKENS[sym];
     if(!base.address) continue;
     const hit = byAddr.get(norm(base.address));
     if(hit){
-      TOKENS[sym] = {
-        ...base,
-        decimals: base.decimals ?? hit.decimals,
-        name: base.name || hit.name,
-        logoURI: base.logoURI || hit.logoURI || null,
-      };
+      TOKENS[sym] = { ...base, ...hit, symbol:sym };
     }
   }
 
-  // ajouter tokenlist dedupe par symbol (sans écraser BASE_FIXED)
-  const bestBySym = new Map();
   for(const t of byAddr.values()){
     const sym = t.symbol;
     if(!sym) continue;
-    if(BASE_FIXED[sym]) continue;
-    if(!bestBySym.has(sym)){
-      bestBySym.set(sym, t);
+    if(!TOKENS[sym]){
+      TOKENS[sym] = t;
     }else{
-      const cur = bestBySym.get(sym);
-      const score = (t.logoURI?10:0);
-      const curScore = (cur.logoURI?10:0);
-      if(score > curScore) bestBySym.set(sym, t);
+      const cur = TOKENS[sym];
+      if(!cur.logoURI && t.logoURI) TOKENS[sym] = { ...cur, ...t };
     }
   }
-  for(const [sym, t] of bestBySym.entries()){
-    TOKENS[sym] = { ...t, symbol:sym };
-  }
 
-  // ajouter USER tokens (sans écraser BASE_FIXED)
-  for(const [symRaw, addrRaw] of Object.entries(USER_TOKENS_BY_SYMBOL)){
-    const sym = symRaw.toUpperCase().trim();
-    const a = safeGetAddress(addrRaw);
+  for(const [symRaw, addr] of Object.entries(USER_TOKENS_BY_SYMBOL)){
+    const sym = symRaw.toUpperCase();
+    const a = safeGetAddress(addr);
     if(!a) continue;
 
-    if(BASE_FIXED[sym]){
-      const cur = TOKENS[sym];
-      if(cur?.address && norm(cur.address) === norm(a)){
-        const hit = byAddr.get(norm(a));
-        if(hit){
-          TOKENS[sym] = {
-            ...cur,
-            decimals: cur.decimals ?? hit.decimals,
-            name: cur.name || hit.name,
-            logoURI: cur.logoURI || hit.logoURI || null,
-          };
-        }
-      }
-      continue;
-    }
-
     const hit = byAddr.get(norm(a));
-    const merged = hit ? hit : { address:a, decimals:18, symbol:sym, name:sym, logoURI:null };
+    const merged = hit ? hit : { symbol:sym, address:a, decimals:18, name:sym, logoURI:null };
 
     if(!TOKENS[sym]){
-      TOKENS[sym] = { ...merged, symbol:sym };
+      TOKENS[sym] = merged;
     }else{
       const cur = TOKENS[sym];
-      if(cur.address && norm(cur.address) === norm(a)){
-        TOKENS[sym] = {
-          ...cur,
-          decimals: cur.decimals ?? merged.decimals,
-          name: cur.name || merged.name,
-          logoURI: cur.logoURI || merged.logoURI || null,
-        };
+      const curAddr = cur.address ? norm(cur.address) : "";
+      const wantedAddr = norm(a);
+      if(curAddr !== wantedAddr){
+        if(merged.logoURI) TOKENS[sym] = merged;
+      }else{
+        TOKENS[sym] = { ...cur, ...merged };
       }
     }
   }
@@ -680,6 +636,8 @@ function mergeTokenDataFromList(list){
   for(const t of Object.values(TOKENS)){
     if(t.address) TOKENS_BY_ADDR[norm(t.address)] = t;
   }
+
+  TOKENLIST_READY = true;
 }
 
 /* ================= WEB3 ================= */
@@ -689,15 +647,19 @@ function getRouter(readOnly=true){
 function getErc20(tokenAddr, readOnly=true){
   return new ethers.Contract(ethers.getAddress(tokenAddr), ERC20_ABI, readOnly ? provider : signer);
 }
+
 async function getBalance(sym){
   if(sym === "PLS") return await provider.getBalance(userAddress);
   const t = TOKENS[sym];
   if(!t?.address) return 0n;
   return await getErc20(t.address, true).balanceOf(userAddress);
 }
+
 async function getBalanceByToken(t){
   if(!networkOk || !userAddress) return null;
-  if(!t.address) return await provider.getBalance(userAddress);
+  if(!t.address){
+    return await provider.getBalance(userAddress);
+  }
   const key = norm(t.address);
   if(BAL_CACHE.has(key)) return BAL_CACHE.get(key);
   const bal = await getErc20(t.address, true).balanceOf(userAddress);
@@ -762,11 +724,7 @@ swapsEl.insertAdjacentHTML("beforeend", swapCardTemplate(2,"Swap B"));
 swapsEl.insertAdjacentHTML("beforeend", swapCardTemplate(3,"Swap C"));
 
 function listSymbolsForUI(){
-  const pinned = [
-    "PLS","WPLS","PHEX","EHEX","PLSX","INC","DAI","USDC","USDT","WETH","WBTC","HDRN","TEXAN","VORTEX",
-    "PHUX","LOAN","PEPE","SHIB","UNI","USDL","PTS","PRS","PXDC","RFX","WATT","SOUNDX","TETRAP",
-    "AXIS","BANANAS","CST","EARN","ELIXIR","HELGO","IM","LINK","PBSKR","UFO","TIME","ATROPA"
-  ];
+  const pinned = ["PLS","WPLS","PHEX","EHEX","PLSX","INC","DAI","USDC","USDT","WETH","WBTC","HDRN","TEXAN","VORTEX","PHUX","LOAN","PEPE","SHIB","UNI","USDL","PTS","PRS","PXDC","RFX","WATT","SOUNDX","TETRAP","AXIS","BANANAS","CST","EARN","ELIXIR","HELGO","IM","LINK","PBSKR","UFO","TIME","ATROPA"];
   const all = Object.keys(TOKENS).map(s=>s.toUpperCase());
   const set = new Set(all);
   const ordered = [];
@@ -784,7 +742,7 @@ function fillSelect(sel, selected){
     opt.textContent = k;
     sel.appendChild(opt);
   }
-  sel.value = (selected && TOKENS[selected]) ? selected : syms[0];
+  sel.value = selected && TOKENS[selected] ? selected : syms[0];
 }
 
 function initCardsDefaults(){
@@ -844,7 +802,6 @@ function buildPath(symIn, symOut){
 
   if(symIn === "PLS") return [WPLS_ADDR, ethers.getAddress(outT.address)];
   if(symOut === "PLS") return [ethers.getAddress(inT.address), WPLS_ADDR];
-
   return [ethers.getAddress(inT.address), ethers.getAddress(outT.address)];
 }
 
@@ -858,6 +815,7 @@ function formatAmount(sym, raw){
   const dec = t?.decimals ?? 18;
   return formatAmountWithDec(dec, raw);
 }
+
 function validatePair(card){
   const from = card.querySelector(".from").value;
   const to = card.querySelector(".to").value;
@@ -874,6 +832,7 @@ async function refreshHeaderPLS(){
   const b = await provider.getBalance(userAddress);
   $("plsPill").textContent = "PLS : " + formatAmountWithDec(18, b);
 }
+
 async function refreshCardBalance(card){
   const balEl = card.querySelector(".balIn");
   if(!networkOk || !userAddress){
@@ -884,6 +843,7 @@ async function refreshCardBalance(card){
   const bal = await getBalance(from);
   balEl.textContent = formatAmount(from, bal);
 }
+
 async function refreshAll(){
   if(!networkOk) return;
   BAL_CACHE.clear();
@@ -894,7 +854,6 @@ async function refreshAll(){
     await refreshCardBalance(card);
     await updateQuote(card);
   }
-
   if($("tokenModal").style.display === "block"){
     await renderTokenList(($("tmSearch").value||"").trim(), true);
   }
@@ -934,6 +893,7 @@ async function checkAllowance(symIn, amountRaw){
   if(symIn === "PLS") return true;
   const t = TOKENS[symIn];
   if(!t?.address) return true;
+
   const allowance = await getErc20(t.address, true).allowance(userAddress, PULSEX_ROUTER);
   return allowance >= amountRaw;
 }
@@ -1084,7 +1044,7 @@ document.querySelectorAll(".swapbox").forEach(card=>{
   card.querySelector(".swapBtn").addEventListener("click", ()=> executeSwap(card));
 });
 
-/* ================= EXECUTE TRINITY (A→B→C) ================= */
+/* ================= EXECUTE TRINITY ================= */
 $("execTrinityBtn").addEventListener("click", async ()=>{
   if(!networkOk) return alert("Connecte ton wallet sur PulseChain");
   const cards = [ $("swap1"), $("swap2"), $("swap3") ];
@@ -1154,7 +1114,10 @@ async function addTokenToMetaMask(sym){
   try{
     const wasAdded = await window.ethereum.request({
       method: "wallet_watchAsset",
-      params: { type: "ERC20", options: { address: t.address, symbol: sym, decimals: t.decimals } }
+      params: {
+        type: "ERC20",
+        options: { address: t.address, symbol: sym, decimals: t.decimals }
+      }
     });
     alert(wasAdded ? "Token ajouté ✅" : "Ajout refusé (cancel)");
   }catch(e){
@@ -1165,13 +1128,43 @@ async function addTokenToMetaMask(sym){
   }
 }
 
+/* ✅ ICON RENDER (tokenlist -> ipfs gateway -> PLS369 CDN -> lettre) */
 function renderIconHTML(t){
-  const logo = getTokenLogo(t);
-  if(logo){
-    const safe = String(logo).replace(/"/g,'&quot;');
-    return `<div class="tmIcon"><img src="${safe}" alt="${t.symbol}" referrerpolicy="no-referrer" onerror="this.parentElement.textContent='${fallbackIconText(t.symbol)}'"></div>`;
+  if(!t) return `<div class="tmIcon">?</div>`;
+
+  // petit style “badge” pour PLS natif (pas d’adresse)
+  if(!t.address){
+    return `<div class="tmIcon" style="background:linear-gradient(135deg,#a855f7,#ec4899);color:#fff;border:none">PLS</div>`;
   }
-  return `<div class="tmIcon">${fallbackIconText(t.symbol)}</div>`;
+
+  const { primary, alt } = resolveLogoURLs(t);
+  const fallback = fallbackIconText(t.symbol);
+
+  // si primary échoue, on essaie alt; si alt échoue -> lettre
+  const src = primary || alt || "";
+  const altSrc = primary && alt ? alt : "";
+
+  if(!src){
+    return `<div class="tmIcon">${fallback}</div>`;
+  }
+
+  return `
+    <div class="tmIcon">
+      <img
+        src="${src}"
+        ${altSrc ? `data-alt="${altSrc}"` : ``}
+        referrerpolicy="no-referrer"
+        alt="${t.symbol}"
+        onerror="
+          if(this.dataset.alt && this.src !== this.dataset.alt){
+            this.src = this.dataset.alt;
+            return;
+          }
+          this.parentElement.textContent='${fallback}';
+        "
+      />
+    </div>
+  `;
 }
 
 function tokenMetaLine(t){
@@ -1187,7 +1180,8 @@ async function renderTokenList(q, withBalances){
   const tokensArr = [];
   for(const sym of listSymbolsForUI()){
     const t = TOKENS[sym];
-    if(t) tokensArr.push(t);
+    if(!t) continue;
+    tokensArr.push(t);
   }
 
   const filtered = tokensArr.filter(t=>{
@@ -1238,7 +1232,6 @@ async function renderTokenList(q, withBalances){
       setTimeout(()=>btn.textContent="📋", 700);
     });
   });
-
   listEl.querySelectorAll(".tmAdd").forEach(btn=>{
     btn.addEventListener("click", async (e)=>{
       e.stopPropagation();
@@ -1270,7 +1263,10 @@ document.querySelectorAll(".swapbox").forEach(card=>{
   fromSel.addEventListener("mousedown", (e)=>{ e.preventDefault(); openTokenModal(card,"from"); });
   toSel.addEventListener("mousedown", (e)=>{ e.preventDefault(); openTokenModal(card,"to"); });
 });
-$("openTokensBtn").addEventListener("click", ()=> openTokenModal($("swap1"), "from"));
+
+$("openTokensBtn").addEventListener("click", ()=>{
+  openTokenModal($("swap1"), "from");
+});
 
 /* ================= SCROLL BTN ================= */
 $("openMultiBtn").addEventListener("click", ()=>{
@@ -1329,6 +1325,7 @@ async function connectWallet(){
   window.ethereum.on?.("accountsChanged", ()=> location.reload());
   window.ethereum.on?.("chainChanged", ()=> location.reload());
 }
+
 $("connectBtn").addEventListener("click", connectWallet);
 $("refreshBtn").addEventListener("click", ()=> refreshAll());
 
@@ -1340,6 +1337,7 @@ $("refreshBtn").addEventListener("click", ()=> refreshAll());
   mergeTokenDataFromList(tokenlist);
 
   initCardsDefaults();
+
   document.querySelectorAll(".swapbox").forEach(card => updateQuote(card).catch(()=>{}));
 })();
 </script>
