@@ -25,7 +25,7 @@
     html,body{height:100%}
 
     /* ✅ pour que les ancres/scrollIntoView ne cachent pas le titre sous le header */
-    html{ scroll-padding-top: 140px; }
+    html{ scroll-padding-top: 130px; }
 
     /* =========================
        FOND (bg.png) VISIBLE + "watermark" permanent
@@ -86,10 +86,11 @@
 
       border-bottom:1px solid rgba(31,41,55,.6);
 
-      padding:18px 16px;        /* ✅ plus équilibré */
+      padding:18px 16px;
       margin:-22px -14px 18px;
 
-      min-height:120px;         /* ✅ hauteur maîtrisée */
+      /* ✅ header moins vide, mais premium */
+      min-height:112px;
       box-shadow:0 18px 45px rgba(0,0,0,.45);
     }
 
@@ -97,20 +98,24 @@
     .brand{
       display:flex;
       align-items:center;
-      justify-content:flex-start;
+      height:100%;
+      padding-left:6px;
     }
     .brand-logo{
-      height:96px;              /* ✅ sweet spot */
+      height:96px;
       width:auto;
       display:block;
 
-      margin-left:6px;
+      /* ✅ boost visuel même si le PNG a du vide autour */
+      transform: translateY(2px) scale(1.22);
+      transform-origin:left center;
+
       filter:
         drop-shadow(0 12px 28px rgba(168,85,247,.35))
         drop-shadow(0 0 18px rgba(168,85,247,.25));
     }
 
-    /* ✅ mobile */
+    /* ✅ responsive */
     @media(max-width:980px){
       header{
         min-height:96px;
@@ -118,10 +123,9 @@
       }
       .brand-logo{
         height:64px;
+        transform: translateY(1px) scale(1.18);
       }
-      html{
-        scroll-padding-top:110px;
-      }
+      html{ scroll-padding-top: 110px; }
     }
 
     .top-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}
