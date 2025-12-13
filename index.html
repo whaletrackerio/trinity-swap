@@ -69,17 +69,24 @@
     }
 
     /* ✅ LOGO + TEXTE */
-    .brand{display:flex;align-items:center;gap:12px;font-weight:900;letter-spacing:.4px}
-    .brand img{
-      height:60px;   /* 🔥 visible */
+     .brand img{
+      height:92px;                 /* 🔥 PLUS GRAND */
       width:auto;
       display:block;
-      border-radius:14px;
-      filter: drop-shadow(0 14px 28px rgba(168,85,247,.28));
+      border-radius:16px;
+      padding:6px;                 /* donne de la présence */
+      background:rgba(2,6,23,.55); /* petit “badge” */
+      border:1px solid rgba(168,85,247,.28);
+      filter: drop-shadow(0 18px 38px rgba(168,85,247,.35));
+    }
+
+    @media(max-width:900px){
+      .brand img{height:78px;}
     }
     @media(max-width:520px){
-      .brand img{height:46px;}
+      .brand img{height:66px;}
     }
+
 
     .top-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}
     .pill{
