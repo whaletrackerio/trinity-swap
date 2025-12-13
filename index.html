@@ -65,27 +65,28 @@
       backdrop-filter: blur(10px);
       background:linear-gradient(180deg, rgba(5,8,22,.88), rgba(5,8,22,.52));
       border-bottom:1px solid rgba(31,41,55,.6);
-      padding:18px 14px;margin:-22px -14px 18px;
+      padding:22px 14px;margin:-22px -14px 18px;
     }
 
     /* ✅ LOGO + TEXTE */
      .brand img{
-      height:92px;                 /* 🔥 PLUS GRAND */
+      height:108px;      /* avant 92 */
       width:auto;
       display:block;
-      border-radius:16px;
-      padding:6px;                 /* donne de la présence */
-      background:rgba(2,6,23,.55); /* petit “badge” */
+      border-radius:18px;
+      padding:7px;
+      background:rgba(2,6,23,.55);
       border:1px solid rgba(168,85,247,.28);
-      filter: drop-shadow(0 18px 38px rgba(168,85,247,.35));
+      filter: drop-shadow(0 20px 42px rgba(168,85,247,.38));
     }
-
+    
     @media(max-width:900px){
-      .brand img{height:78px;}
+      .brand img{height:92px;}   /* avant 78 */
     }
     @media(max-width:520px){
-      .brand img{height:66px;}
+      .brand img{height:78px;}   /* avant 66 */
     }
+
 
 
     .top-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end}
