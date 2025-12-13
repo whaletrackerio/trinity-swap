@@ -65,26 +65,29 @@
       backdrop-filter: blur(10px);
       background:linear-gradient(180deg, rgba(5,8,22,.88), rgba(5,8,22,.52));
       border-bottom:1px solid rgba(31,41,55,.6);
-      padding:22px 14px;margin:-22px -14px 18px;
+      padding:26px 16px;margin:-22px -14px 18px;
     }
 
     /* ✅ LOGO + TEXTE */
      .brand img{
-      height:108px;      /* avant 92 */
+      height:128px;                /* 🔥 BIEN VISIBLE */
       width:auto;
       display:block;
-      border-radius:18px;
-      padding:7px;
+      border-radius:20px;
+      padding:8px;
       background:rgba(2,6,23,.55);
-      border:1px solid rgba(168,85,247,.28);
-      filter: drop-shadow(0 20px 42px rgba(168,85,247,.38));
+      border:1px solid rgba(168,85,247,.32);
+      filter: drop-shadow(0 22px 46px rgba(168,85,247,.42));
     }
     
-    @media(max-width:900px){
-      .brand img{height:92px;}   /* avant 78 */
+    /* Laptop / tablette */
+    @media(max-width:1100px){
+      .brand img{height:108px;}
     }
+    
+    /* Mobile */
     @media(max-width:520px){
-      .brand img{height:78px;}   /* avant 66 */
+      .brand img{height:86px;}
     }
 
 
