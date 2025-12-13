@@ -121,37 +121,29 @@
       min-width: 240px;
       padding: 0 8px;
     }
-      .header-rect{
-    width: clamp(320px, 44vw, 760px);
-    height: 84px;
-    border-radius: 18px;
-    border:1px solid rgba(31,41,55,.80);
-  
-    /* ✅ fallback visible + image */
-    background-color: rgba(2,6,23,.55);
-    background-image: url("header-art.png");
-    background-size: cover;
-    background-position: center;
-    background-repeat:no-repeat;
-  
-    /* ✅ boost l’image */
-    opacity: 1;
-    filter: saturate(1.25) contrast(1.18) brightness(1.15);
-  
-    box-shadow: 0 16px 40px rgba(0,0,0,.35);
-    position:relative;
-    overflow:hidden;
-  }
-
-/* ✅ glow léger au lieu d’un voile noir */
-.header-rect::after{
-  content:"";
-  position:absolute; inset:0;
-  background:
-    radial-gradient(260px 100px at 18% 45%, rgba(168,85,247,.18), transparent 62%),
-    radial-gradient(260px 100px at 70% 55%, rgba(34,197,94,.10), transparent 65%);
-  pointer-events:none;
-}
+    .header-rect{
+      flex:1;
+      height:120px;
+      border-radius:18px;
+    
+      background-image: url("header-art.png");
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-position: right center;
+    
+      box-shadow: inset 0 0 40px rgba(0,0,0,.45);
+    }
+    
+    
+    /* ✅ glow léger au lieu d’un voile noir */
+    .header-rect::after{
+      content:"";
+      position:absolute; inset:0;
+      background:
+        radial-gradient(260px 100px at 18% 45%, rgba(168,85,247,.18), transparent 62%),
+        radial-gradient(260px 100px at 70% 55%, rgba(34,197,94,.10), transparent 65%);
+      pointer-events:none;
+    }
 
 
     /* ✅ responsive */
