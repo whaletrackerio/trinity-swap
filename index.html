@@ -792,9 +792,16 @@ function mergeTokenDataFromList(list){
 }
 
 /* ================= WEB3 ================= */
-function getRouter(readOnly=true){
-  return new ethers.Contract(PULSEX_ROUTER, ROUTER_ABI, readOnly ? provider : signer);
+function getRouter(readOnly = true){
+  const p = readOnly
+    ? (provider || readProvider)
+    : signer;
+
+  if(!p) throw new Error("No provider available");
+
+  return new ethers.Contract(PULSEX_ROUTER, ROUTER_ABI, p);
 }
+
 function getErc20(tokenAddr, readOnly=true){
   return new ethers.Contract(ethers.getAddress(tokenAddr), ERC20_ABI, readOnly ? provider : signer);
 }
