@@ -55,7 +55,7 @@ body::after{
 a{color:inherit;text-decoration:none}
 .wrap{max-width:1200px;margin:0 auto;padding:22px 14px 90px}
 
-/* HEADER */
+/* HEADER STICKY */
 header{
   display:flex;align-items:center;justify-content:space-between;gap:14px;
   position:sticky;top:0;z-index:50;
@@ -63,14 +63,17 @@ header{
   -webkit-backdrop-filter: blur(10px);
   background:linear-gradient(180deg, rgba(5,8,22,.92), rgba(5,8,22,.55));
   border-bottom:1px solid rgba(31,41,55,.6);
-  padding:14px 14px;              /* ✅ un peu plus de padding */
+  padding:14px 12px;
   margin:-22px -14px 18px;
   box-shadow: 0 18px 45px rgba(0,0,0,.35);
   overflow:visible;
+  flex-wrap:wrap;
 }
 .brand{display:flex;align-items:center;gap:12px;flex:0 0 auto}
 .brand-logo{
-  height:110px;width:auto;display:block;
+  height:110px;
+  width:auto;
+  display:block;
   filter: drop-shadow(0 14px 26px rgba(168,85,247,.22));
   user-select:none;
 }
@@ -90,42 +93,30 @@ header{
   box-shadow: 0 18px 45px rgba(0,0,0,.45);
   overflow:hidden;
 }
-
-/* ✅ IMPORTANT: permet au bloc de droite de se compresser sans pousser hors écran */
 .top-right{
   display:flex;align-items:center;gap:10px;
   justify-content:flex-end;
-  flex:0 1 auto;       /* ✅ au lieu de 0 0 auto */
-  min-width:0;         /* ✅ autorise shrink */
-  max-width:100%;
-  flex-wrap:wrap;      /* ✅ sur desktop aussi si nécessaire */
+  flex:1 1 520px;
+  min-width:0;
+  flex-wrap:wrap;
   overflow:visible;
 }
-
-/* ✅ regroupe Connect/Disconnect ensemble (ça évite le “décalage”) */
-.walletActions{
-  display:flex;
-  gap:10px;
-  align-items:center;
-  flex:0 0 auto;
-}
-
 @media (max-width:980px){
-  header{flex-wrap:wrap; align-items:flex-start}
   html{ scroll-padding-top: 120px; }
   .brand-logo{ height:80px; }
   .header-rect{
-    order:3;
     width:100%;
     max-width:none;
     min-width:0;
     height:170px;
     margin-top:10px;
     background-position: 70% 70%;
+    order:3;
   }
   .top-right{order:2; width:100%;}
 }
 
+/* pills + buttons */
 .pill{
   font-size:12px;color:var(--muted);
   border:1px solid rgba(31,41,55,.9);
@@ -139,6 +130,7 @@ header{
   background:linear-gradient(120deg,var(--accent),var(--accent2));
   color:#fff;font-weight:900;
   box-shadow:0 12px 30px rgba(236,72,153,.15);
+  white-space:nowrap;
 }
 .btn:disabled{opacity:.55;cursor:not-allowed}
 .btn2{
@@ -146,25 +138,25 @@ header{
   padding:10px 14px;border-radius:999px;
   background:rgba(2,6,23,.60);
   color:var(--text);font-weight:900;
+  white-space:nowrap;
 }
 .btn2:disabled{opacity:.55;cursor:not-allowed}
 
-/* ✅ bouton connecté stable + jamais hors écran */
-#connectBtn{
-  max-width: 170px;           /* ✅ évite de partir hors écran */
-  overflow:hidden;            /* ✅ */
-  text-overflow:ellipsis;     /* ✅ */
-  white-space:nowrap;         /* ✅ */
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-}
-#disconnectBtn{
-  padding:10px 12px;
+/* ✅ Wallet badge séparé (copie adresse uniquement) */
+.walletBadge{
+  cursor:pointer;border:none;
+  padding:10px 14px;border-radius:999px;
+  background:linear-gradient(120deg,var(--accent),var(--accent2));
+  color:#fff;font-weight:900;
+  box-shadow:0 12px 30px rgba(236,72,153,.15);
   white-space:nowrap;
+  max-width:190px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  display:none;
 }
 
-/* layout page */
+/* page */
 .grid2{display:grid;grid-template-columns:1.25fr .75fr;gap:14px;align-items:stretch}
 @media(max-width:980px){.grid2{grid-template-columns:1fr}}
 .card{
@@ -255,7 +247,7 @@ input,select{
 .linkBtn{padding:8px 12px;border-radius:999px}
 footer{margin-top:26px;text-align:center;color:var(--muted);font-size:11px;line-height:1.6}
 
-/* TOKEN MODAL (inchangé) */
+/* TOKEN MODAL */
 #tokenModal{display:none; position:fixed; inset:0; z-index:9999;}
 #tmBackdrop{position:absolute; inset:0; background:rgba(0,0,0,.65);}
 .tmBox{
@@ -341,10 +333,10 @@ footer{margin-top:26px;text-align:center;color:var(--muted);font-size:11px;line-
     <div class="pill" id="walletPill">Wallet : non connecté</div>
     <div class="pill" id="plsPill">PLS : —</div>
 
-    <div class="walletActions">
-      <button class="btn" id="connectBtn">Connect Wallet</button>
-      <button class="btn2" id="disconnectBtn" style="display:none">Disconnect</button>
-    </div>
+    <!-- ✅ Connect / Badge / Disconnect (séparés) -->
+    <button class="btn" id="connectBtn">Connect Wallet</button>
+    <button class="walletBadge" id="walletBadge" title="Copier l'adresse">—</button>
+    <button class="btn2" id="disconnectBtn" style="display:none">Disconnect</button>
   </div>
 </header>
 
@@ -355,12 +347,14 @@ footer{margin-top:26px;text-align:center;color:var(--muted);font-size:11px;line-
       TRINITY = MultiSwap : tu prépares 3 swaps différents et tu lances chaque swap avec son propre bouton.<br/>
       Mode 1 (PulseX-like) : UI au-dessus du router PulseX • non-custodial • 0 fee TRINITY.
     </p>
+
     <div class="chips">
       <div class="chip"><span class="okdot"></span>3 swaps indépendants</div>
       <div class="chip"><span class="okdot"></span>Quotes live (sans wallet)</div>
       <div class="chip"><span class="okdot"></span>Approve auto (avec wallet)</div>
       <div class="chip"><span class="okdot"></span>MAX + balances (avec wallet)</div>
     </div>
+
     <div class="ctaRow">
       <button class="btn" id="openMultiBtn">🚀 Ouvrir le MultiSwap</button>
       <button class="btn2" id="execTrinityBtn" disabled>⚡ Exécuter TRINITY (A→B→C)</button>
@@ -368,6 +362,7 @@ footer{margin-top:26px;text-align:center;color:var(--muted);font-size:11px;line-
       <a class="btn2" href="https://whaletrackerio.github.io/dca-pulsechain/" target="_blank" rel="noreferrer">📈 DCA</a>
       <a class="btn2" href="#support">💜 Soutenir</a>
     </div>
+
     <div class="hr"></div>
     <div class="warnbox">⚠️ Teste avec de petits montants. TRINITY ne garde pas tes fonds : c’est ton wallet qui signe.</div>
   </div>
@@ -375,6 +370,7 @@ footer{margin-top:26px;text-align:center;color:var(--muted);font-size:11px;line-
   <div class="card">
     <div style="font-weight:900;font-size:14px">Réglages</div>
     <p class="sub">Slippage + deadline pour calculer le minOut sur chaque swap.</p>
+
     <div class="hr"></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
       <div>
@@ -386,10 +382,12 @@ footer{margin-top:26px;text-align:center;color:var(--muted);font-size:11px;line-
         <input id="deadlineM" type="number" min="1" step="1" value="10" />
       </div>
     </div>
+
     <div class="hr"></div>
     <div class="warnbox">
       Explorer : <a class="txlink" target="_blank" rel="noreferrer" href="https://otter.pulsechain.com/">otter.pulsechain.com</a>
     </div>
+
     <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap">
       <button class="btn2" id="refreshBtn">↻ Refresh balances/quotes</button>
       <button class="btn2" id="openTokensBtn">🪙 Ouvrir la liste tokens</button>
@@ -484,7 +482,7 @@ const RPCS = [
   "https://pulsechain-rpc.publicnode.com"
 ];
 
-const $ = (id) => document.getElementById(id);
+const $ = (id)=>document.getElementById(id);
 function norm(x){ return (x||"").toLowerCase(); }
 function isAddr(x){ return /^0x[a-fA-F0-9]{40}$/.test((x||"").trim()); }
 function shortAddr(a){ return a ? (a.slice(0,6)+"…"+a.slice(-4)) : ""; }
@@ -535,7 +533,28 @@ readProvider = pickReadProvider();
 function getReadProvider(){ return provider || readProvider; }
 function rpcReady(){ return !!getReadProvider(); }
 
-/* ✅ Déconnexion UX (reset complet app) */
+/* ================= WALLET UI (PRO) ================= */
+function setWalletUIConnected(){
+  // connect btn off
+  $("connectBtn").style.display = "none";
+  // badge on
+  const badge = $("walletBadge");
+  badge.textContent = shortAddr(userAddress);
+  badge.style.display = "inline-flex";
+  badge.onclick = async ()=>{
+    await copyText(userAddress);
+    alert("Adresse copiée ✅");
+  };
+  // disconnect on
+  $("disconnectBtn").style.display = "inline-flex";
+}
+function setWalletUIDisconnected(){
+  $("connectBtn").style.display = "inline-flex";
+  $("walletBadge").style.display = "none";
+  $("disconnectBtn").style.display = "none";
+}
+
+/* ✅ Déconnexion UI */
 function disconnectWallet(){
   provider = null;
   signer = null;
@@ -546,21 +565,17 @@ function disconnectWallet(){
   $("netPill").textContent = "Réseau : (quotes RPC)";
   $("plsPill").textContent = "PLS : —";
 
-  const btn = $("connectBtn");
-  btn.textContent = "Connect Wallet";
-  $("disconnectBtn").style.display = "none";
-
+  setWalletUIDisconnected();
   setConnectedUI(false);
   refreshAll().catch(()=>{});
 }
 
-/* ✅ Connect (IMPORTANT: on n'utilise QUE onclick, pas addEventListener + onclick mélangés) */
+/* ✅ Connect wallet */
 async function connectWallet(){
   if(!window.ethereum){
     alert("Wallet requis : MetaMask");
     return;
   }
-
   await window.ethereum.request({ method:"eth_requestAccounts" });
   provider = new ethers.BrowserProvider(window.ethereum);
   signer = await provider.getSigner();
@@ -577,38 +592,29 @@ async function connectWallet(){
       });
       const net2 = await provider.getNetwork();
       ok = (Number(net2.chainId) === PULSECHAIN_ID);
-    }catch(e){
-      console.error(e);
-    }
+    }catch(e){ console.error(e); }
   }
 
   walletOnPulse = ok;
   $("walletPill").textContent = "Wallet : " + shortAddr(userAddress);
   $("netPill").textContent = "Réseau : " + (ok ? "PulseChain ✅" : "Mauvais réseau ❌");
 
-  const btn = $("connectBtn");
-  btn.textContent = shortAddr(userAddress);
-
-  // ✅ clic = copie adresse (comme avant)
-  btn.onclick = async ()=>{ await copyText(userAddress); alert("Adresse copiée ✅"); };
-
-  // ✅ bouton Disconnect visible + fonctionnel
-  $("disconnectBtn").style.display = "inline-flex";
-  $("disconnectBtn").onclick = disconnectWallet;
-
-  setConnectedUI(ok);
-
   if(!ok){
     alert("Passe sur PulseChain (chainId 369) puis reconnecte.");
+    // UI reste en mode déconnecté
+    disconnectWallet();
     return;
   }
 
+  setWalletUIConnected();
+  setConnectedUI(true);
   await refreshAll();
+
   window.ethereum.on?.("accountsChanged", ()=> location.reload());
   window.ethereum.on?.("chainChanged", ()=> location.reload());
 }
 
-/* ================= TOKENS / SWAPS (inchangé : repris stable) ================= */
+/* ================= TOKENS ================= */
 const BASE_FIXED = {
   PLS:  { symbol:"PLS",  address:null, decimals:18, name:"PulseChain", logoURI:null },
   WPLS: { symbol:"WPLS", address:WPLS_ADDR, decimals:18, name:"Wrapped PLS", logoURI:null },
@@ -667,6 +673,7 @@ function addTokenToRuntime(t){
   rebuildTOKENS_BY_ADDR();
 }
 
+/* ================= ABI ================= */
 const ERC20_ABI = [
   "function approve(address spender,uint256 amount) external returns (bool)",
   "function allowance(address owner,address spender) external view returns (uint256)",
@@ -681,12 +688,12 @@ const ROUTER_ABI = [
   "function swapExactETHForTokens(uint256 amountOutMin,address[] calldata path,address to,uint256 deadline) external payable returns (uint256[] memory amounts)",
   "function swapExactTokensForETH(uint256 amountIn,uint256 amountOutMin,address[] calldata path,address to,uint256 deadline) external returns (uint256[] memory amounts)"
 ];
-
 function getRouterRead(){ return new ethers.Contract(PULSEX_ROUTER, ROUTER_ABI, getReadProvider()); }
 function getRouterWrite(){ if(!signer) throw new Error("No signer"); return new ethers.Contract(PULSEX_ROUTER, ROUTER_ABI, signer); }
 function getErc20Read(tokenAddr){ return new ethers.Contract(ethers.getAddress(tokenAddr), ERC20_ABI, getReadProvider()); }
 function getErc20Write(tokenAddr){ if(!signer) throw new Error("No signer"); return new ethers.Contract(ethers.getAddress(tokenAddr), ERC20_ABI, signer); }
 
+/* ================= LOGOS ================= */
 function normalizeLogoUri(uri){
   if(!uri) return null;
   if(uri.startsWith("ipfs://")) return "https://cloudflare-ipfs.com/ipfs/" + uri.replace("ipfs://","");
@@ -713,19 +720,23 @@ function renderIconHTML(t){
   const payload = encodeURIComponent(JSON.stringify(candidates));
   const sym = (t.symbol||"").replace(/'/g,"");
   return `
-  <div class="tmIcon">
-    <img src="${candidates[0]}" alt="${sym}"
-      data-cands="${payload}" data-idx="0" referrerpolicy="no-referrer"
-      onerror="
-        try{
-          const c=JSON.parse(decodeURIComponent(this.dataset.cands));
-          let i=parseInt(this.dataset.idx||'0',10)+1;
-          if(i<c.length){ this.dataset.idx=String(i); this.src=c[i]; return; }
-        }catch(e){}
-        this.parentElement.textContent='${fallbackIconText(sym)}';
-      "
-    />
-  </div>`;
+    <div class="tmIcon">
+      <img
+        src="${candidates[0]}"
+        alt="${sym}"
+        data-cands="${payload}"
+        data-idx="0"
+        referrerpolicy="no-referrer"
+        onerror="
+          try{
+            const c=JSON.parse(decodeURIComponent(this.dataset.cands));
+            let i=parseInt(this.dataset.idx||'0',10)+1;
+            if(i<c.length){ this.dataset.idx=String(i); this.src=c[i]; return; }
+          }catch(e){}
+          this.parentElement.textContent='${fallbackIconText(sym)}';
+        "
+      />
+    </div>`;
 }
 function tokenMetaLine(t){
   const addr = t.address ? shortAddr(t.address) : "Native";
@@ -733,6 +744,7 @@ function tokenMetaLine(t){
   return `<div class="tmMeta mono">${addr}${name}</div>`;
 }
 
+/* ================= TOKENLIST (logos) ================= */
 async function loadPulseXTokenList(){
   try{
     const r = await fetch(PULSEX_TOKENLIST_URL, { cache:"no-store" });
@@ -759,12 +771,14 @@ function mergeTokenDataFromList(list){
       if(!known.decimals && dec) known.decimals = dec;
       continue;
     }
+
     if(TOKENS[sym] && TOKENS[sym].address && norm(TOKENS[sym].address) === norm(addr)){
       if(!TOKENS[sym].logoURI && t.logoURI) TOKENS[sym].logoURI = t.logoURI;
       if(!TOKENS[sym].name && t.name) TOKENS[sym].name = t.name;
       TOKENS[sym].decimals = TOKENS[sym].decimals ?? dec;
     }
   }
+
   rebuildTOKENS_BY_ADDR();
 
   const imported = loadImportedTokens();
@@ -777,12 +791,15 @@ function mergeTokenDataFromList(list){
   rebuildTOKENS_BY_ADDR();
 }
 
-/* ====== UI 3 swaps ====== */
+/* ================= UI BUILD: 3 SWAPS ================= */
 const swapsEl = $("swaps");
 function swapCardTemplate(i, label){
   return `
   <div class="card swapbox" id="swap${i}">
-    <div class="swap-title"><b>${label}</b><span>TX #${i}</span></div>
+    <div class="swap-title">
+      <b>${label}</b>
+      <span>TX #${i}</span>
+    </div>
 
     <label>Tu payes</label>
     <div class="row2">
@@ -809,7 +826,10 @@ function swapCardTemplate(i, label){
       <input class="out" placeholder="Estimation" readonly />
     </div>
 
-    <div class="quoteLine"><span>Quote:</span><span class="quoteText">—</span></div>
+    <div class="quoteLine">
+      <span>Quote:</span>
+      <span class="quoteText">—</span>
+    </div>
 
     <div class="actions">
       <button class="btn2 approveBtn" style="display:none" disabled>Approve</button>
@@ -845,7 +865,8 @@ function fillSelect(sel, selected){
   sel.innerHTML = "";
   for(const k of syms){
     const opt = document.createElement("option");
-    opt.value = k; opt.textContent = k;
+    opt.value = k;
+    opt.textContent = k;
     sel.appendChild(opt);
   }
   sel.value = selected && TOKENS[selected] ? selected : syms[0];
@@ -879,15 +900,21 @@ function initCardsDefaults(){
   });
 }
 
-/* ====== Quote / Swap (comme avant) ====== */
+/* ================= PATH / AMOUNTS ================= */
 function buildPath(symIn, symOut){
   if(symIn === symOut) return null;
   const inT = TOKENS[symIn];
   const outT = TOKENS[symOut];
   if(!inT || !outT) return null;
 
-  if(symIn === "PLS"){ if(!outT.address) return null; return [WPLS_ADDR, ethers.getAddress(outT.address)]; }
-  if(symOut === "PLS"){ if(!inT.address) return null; return [ethers.getAddress(inT.address), WPLS_ADDR]; }
+  if(symIn === "PLS"){
+    if(!outT.address) return null;
+    return [WPLS_ADDR, ethers.getAddress(outT.address)];
+  }
+  if(symOut === "PLS"){
+    if(!inT.address) return null;
+    return [ethers.getAddress(inT.address), WPLS_ADDR];
+  }
   if(!inT.address || !outT.address) return null;
   return [ethers.getAddress(inT.address), ethers.getAddress(outT.address)];
 }
@@ -911,6 +938,7 @@ function validatePair(card){
   return true;
 }
 
+/* ================= BALANCES (wallet only) ================= */
 async function getBalance(sym){
   if(!provider || !userAddress) return null;
   if(sym === "PLS") return await provider.getBalance(userAddress);
@@ -931,15 +959,19 @@ async function refreshCardBalance(card){
     return;
   }
   const bal = await getBalance(from);
-  balEl.textContent = (bal == null) ? "—" : formatAmount(from, bal);
+  if(bal == null) { balEl.textContent = "—"; return; }
+  balEl.textContent = formatAmount(from, bal);
 }
-
 async function refreshAll(){
   const cards = document.querySelectorAll(".swapbox");
-  for(const card of cards){ await updateQuote(card); }
+  for(const card of cards){
+    await updateQuote(card);
+  }
   if(provider && userAddress && walletOnPulse){
     await refreshHeaderPLS();
-    for(const card of cards){ await refreshCardBalance(card); }
+    for(const card of cards){
+      await refreshCardBalance(card);
+    }
     if($("tokenModal").style.display === "block"){
       await renderTokenList(($("tmSearch").value||"").trim(), true);
     }
@@ -951,14 +983,19 @@ async function refreshAll(){
   }
 }
 
+/* ================= MAX + % (wallet only) ================= */
 async function setAmountFromPercent(card, pct){
   if(!provider || !userAddress || !walletOnPulse) return alert("Connecte ton wallet sur PulseChain d’abord");
   if(!validatePair(card)) return;
   const from = card.querySelector(".from").value;
   let bal = await getBalance(from);
   if(bal == null) return;
+
   if(from === "PLS"){
-    if(bal <= PLS_GAS_RESERVE){ alert("Balance PLS insuffisante pour le gas"); return; }
+    if(bal <= PLS_GAS_RESERVE){
+      alert("Balance PLS insuffisante pour le gas");
+      return;
+    }
     bal = bal - PLS_GAS_RESERVE;
   }
   const amount = bal * BigInt(pct) / 100n;
@@ -966,13 +1003,17 @@ async function setAmountFromPercent(card, pct){
   card.querySelector(".amount").value = ethers.formatUnits(amount, dec);
   await updateQuote(card);
 }
-document.querySelectorAll(".swapbox").forEach(card=>{
-  card.querySelector(".maxBtn").addEventListener("click", ()=> setAmountFromPercent(card, 100).catch(console.error));
-  card.querySelectorAll(".pctBtn").forEach(b=>{
-    b.addEventListener("click", ()=> setAmountFromPercent(card, parseInt(b.dataset.p,10)).catch(console.error));
+function wireMaxPctButtons(){
+  document.querySelectorAll(".swapbox").forEach(card=>{
+    card.querySelector(".maxBtn").addEventListener("click", ()=> setAmountFromPercent(card, 100).catch(console.error));
+    card.querySelectorAll(".pctBtn").forEach(b=>{
+      b.addEventListener("click", ()=> setAmountFromPercent(card, parseInt(b.dataset.p,10)).catch(console.error));
+    });
   });
-});
+}
+wireMaxPctButtons();
 
+/* ================= QUOTES (RPC ONLY) ================= */
 let quoteTimer = null;
 function triggerQuote(card){
   if(quoteTimer) clearTimeout(quoteTimer);
@@ -1000,6 +1041,7 @@ async function updateQuote(card){
     setStatus(card, "Quotes dispo ✅ (mets un montant)", "good");
     return;
   }
+
   try{
     setStatus(card, "Quoting…", "warn");
     const amountIn = parseAmount(from, amt);
@@ -1008,15 +1050,22 @@ async function updateQuote(card){
     const router = getRouterRead();
     const amounts = await router.getAmountsOut(amountIn, path);
     const outRaw = amounts[amounts.length - 1];
+
     outInp.value = formatAmount(to, outRaw);
     quoteText.textContent = `${amt} ${from} → ~${formatAmount(to, outRaw)} ${to}`;
-    setStatus(card, (provider && userAddress && walletOnPulse) ? "Ready ✅ (connecté)" : "Quote OK ✅ (connecte pour swap)", "good");
+
+    if(provider && userAddress && walletOnPulse){
+      setStatus(card, "Ready ✅ (connecté)", "good");
+    }else{
+      setStatus(card, "Quote OK ✅ (connecte pour swap)", "good");
+    }
   }catch(e){
     console.error(e);
     setStatus(card, "Quote error (pair/liquidité?)", "bad");
   }
 }
 
+/* ================= APPROVE / SWAP (wallet only) ================= */
 async function checkAllowance(symIn, amountRaw){
   if(symIn === "PLS") return true;
   if(!provider || !userAddress || !walletOnPulse) return false;
@@ -1043,7 +1092,11 @@ async function executeSwap(card){
   const amt  = (card.querySelector(".amount").value || "").trim();
   const txLink = card.querySelector(".txA");
   txLink.style.display = "none";
-  if(!amt || Number(amt) <= 0){ setStatus(card, "Montant manquant", "bad"); return; }
+
+  if(!amt || Number(amt) <= 0){
+    setStatus(card, "Montant manquant", "bad");
+    return;
+  }
 
   const { slippage, deadlineMin } = getSettings();
   try{
@@ -1067,9 +1120,13 @@ async function executeSwap(card){
 
     let tx;
     setStatus(card, "Signature (MetaMask)…", "warn");
-    if(from === "PLS") tx = await routerWrite.swapExactETHForTokens(minOut, path, userAddress, deadline, { value: amountIn });
-    else if(to === "PLS") tx = await routerWrite.swapExactTokensForETH(amountIn, minOut, path, userAddress, deadline);
-    else tx = await routerWrite.swapExactTokensForTokens(amountIn, minOut, path, userAddress, deadline);
+    if(from === "PLS"){
+      tx = await routerWrite.swapExactETHForTokens(minOut, path, userAddress, deadline, { value: amountIn });
+    }else if(to === "PLS"){
+      tx = await routerWrite.swapExactTokensForETH(amountIn, minOut, path, userAddress, deadline);
+    }else{
+      tx = await routerWrite.swapExactTokensForTokens(amountIn, minOut, path, userAddress, deadline);
+    }
 
     setStatus(card, "Pending…", "warn");
     txLink.href = txUrl(tx.hash);
@@ -1090,34 +1147,52 @@ function setConnectedUI(isConnected){
   document.querySelectorAll(".maxBtn").forEach(b => b.disabled = !isConnected);
   document.querySelectorAll(".pctBtn").forEach(b => b.disabled = !isConnected);
   $("execTrinityBtn").disabled = !isConnected;
+
   document.querySelectorAll(".swapbox").forEach(card=>{
     const approveBtn = card.querySelector(".approveBtn");
     approveBtn.style.display = "none";
     approveBtn.disabled = true;
   });
 }
-document.querySelectorAll(".swapbox").forEach(card=>{
-  card.querySelector(".swapBtn").addEventListener("click", ()=> executeSwap(card));
-});
+function wireSwapButtons(){
+  document.querySelectorAll(".swapbox").forEach(card=>{
+    card.querySelector(".swapBtn").addEventListener("click", ()=> executeSwap(card));
+  });
+}
+wireSwapButtons();
 
+/* ================= EXECUTE TRINITY (A→B→C) ================= */
 $("execTrinityBtn").addEventListener("click", async ()=>{
   if(!provider || !userAddress || !walletOnPulse) return alert("Connecte ton wallet sur PulseChain");
   const cards = [ $("swap1"), $("swap2"), $("swap3") ];
+
   $("multiswap").scrollIntoView({behavior:"smooth", block:"start"});
   window.scrollBy(0, -90);
+
   for(const card of cards){
     const amt = (card.querySelector(".amount").value || "").trim();
     const from = card.querySelector(".from").value;
     const to = card.querySelector(".to").value;
-    if(!amt || Number(amt) <= 0){ setStatus(card, "Skip (montant vide)", ""); continue; }
-    if(from === to){ setStatus(card, "Skip (tokens identiques)", "bad"); continue; }
+
+    if(!amt || Number(amt) <= 0){
+      setStatus(card, "Skip (montant vide)", "");
+      continue;
+    }
+    if(from === to){
+      setStatus(card, "Skip (tokens identiques)", "bad");
+      continue;
+    }
+
     await executeSwap(card);
     const st = (card.querySelector(".status").textContent || "").toLowerCase();
-    if(st.includes("error")){ alert("TRINITY stoppé (erreur sur un swap)."); break; }
+    if(st.includes("error")){
+      alert("TRINITY stoppé (erreur sur un swap).");
+      break;
+    }
   }
 });
 
-/* ===== Token modal (repris) ===== */
+/* ================= TOKEN MODAL ================= */
 let tokenModalTarget = null;
 function openTokenModal(card, side){
   tokenModalTarget = { card, side };
@@ -1126,7 +1201,10 @@ function openTokenModal(card, side){
   renderTokenList("", false);
   setTimeout(()=>$("tmSearch").focus(), 50);
 }
-function closeTokenModal(){ $("tokenModal").style.display = "none"; tokenModalTarget = null; }
+function closeTokenModal(){
+  $("tokenModal").style.display = "none";
+  tokenModalTarget = null;
+}
 $("tmClose").onclick = closeTokenModal;
 $("tmBackdrop").onclick = closeTokenModal;
 $("tmSearch").addEventListener("input", (e)=> renderTokenList((e.target.value||"").trim(), false));
@@ -1138,11 +1216,16 @@ async function addTokenToMetaMask(sym){
   if(!t.address) return alert("PLS = token natif (pas ERC20)");
   try{
     const wasAdded = await window.ethereum.request({
-      method:"wallet_watchAsset",
-      params:{ type:"ERC20", options:{
-        address:t.address, symbol:sym, decimals:t.decimals,
-        image: normalizeLogoUri(t.logoURI) || undefined
-      }}
+      method: "wallet_watchAsset",
+      params: {
+        type: "ERC20",
+        options: {
+          address: t.address,
+          symbol: sym,
+          decimals: t.decimals,
+          image: normalizeLogoUri(t.logoURI) || undefined
+        }
+      }
     });
     if(wasAdded) alert("Token ajouté à MetaMask ✅");
     else throw new Error("Refus MetaMask");
@@ -1153,7 +1236,6 @@ async function addTokenToMetaMask(sym){
     window.open("https://otter.pulsechain.com/address/" + t.address, "_blank");
   }
 }
-
 async function resolveTokenByAddress(addr){
   const a = safeGetAddress(addr);
   if(!a) throw new Error("Bad address");
@@ -1162,7 +1244,13 @@ async function resolveTokenByAddress(addr){
   if(!rpcReady()) throw new Error("No RPC");
   const c = new ethers.Contract(a, ERC20_ABI, getReadProvider());
   const [sym, name, dec] = await Promise.all([ c.symbol(), c.name(), c.decimals() ]);
-  return { symbol:String(sym).toUpperCase().slice(0,11), address:a, decimals:Number(dec), name:String(name).slice(0,64), logoURI:null };
+  return {
+    symbol: String(sym).toUpperCase().slice(0,11),
+    address: a,
+    decimals: Number(dec),
+    name: String(name).slice(0,64),
+    logoURI: null
+  };
 }
 
 async function renderTokenList(q, withBalances){
@@ -1173,6 +1261,7 @@ async function renderTokenList(q, withBalances){
     const t = TOKENS[sym];
     if(t) tokensArr.push(t);
   }
+
   const wantAddr = isAddr(q) ? safeGetAddress(q) : null;
   const filtered = tokensArr.filter(t=>{
     if(!q) return true;
@@ -1190,7 +1279,9 @@ async function renderTokenList(q, withBalances){
           <div class="tmMeta mono">${shortAddr(wantAddr)} • lecture via RPC PulseChain</div>
         </div>
         <div class="tmBal" id="tmImportMeta"><b>—</b>Token</div>
-        <div class="tmActions"><button class="tmIconBtn" id="tmImportBtn" disabled>Import</button></div>
+        <div class="tmActions">
+          <button class="tmIconBtn" id="tmImportBtn" disabled>Import</button>
+        </div>
       </div>`;
   }
 
@@ -1208,7 +1299,8 @@ async function renderTokenList(q, withBalances){
           <button class="tmIconBtn tmAdd" title="Add to MetaMask">🦊</button>
         ` : `<span style="color:var(--muted)">—</span>`}
       </div>
-    </div>`).join("");
+    </div>
+  `).join("");
 
   listEl.innerHTML = html;
 
@@ -1217,6 +1309,7 @@ async function renderTokenList(q, withBalances){
       if(e.target.classList.contains("tmCopy") || e.target.classList.contains("tmAdd")) return;
       const sym = row.dataset.sym;
       if(!tokenModalTarget) return;
+
       const { card, side } = tokenModalTarget;
       const sel = card.querySelector(side === "from" ? ".from" : ".to");
       fillSelect(sel, sym);
@@ -1250,6 +1343,7 @@ async function renderTokenList(q, withBalances){
     const btn = $("tmImportBtn");
     btn.disabled = true;
     metaEl.innerHTML = `<b>Lecture…</b>Token`;
+
     try{
       const t = await resolveTokenByAddress(wantAddr);
       const already = TOKENS_BY_ADDR[norm(t.address)];
@@ -1261,9 +1355,11 @@ async function renderTokenList(q, withBalances){
         metaEl.innerHTML = `<b>${t.symbol}</b>${t.name ? " "+t.name : ""} • ${t.decimals} dec`;
         btn.textContent = "Import";
         btn.disabled = false;
+
         btn.onclick = async ()=>{
           addTokenToRuntime(t);
           addImportedToken(t);
+
           document.querySelectorAll(".swapbox").forEach(card=>{
             const fromSel = card.querySelector(".from");
             const toSel = card.querySelector(".to");
@@ -1272,6 +1368,7 @@ async function renderTokenList(q, withBalances){
             fillSelect(fromSel, curFrom);
             fillSelect(toSel, curTo);
           });
+
           metaEl.innerHTML = `<b>Importé ✅</b>Token`;
           btn.textContent = "OK";
           btn.disabled = true;
@@ -1300,11 +1397,14 @@ async function renderTokenList(q, withBalances){
           const dec = t.decimals ?? 18;
           balBox.innerHTML = `<b>${formatAmountWithDec(dec, bal)}</b>Balance`;
         }
-      }catch{ balBox.innerHTML = `<b>—</b>Balance`; }
+      }catch{
+        balBox.innerHTML = `<b>—</b>Balance`;
+      }
     }
   }
 }
 
+/* open token modal on selects */
 document.querySelectorAll(".swapbox").forEach(card=>{
   const fromSel = card.querySelector(".from");
   const toSel   = card.querySelector(".to");
@@ -1321,12 +1421,12 @@ $("openMultiBtn").addEventListener("click", ()=>{
   window.scrollBy(0, -90);
 });
 
-/* ===== Buttons header ===== */
-$("connectBtn").onclick = connectWallet;     // ✅ UN SEUL handler (pas de mix)
-$("disconnectBtn").onclick = disconnectWallet;
-$("refreshBtn").onclick = ()=> refreshAll();
+/* ================= HEADER BUTTONS ================= */
+$("connectBtn").addEventListener("click", connectWallet);
+$("disconnectBtn").addEventListener("click", disconnectWallet);
+$("refreshBtn").addEventListener("click", ()=> refreshAll());
 
-/* ===== Donation copy ===== */
+/* ================= DONATION COPY ================= */
 (function initDonationBox(){
   const btn = $("copyDonBtn");
   const msg = $("copyDonMsg");
@@ -1340,21 +1440,25 @@ $("refreshBtn").onclick = ()=> refreshAll();
   });
 })();
 
-/* ===== INIT ===== */
+/* ================= INIT ================= */
 (async function boot(){
-  $("disconnectBtn").style.display = "none";
-
+  // header state
+  setWalletUIDisconnected();
   $("rpcPill").textContent = readProvider ? "RPC : OK ✅ (quotes sans wallet)" : "RPC : indisponible ❌";
   $("netPill").textContent = "Réseau : (quotes RPC)";
+  $("walletPill").textContent = "Wallet : non connecté";
   $("plsPill").textContent = "PLS : —";
   setConnectedUI(false);
 
+  // tokenlist (logos)
   const tokenlist = await loadPulseXTokenList();
   mergeTokenDataFromList(tokenlist);
 
+  // defaults & quotes
   initCardsDefaults();
   document.querySelectorAll(".swapbox").forEach(card => updateQuote(card).catch(()=>{}));
 })();
 </script>
+
 </body>
 </html>
