@@ -56,9 +56,14 @@ body::after{
 a{color:inherit;text-decoration:none}
 .wrap{max-width:1200px;margin:0 auto;padding:22px 14px 90px}
 
-/* HEADER STICKY */
+/* ================= HEADER (FIX PRO) ================= */
 header{
-  display:flex;align-items:center;justify-content:space-between;gap:14px;
+  /* ✅ Grid = 3 zones stables (logo | art | actions) */
+  display:grid;
+  grid-template-columns: auto minmax(320px, 1fr) auto;
+  align-items:center;
+  gap:14px;
+
   position:sticky;top:0;z-index:50;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
@@ -67,10 +72,8 @@ header{
   padding:14px 12px;
   margin:-22px -14px 18px;
   box-shadow: 0 18px 45px rgba(0,0,0,.35);
-  overflow:visible;
-  flex-wrap:wrap;
 }
-.brand{display:flex;align-items:center;gap:12px;flex:0 0 auto}
+.brand{display:flex;align-items:center;gap:12px}
 .brand-logo{
   height:110px;
   width:auto;
@@ -79,8 +82,7 @@ header{
   user-select:none;
 }
 .header-rect{
-  flex:1 1 auto;
-  min-width:420px;
+  width:100%;
   max-width:760px;
   height:110px;
   border-radius:18px;
@@ -93,28 +95,27 @@ header{
   filter: saturate(1.20) contrast(1.12) brightness(1.10);
   box-shadow: 0 18px 45px rgba(0,0,0,.45);
   overflow:hidden;
+  justify-self:center; /* ✅ reste au centre */
 }
 .top-right{
   display:flex;align-items:center;gap:10px;
   justify-content:flex-end;
-  flex:1 1 520px;
-  min-width:0;
-  flex-wrap:wrap;
-  overflow:visible;
+  flex-wrap:wrap;          /* ✅ si pas assez de place, wrap propre DANS la zone droite */
+  max-width:560px;         /* ✅ évite que ça “mange” l’art */
+  justify-self:end;
 }
+
+/* ✅ mobile / tablette : on empile proprement */
 @media (max-width:980px){
   html{ scroll-padding-top: 120px; }
+  header{ grid-template-columns: 1fr; }
   .brand-logo{ height:80px; }
+  .top-right{ justify-self:stretch; justify-content:flex-end; }
   .header-rect{
-    width:100%;
     max-width:none;
-    min-width:0;
     height:170px;
-    margin-top:10px;
     background-position: 70% 70%;
-    order:3;
   }
-  .top-right{order:2; width:100%;}
 }
 
 /* pills + buttons */
@@ -142,8 +143,6 @@ header{
   white-space:nowrap;
 }
 .btn2:disabled{opacity:.55;cursor:not-allowed}
-
-/* ✅ Wallet badge séparé (copie adresse uniquement) */
 .walletBadge{
   cursor:pointer;border:none;
   padding:10px 14px;border-radius:999px;
@@ -151,7 +150,7 @@ header{
   color:#fff;font-weight:900;
   box-shadow:0 12px 30px rgba(236,72,153,.15);
   white-space:nowrap;
-  max-width:190px;
+  max-width:200px;
   overflow:hidden;
   text-overflow:ellipsis;
   display:none;
@@ -167,6 +166,31 @@ header{
   box-shadow:var(--shadow);
   padding:16px;
 }
+
+/* ✅ SWAP BOXES: bordure très épaisse + très brillante */
+.swapbox{
+  position:relative;
+  border:3px solid rgba(236,72,153,.75) !important;
+  border-radius: var(--radius);
+  box-shadow:
+    0 18px 45px rgba(0,0,0,.55),
+    0 0 0 2px rgba(168,85,247,.25) inset,
+    0 0 30px rgba(236,72,153,.28),
+    0 0 55px rgba(168,85,247,.18);
+  transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+  isolation:isolate;
+  contain: paint;
+}
+.swapbox:hover{
+  border-color: rgba(168,85,247,.95) !important;
+  box-shadow:
+    0 22px 55px rgba(0,0,0,.65),
+    0 0 0 2px rgba(236,72,153,.30) inset,
+    0 0 42px rgba(236,72,153,.38),
+    0 0 80px rgba(168,85,247,.25);
+  transform: translateY(-1px);
+}
+
 h1{font-size:34px;line-height:1.05}
 .sub{margin-top:10px;color:var(--muted);font-size:13px;line-height:1.55}
 .hr{height:1px;background:rgba(31,41,55,.7);margin:14px 0}
@@ -334,10 +358,9 @@ footer{margin-top:26px;text-align:center;color:var(--muted);font-size:11px;line-
     <div class="pill" id="walletPill">Wallet : non connecté</div>
     <div class="pill" id="plsPill">PLS : —</div>
 
-    <!-- ✅ Connect / Badge / Disconnect (séparés) -->
-    <button class="btn" id="connectBtn">Connect Wallet</button>
-    <button class="walletBadge" id="walletBadge" title="Copier l'adresse">—</button>
-    <button class="btn2" id="disconnectBtn" style="display:none">Disconnect</button>
+    <button class="btn" id="connectBtn" type="button">Connect Wallet</button>
+    <button class="walletBadge" id="walletBadge" type="button" title="Copier l'adresse">—</button>
+    <button class="btn2" id="disconnectBtn" type="button" style="display:none">Disconnect</button>
   </div>
 </header>
 
@@ -357,8 +380,8 @@ footer{margin-top:26px;text-align:center;color:var(--muted);font-size:11px;line-
     </div>
 
     <div class="ctaRow">
-      <button class="btn" id="openMultiBtn">🚀 Ouvrir le MultiSwap</button>
-      <button class="btn2" id="execTrinityBtn" disabled>⚡ Exécuter TRINITY (A→B→C)</button>
+      <button class="btn" id="openMultiBtn" type="button">🚀 Ouvrir le MultiSwap</button>
+      <button class="btn2" id="execTrinityBtn" type="button" disabled>⚡ Exécuter TRINITY (A→B→C)</button>
       <a class="btn2" href="https://whaletrackerio.github.io/autopilot-pulsechain/" target="_blank" rel="noreferrer">⚡ AutoPilot</a>
       <a class="btn2" href="https://whaletrackerio.github.io/dca-pulsechain/" target="_blank" rel="noreferrer">📈 DCA</a>
       <a class="btn2" href="#support">💜 Soutenir</a>
@@ -390,8 +413,8 @@ footer{margin-top:26px;text-align:center;color:var(--muted);font-size:11px;line-
     </div>
 
     <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap">
-      <button class="btn2" id="refreshBtn">↻ Refresh balances/quotes</button>
-      <button class="btn2" id="openTokensBtn">🪙 Ouvrir la liste tokens</button>
+      <button class="btn2" id="refreshBtn" type="button">↻ Refresh balances/quotes</button>
+      <button class="btn2" id="openTokensBtn" type="button">🪙 Ouvrir la liste tokens</button>
     </div>
   </div>
 </section>
@@ -417,7 +440,7 @@ footer{margin-top:26px;text-align:center;color:var(--muted);font-size:11px;line-
         0x7a23b75434942ddd7d9fe19aa0ed2fea08ed57a1
       </div>
       <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center">
-        <button class="btn2" id="copyDonBtn">📋 Copier l’adresse</button>
+        <button class="btn2" id="copyDonBtn" type="button">📋 Copier l’adresse</button>
         <span id="copyDonMsg" style="color:var(--muted);font-size:12px"></span>
       </div>
       <div style="color:var(--muted);font-size:12px">Merci à tous ceux qui soutiennent le projet 🙏</div>
@@ -457,13 +480,13 @@ footer{margin-top:26px;text-align:center;color:var(--muted);font-size:11px;line-
   <div class="tmBox">
     <div class="tmTop">
       <div style="font-weight:900;font-size:22px;">Select a token</div>
-      <button class="tmClose" id="tmClose">✕</button>
+      <button class="tmClose" id="tmClose" type="button">✕</button>
     </div>
     <input class="tmSearch" id="tmSearch" placeholder="Search name or paste address (0x...)" />
     <div class="tmList" id="tmList"></div>
     <div class="tmBottom">
       <div>Coller une adresse 0x... pour importer un token (comme PulseX). 📋 copie l’adresse. 🦊 ajoute à MetaMask.</div>
-      <button class="btn2" id="tmRefresh">↻ Refresh</button>
+      <button class="btn2" id="tmRefresh" type="button">↻ Refresh</button>
     </div>
   </div>
 </div>
@@ -518,11 +541,14 @@ async function copyText(txt){
 }
 
 /* ================= PROVIDERS ================= */
-let readProvider = null;          // RPC read-only
-let provider = null;              // BrowserProvider (wallet)
+let readProvider = null;
+let provider = null;
 let signer = null;
 let userAddress = null;
 let walletOnPulse = false;
+
+let CONNECTING = false;
+let IGNORE_BADGE_UNTIL = 0;
 
 function pickReadProvider(){
   for(const url of RPCS){
@@ -534,28 +560,31 @@ readProvider = pickReadProvider();
 function getReadProvider(){ return provider || readProvider; }
 function rpcReady(){ return !!getReadProvider(); }
 
-/* ================= WALLET UI (PRO) ================= */
+/* ================= WALLET UI ================= */
 function setWalletUIConnected(){
-  // connect btn off
   $("connectBtn").style.display = "none";
-  // badge on
+
   const badge = $("walletBadge");
   badge.textContent = shortAddr(userAddress);
   badge.style.display = "inline-flex";
-  badge.onclick = async ()=>{
-    await copyText(userAddress);
-    alert("Adresse copiée ✅");
-  };
-  // disconnect on
+
+  badge.onclick = null;
+  setTimeout(()=>{
+    badge.onclick = async ()=>{
+      if(Date.now() < IGNORE_BADGE_UNTIL) return;
+      await copyText(userAddress);
+      alert("Adresse copiée ✅");
+    };
+  }, 350);
+
   $("disconnectBtn").style.display = "inline-flex";
 }
 function setWalletUIDisconnected(){
   $("connectBtn").style.display = "inline-flex";
+  $("connectBtn").disabled = false;
   $("walletBadge").style.display = "none";
   $("disconnectBtn").style.display = "none";
 }
-
-/* ✅ Déconnexion UI */
 function disconnectWallet(){
   provider = null;
   signer = null;
@@ -570,49 +599,59 @@ function disconnectWallet(){
   setConnectedUI(false);
   refreshAll().catch(()=>{});
 }
-
-/* ✅ Connect wallet */
 async function connectWallet(){
+  if(CONNECTING) return;
   if(!window.ethereum){
     alert("Wallet requis : MetaMask");
     return;
   }
-  await window.ethereum.request({ method:"eth_requestAccounts" });
-  provider = new ethers.BrowserProvider(window.ethereum);
-  signer = await provider.getSigner();
-  userAddress = await signer.getAddress();
+  CONNECTING = true;
+  const btn = $("connectBtn");
+  btn.disabled = true;
 
-  const net = await provider.getNetwork();
-  let ok = (Number(net.chainId) === PULSECHAIN_ID);
+  try{
+    await window.ethereum.request({ method:"eth_requestAccounts" });
 
-  if(!ok){
-    try{
-      await window.ethereum.request({
-        method: "wallet_switchEthereumChain",
-        params: [{ chainId: PULSECHAIN_HEX }]
-      });
-      const net2 = await provider.getNetwork();
-      ok = (Number(net2.chainId) === PULSECHAIN_ID);
-    }catch(e){ console.error(e); }
+    provider = new ethers.BrowserProvider(window.ethereum);
+    signer = await provider.getSigner();
+    userAddress = await signer.getAddress();
+
+    const net = await provider.getNetwork();
+    let ok = (Number(net.chainId) === PULSECHAIN_ID);
+
+    if(!ok){
+      try{
+        await window.ethereum.request({
+          method: "wallet_switchEthereumChain",
+          params: [{ chainId: PULSECHAIN_HEX }]
+        });
+        const net2 = await provider.getNetwork();
+        ok = (Number(net2.chainId) === PULSECHAIN_ID);
+      }catch(e){ console.error(e); }
+    }
+
+    walletOnPulse = ok;
+    $("walletPill").textContent = "Wallet : " + shortAddr(userAddress);
+    $("netPill").textContent = "Réseau : " + (ok ? "PulseChain ✅" : "Mauvais réseau ❌");
+
+    if(!ok){
+      alert("Passe sur PulseChain (chainId 369) puis reconnecte.");
+      disconnectWallet();
+      return;
+    }
+
+    IGNORE_BADGE_UNTIL = Date.now() + 700;
+
+    setWalletUIConnected();
+    setConnectedUI(true);
+    await refreshAll();
+
+    window.ethereum.on?.("accountsChanged", ()=> location.reload());
+    window.ethereum.on?.("chainChanged", ()=> location.reload());
+  }finally{
+    CONNECTING = false;
+    btn.disabled = false;
   }
-
-  walletOnPulse = ok;
-  $("walletPill").textContent = "Wallet : " + shortAddr(userAddress);
-  $("netPill").textContent = "Réseau : " + (ok ? "PulseChain ✅" : "Mauvais réseau ❌");
-
-  if(!ok){
-    alert("Passe sur PulseChain (chainId 369) puis reconnecte.");
-    // UI reste en mode déconnecté
-    disconnectWallet();
-    return;
-  }
-
-  setWalletUIConnected();
-  setConnectedUI(true);
-  await refreshAll();
-
-  window.ethereum.on?.("accountsChanged", ()=> location.reload());
-  window.ethereum.on?.("chainChanged", ()=> location.reload());
 }
 
 /* ================= TOKENS ================= */
@@ -779,7 +818,6 @@ function mergeTokenDataFromList(list){
       TOKENS[sym].decimals = TOKENS[sym].decimals ?? dec;
     }
   }
-
   rebuildTOKENS_BY_ADDR();
 
   const imported = loadImportedTokens();
@@ -819,7 +857,7 @@ function swapCardTemplate(i, label){
       <button class="pctBtn" type="button" data-p="75" disabled>75%</button>
     </div>
 
-    <div class="switch"><button class="invert" title="Inverser">↕</button></div>
+    <div class="switch"><button class="invert" type="button" title="Inverser">↕</button></div>
 
     <label>Tu reçois</label>
     <div class="row2">
@@ -833,8 +871,8 @@ function swapCardTemplate(i, label){
     </div>
 
     <div class="actions">
-      <button class="btn2 approveBtn" style="display:none" disabled>Approve</button>
-      <button class="btn swapBtn" disabled>Exécuter ${label}</button>
+      <button class="btn2 approveBtn" type="button" style="display:none" disabled>Approve</button>
+      <button class="btn swapBtn" type="button" disabled>Exécuter ${label}</button>
     </div>
 
     <div class="status">Quotes dispo sans wallet ✅ (connecte pour swap)</div>
@@ -1142,7 +1180,6 @@ async function executeSwap(card){
     setStatus(card, "Swap error (cancel ? liquidité ?)", "bad");
   }
 }
-
 function setConnectedUI(isConnected){
   document.querySelectorAll(".swapBtn").forEach(b => b.disabled = !isConnected);
   document.querySelectorAll(".maxBtn").forEach(b => b.disabled = !isConnected);
@@ -1162,7 +1199,6 @@ function wireSwapButtons(){
 }
 wireSwapButtons();
 
-/* ================= EXECUTE TRINITY (A→B→C) ================= */
 $("execTrinityBtn").addEventListener("click", async ()=>{
   if(!provider || !userAddress || !walletOnPulse) return alert("Connecte ton wallet sur PulseChain");
   const cards = [ $("swap1"), $("swap2"), $("swap3") ];
@@ -1281,7 +1317,7 @@ async function renderTokenList(q, withBalances){
         </div>
         <div class="tmBal" id="tmImportMeta"><b>—</b>Token</div>
         <div class="tmActions">
-          <button class="tmIconBtn" id="tmImportBtn" disabled>Import</button>
+          <button class="tmIconBtn" id="tmImportBtn" disabled type="button">Import</button>
         </div>
       </div>`;
   }
@@ -1296,8 +1332,8 @@ async function renderTokenList(q, withBalances){
       <div class="tmBal"><b>—</b>Balance</div>
       <div class="tmActions">
         ${t.address ? `
-          <button class="tmIconBtn tmCopy" title="Copy address">📋</button>
-          <button class="tmIconBtn tmAdd" title="Add to MetaMask">🦊</button>
+          <button class="tmIconBtn tmCopy" type="button" title="Copy address">📋</button>
+          <button class="tmIconBtn tmAdd" type="button" title="Add to MetaMask">🦊</button>
         ` : `<span style="color:var(--muted)">—</span>`}
       </div>
     </div>
@@ -1423,7 +1459,11 @@ $("openMultiBtn").addEventListener("click", ()=>{
 });
 
 /* ================= HEADER BUTTONS ================= */
-$("connectBtn").addEventListener("click", connectWallet);
+$("connectBtn").addEventListener("pointerdown", (e)=>{
+  e.preventDefault();
+  e.stopPropagation();
+  connectWallet();
+});
 $("disconnectBtn").addEventListener("click", disconnectWallet);
 $("refreshBtn").addEventListener("click", ()=> refreshAll());
 
@@ -1443,7 +1483,6 @@ $("refreshBtn").addEventListener("click", ()=> refreshAll());
 
 /* ================= INIT ================= */
 (async function boot(){
-  // header state
   setWalletUIDisconnected();
   $("rpcPill").textContent = readProvider ? "RPC : OK ✅ (quotes sans wallet)" : "RPC : indisponible ❌";
   $("netPill").textContent = "Réseau : (quotes RPC)";
@@ -1451,11 +1490,9 @@ $("refreshBtn").addEventListener("click", ()=> refreshAll());
   $("plsPill").textContent = "PLS : —";
   setConnectedUI(false);
 
-  // tokenlist (logos)
   const tokenlist = await loadPulseXTokenList();
   mergeTokenDataFromList(tokenlist);
 
-  // defaults & quotes
   initCardsDefaults();
   document.querySelectorAll(".swapbox").forEach(card => updateQuote(card).catch(()=>{}));
 })();
