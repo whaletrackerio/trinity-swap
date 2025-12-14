@@ -792,7 +792,12 @@ function mergeTokenDataFromList(list){
 }
 
 /* ================= WEB3 ================= */
-function getRouter(readOnly = true){
+const router = new ethers.Contract(
+  PULSEX_ROUTER,
+  ROUTER_ABI,
+  readProvider
+);
+
   const p = readOnly
     ? (provider || readProvider)
     : signer;
