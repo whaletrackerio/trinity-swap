@@ -357,6 +357,7 @@
         <button class="btn2" id="execTrinityBtn" disabled>⚡ Exécuter TRINITY (A→B→C)</button>
         <a class="btn2" href="https://whaletrackerio.github.io/autopilot-pulsechain/" target="_blank" rel="noreferrer">⚡ AutoPilot</a>
         <a class="btn2" href="https://whaletrackerio.github.io/dca-pulsechain/" target="_blank" rel="noreferrer">📈 DCA</a>
+        <a class="btn2" href="#support">💜 Soutenir</a>
       </div>
 
       <div class="hr"></div>
@@ -401,14 +402,34 @@
   <section class="swaps" id="swaps"></section>
 
   <section class="bottomGrid">
-    <div class="card">
-      <div style="font-weight:900;font-size:14px">Notes</div>
-      <p class="sub">
-        Mode 1 = pas de fee TRINITY, pas de smart contract maison, chaque swap = 1 transaction.
-        Si une quote échoue, c’est souvent un manque de liquidité sur la paire.
+    <!-- ✅ SUPPORT BOX -->
+    <div class="card" id="support">
+      <div style="font-weight:900;font-size:14px">💜 Soutenir TRINITY</div>
+
+      <p class="sub" style="margin-top:10px">
+        TRINITY Swap est gratuit, non-custodial et sans frais TRINITY.<br/>
+        Si l’outil t’aide et que tu souhaites soutenir le développement, tu peux faire un don.
       </p>
+
       <div class="hr"></div>
-      <div class="warnbox">Tip : si un token n’a pas de logo dans la tokenlist PulseX → TRINITY affiche un fallback.</div>
+
+      <div class="warnbox" style="display:grid; gap:10px">
+        <div style="font-weight:900;color:#e5e7eb">Adresse PulseChain :</div>
+
+        <div class="mono" id="donAddr"
+          style="padding:12px;border-radius:14px;border:1px solid rgba(31,41,55,.9);background:rgba(2,6,23,.70);word-break:break-all">
+          0x7a23b75434942ddd7d9fe19aa0ed2fea08ed57a1
+        </div>
+
+        <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center">
+          <button class="btn2" id="copyDonBtn">📋 Copier l’adresse</button>
+          <span id="copyDonMsg" style="color:var(--muted);font-size:12px"></span>
+        </div>
+
+        <div style="color:var(--muted);font-size:12px">
+          Merci à tous ceux qui soutiennent le projet 🙏
+        </div>
+      </div>
     </div>
 
     <div class="card">
@@ -1577,6 +1598,35 @@ async function connectWallet(){
 
 $("connectBtn").addEventListener("click", connectWallet);
 $("refreshBtn").addEventListener("click", ()=> refreshAll());
+
+/* ================= DONATION COPY ================= */
+(function initDonationBox(){
+  const btn = document.getElementById("copyDonBtn");
+  const msg = document.getElementById("copyDonMsg");
+  const addr = "0x7a23b75434942ddd7d9fe19aa0ed2fea08ed57a1";
+  if(!btn) return;
+
+  async function copyDonation(){
+    try{
+      await navigator.clipboard.writeText(addr);
+    }catch{
+      const ta = document.createElement("textarea");
+      ta.value = addr;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand("copy");
+      document.body.removeChild(ta);
+    }
+    msg.textContent = "Copié ✅";
+    btn.textContent = "✅ Copié";
+    setTimeout(()=>{
+      msg.textContent = "";
+      btn.textContent = "📋 Copier l’adresse";
+    }, 1200);
+  }
+
+  btn.addEventListener("click", copyDonation);
+})();
 
 /* ================= INIT ================= */
 (async function boot(){
