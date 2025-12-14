@@ -504,6 +504,30 @@ const RPCS = [
   "https://pulsechain-rpc.publicnode.com"
 ];
 
+/* ================= TRINITY LICENSE (phantom) =================
+   ✅ Invisible / désactivé par défaut
+   ✅ Aucun token requis tant que TRINITY_MODE=false
+   ✅ Quand tu voudras activer:
+      - mets TRINITY_TOKEN_ADDR
+      - passe TRINITY_MODE=true (et TRINITY_ENFORCE=true si tu veux bloquer)
+*/
+const TRINITY_MODE = false;          // <- OFF = rien ne change pour les users
+const TRINITY_ENFORCE = false;       // <- OFF = même si mode ON, ça ne bloque rien
+const TRINITY_TOKEN_ADDR = "";       // <- à remplir plus tard (ERC20 PulseChain)
+const TRINITY_LEVELS = { starter: 1000, pro: 2000, dca: 500 };
+const TRINITY_DEFAULT_DECIMALS = 18;
+
+/* état interne (non affiché) */
+let TRINITY_STATE = {
+  ready: false,
+  addr: null,
+  symbol: "TRINITY",
+  decimals: TRINITY_DEFAULT_DECIMALS,
+  balanceRaw: 0n,
+  balance: 0,     // en unités humaines
+  level: "public" // public | starter | pro | dca (dca = usage bots, pas utile sur swap)
+};
+
 const $ = (id)=>document.getElementById(id);
 function norm(x){ return (x||"").toLowerCase(); }
 function isAddr(x){ return /^0x[a-fA-F0-9]{40}$/.test((x||"").trim()); }
@@ -559,6 +583,78 @@ readProvider = pickReadProvider();
 function getReadProvider(){ return provider || readProvider; }
 function rpcReady(){ return !!getReadProvider(); }
 
+/* ================= TRINITY LICENSE (phantom) ================= */
+const _TRINITY_ABI = [
+  "function balanceOf(address owner) external view returns (uint256)",
+  "function decimals() external view returns (uint8)",
+  "function symbol() external view returns (string)"
+];
+let _TRINITY_CACHE = { ok:false, addr:null, decimals:TRINITY_DEFAULT_DECIMALS, symbol:"TRINITY" };
+
+function trinityComputeLevel(balanceHuman){
+  const b = Number(balanceHuman || 0);
+  if(b >= TRINITY_LEVELS.pro) return "pro";
+  if(b >= TRINITY_LEVELS.starter) return "starter";
+  return "public";
+}
+
+async function trinityRefreshSilent(){
+  // reset safe
+  TRINITY_STATE.ready = false;
+  TRINITY_STATE.addr = null;
+  TRINITY_STATE.balanceRaw = 0n;
+  TRINITY_STATE.balance = 0;
+  TRINITY_STATE.level = "public";
+
+  // si pas connecté, ou pas sur Pulse, ou pas d'adresse token: on sort
+  if(!provider || !userAddress || !walletOnPulse) return;
+  const addr = safeGetAddress(TRINITY_TOKEN_ADDR);
+  if(!addr) return;
+
+  try{
+    TRINITY_STATE.addr = addr;
+
+    const c = new ethers.Contract(addr, _TRINITY_ABI, getReadProvider());
+
+    // cache decimals/symbol (une seule fois)
+    if(!_TRINITY_CACHE.ok || _TRINITY_CACHE.addr !== addr){
+      const [dec, sym] = await Promise.all([ c.decimals(), c.symbol() ]);
+      _TRINITY_CACHE = {
+        ok: true,
+        addr,
+        decimals: Number(dec),
+        symbol: String(sym || "TRINITY").slice(0,11)
+      };
+    }
+
+    TRINITY_STATE.decimals = _TRINITY_CACHE.decimals;
+    TRINITY_STATE.symbol = _TRINITY_CACHE.symbol;
+
+    const balRaw = await c.balanceOf(userAddress);
+    TRINITY_STATE.balanceRaw = balRaw;
+
+    const balHuman = Number(ethers.formatUnits(balRaw, TRINITY_STATE.decimals));
+    TRINITY_STATE.balance = isFinite(balHuman) ? balHuman : 0;
+
+    TRINITY_STATE.level = trinityComputeLevel(TRINITY_STATE.balance);
+    TRINITY_STATE.ready = true;
+
+    // rien d'affiché. Pour debug éventuel: window.__TRINITY = TRINITY_STATE
+    window.__TRINITY = { ...TRINITY_STATE };
+  }catch(e){
+    // silencieux: aucun UI impact
+    console.warn("TRINITY silent check failed:", e);
+  }
+}
+
+// Optionnel: gating futur (phantom). Par défaut ça ne fait rien.
+function trinityGateExecTrinityButton(){
+  if(!TRINITY_MODE || !TRINITY_ENFORCE) return; // phantom: pas de blocage
+  // exemple: batch A→B→C = feature Pro
+  const ok = (TRINITY_STATE.level === "pro");
+  $("execTrinityBtn").disabled = !ok;
+}
+
 /* ================= WALLET UI (PRO) ================= */
 function setWalletUIConnected(){
   $("connectBtn").style.display = "none";
@@ -597,6 +693,13 @@ function disconnectWallet(){
   $("walletPill").textContent = "Wallet : non connecté";
   $("netPill").textContent = "Réseau : (quotes RPC)";
   $("plsPill").textContent = "PLS : —";
+
+  // TRINITY phantom reset (silencieux)
+  TRINITY_STATE = {
+    ready:false, addr:null, symbol:"TRINITY", decimals:TRINITY_DEFAULT_DECIMALS,
+    balanceRaw:0n, balance:0, level:"public"
+  };
+  window.__TRINITY = { ...TRINITY_STATE };
 
   setWalletUIDisconnected();
   setConnectedUI(false);
@@ -651,6 +754,11 @@ async function connectWallet(){
 
     setWalletUIConnected();
     setConnectedUI(true);
+
+    // TRINITY phantom silent check
+    await trinityRefreshSilent();
+    trinityGateExecTrinityButton();
+
     await refreshAll();
 
     window.ethereum.on?.("accountsChanged", ()=> location.reload());
@@ -1013,11 +1121,17 @@ async function refreshAll(){
   for(const card of cards){
     await updateQuote(card);
   }
+
   if(provider && userAddress && walletOnPulse){
     await refreshHeaderPLS();
     for(const card of cards){
       await refreshCardBalance(card);
     }
+
+    // TRINITY phantom refresh (silencieux)
+    await trinityRefreshSilent();
+    trinityGateExecTrinityButton();
+
     if($("tokenModal").style.display === "block"){
       await renderTokenList(($("tmSearch").value||"").trim(), true);
     }
@@ -1199,6 +1313,9 @@ function setConnectedUI(isConnected){
     approveBtn.style.display = "none";
     approveBtn.disabled = true;
   });
+
+  // TRINITY phantom gating (ne fait rien tant que TRINITY_MODE=false)
+  trinityGateExecTrinityButton();
 }
 function wireSwapButtons(){
   document.querySelectorAll(".swapbox").forEach(card=>{
@@ -1210,6 +1327,15 @@ wireSwapButtons();
 /* ================= EXECUTE TRINITY (A→B→C) ================= */
 $("execTrinityBtn").addEventListener("click", async ()=>{
   if(!provider || !userAddress || !walletOnPulse) return alert("Connecte ton wallet sur PulseChain");
+
+  // TRINITY phantom enforcement (OFF par défaut)
+  if(TRINITY_MODE && TRINITY_ENFORCE){
+    if(TRINITY_STATE.level !== "pro"){
+      alert("Accès Pro requis (TRINITY).");
+      return;
+    }
+  }
+
   const cards = [ $("swap1"), $("swap2"), $("swap3") ];
 
   $("multiswap").scrollIntoView({behavior:"smooth", block:"start"});
@@ -1499,6 +1625,9 @@ $("refreshBtn").addEventListener("click", ()=> refreshAll());
   $("walletPill").textContent = "Wallet : non connecté";
   $("plsPill").textContent = "PLS : —";
   setConnectedUI(false);
+
+  // TRINITY phantom init (silencieux)
+  window.__TRINITY = { ...TRINITY_STATE };
 
   const tokenlist = await loadPulseXTokenList();
   mergeTokenDataFromList(tokenlist);
