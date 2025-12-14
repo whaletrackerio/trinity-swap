@@ -77,9 +77,11 @@ header{
   filter: drop-shadow(0 14px 26px rgba(168,85,247,.22));
   user-select:none;
 }
+
+/* ✅ FIX: l'image garde sa place, les pills ne passent plus dessus */
 .header-rect{
-  flex:1 1 auto;
-  min-width:420px;
+  flex:1 1 520px;
+  min-width:520px;
   max-width:760px;
   height:110px;
   border-radius:18px;
@@ -92,21 +94,19 @@ header{
   filter: saturate(1.20) contrast(1.12) brightness(1.10);
   box-shadow: 0 18px 45px rgba(0,0,0,.45);
   overflow:hidden;
-  pointer-events:none;
-  position:relative;
-  z-index:1;
 }
 .top-right{
   display:flex;align-items:center;gap:10px;
   justify-content:flex-end;
-  flex:1 1 520px;
+  flex:0 0 auto;
+  max-width:520px;
   min-width:0;
   flex-wrap:nowrap;
   overflow:visible;
-  position:relative;
-  z-index:10;
 }
-@media (max-width:980px){
+
+/* ✅ on passe en 2 lignes plus tôt -> plus de chevauchement sur l'image */
+@media (max-width:1180px){
   html{ scroll-padding-top: 120px; }
   .brand-logo{ height:80px; }
   .header-rect{
@@ -118,7 +118,13 @@ header{
     background-position: 70% 70%;
     order:3;
   }
-  .top-right{order:2; width:100%; flex-wrap:wrap;}
+  .top-right{
+    order:2;
+    width:100%;
+    max-width:none;
+    flex-wrap:wrap;
+    justify-content:flex-end;
+  }
 }
 
 /* pills + buttons */
@@ -172,51 +178,29 @@ header{
   padding:16px;
 }
 
-/* ✅ SWAP BOXES: CONTOURS ÉPAIS + TRÈS BRILLANT (NOUVEAU) */
+/* ✅ SWAP BOXES: épais + très brillant (SAFE) */
 .swapbox{
   position:relative;
-  border:3px solid rgba(168,85,247,.75) !important;
+  border:3px solid rgba(236,72,153,.75) !important;
+  border-radius: var(--radius);
+  background: linear-gradient(180deg, rgba(15,23,42,.92), rgba(15,23,42,.72));
   box-shadow:
-    0 22px 60px rgba(0,0,0,.65),
-    0 0 0 2px rgba(236,72,153,.25) inset,
-    0 0 42px rgba(168,85,247,.35),
-    0 0 80px rgba(236,72,153,.18);
-  transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease, filter .15s ease;
-  overflow:hidden;
-}
-.swapbox::before{
-  content:"";
-  position:absolute;
-  inset:-2px;
-  border-radius:calc(var(--radius) + 2px);
-  background: radial-gradient(900px 320px at 25% 10%,
-      rgba(236,72,153,.35),
-      rgba(168,85,247,.25) 35%,
-      rgba(0,0,0,0) 70%);
-  pointer-events:none;
-  opacity:.85;
-  mix-blend-mode:screen;
-  filter: blur(10px);
-}
-.swapbox::after{
-  content:"";
-  position:absolute;
-  inset:0;
-  border-radius:var(--radius);
-  box-shadow:
-    0 0 0 2px rgba(255,255,255,.06) inset,
-    0 0 0 1px rgba(236,72,153,.22) inset;
-  pointer-events:none;
+    0 18px 45px rgba(0,0,0,.55),
+    0 0 0 2px rgba(168,85,247,.25) inset,
+    0 0 30px rgba(236,72,153,.28),
+    0 0 55px rgba(168,85,247,.18);
+  transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+  isolation:isolate;
+  contain: paint;
 }
 .swapbox:hover{
-  border-color: rgba(236,72,153,.95) !important;
+  border-color: rgba(168,85,247,.95) !important;
   box-shadow:
-    0 26px 70px rgba(0,0,0,.70),
-    0 0 0 2px rgba(236,72,153,.35) inset,
-    0 0 62px rgba(236,72,153,.45),
-    0 0 110px rgba(168,85,247,.28);
+    0 22px 55px rgba(0,0,0,.65),
+    0 0 0 2px rgba(236,72,153,.30) inset,
+    0 0 42px rgba(236,72,153,.38),
+    0 0 80px rgba(168,85,247,.25);
   transform: translateY(-1px);
-  filter: saturate(1.08) brightness(1.04);
 }
 
 h1{font-size:34px;line-height:1.05}
@@ -386,7 +370,6 @@ footer{margin-top:26px;text-align:center;color:var(--muted);font-size:11px;line-
     <div class="pill" id="walletPill">Wallet : non connecté</div>
     <div class="pill" id="plsPill">PLS : —</div>
 
-    <!-- ✅ Connect / Badge / Disconnect (séparés) -->
     <button class="btn" id="connectBtn" type="button">Connect Wallet</button>
     <button class="walletBadge" id="walletBadge" type="button" title="Copier l'adresse">—</button>
     <button class="btn2" id="disconnectBtn" type="button" style="display:none">Disconnect</button>
@@ -598,11 +581,9 @@ function setWalletUIConnected(){
   badge.textContent = shortAddr(userAddress);
   badge.style.display = "inline-flex";
 
-  // ✅ IMPORTANT: on “arme” le click badge après un petit délai
   badge.onclick = null;
   setTimeout(()=>{
     badge.onclick = async ()=>{
-      // ignore si c’est encore le “click” du connect
       if(Date.now() < IGNORE_BADGE_UNTIL) return;
       await copyText(userAddress);
       alert("Adresse copiée ✅");
@@ -617,8 +598,6 @@ function setWalletUIDisconnected(){
   $("walletBadge").style.display = "none";
   $("disconnectBtn").style.display = "none";
 }
-
-/* ✅ Déconnexion UI */
 function disconnectWallet(){
   provider = null;
   signer = null;
@@ -633,8 +612,6 @@ function disconnectWallet(){
   setConnectedUI(false);
   refreshAll().catch(()=>{});
 }
-
-/* ✅ Connect wallet */
 async function connectWallet(){
   if(CONNECTING) return;
   if(!window.ethereum){
@@ -677,7 +654,6 @@ async function connectWallet(){
       return;
     }
 
-    // ✅ clé: empêcher le badge de “prendre” le mouseup du click connect
     IGNORE_BADGE_UNTIL = Date.now() + 700;
 
     setWalletUIConnected();
@@ -1218,7 +1194,6 @@ async function executeSwap(card){
     setStatus(card, "Swap error (cancel ? liquidité ?)", "bad");
   }
 }
-
 function setConnectedUI(isConnected){
   document.querySelectorAll(".swapBtn").forEach(b => b.disabled = !isConnected);
   document.querySelectorAll(".maxBtn").forEach(b => b.disabled = !isConnected);
@@ -1499,7 +1474,6 @@ $("openMultiBtn").addEventListener("click", ()=>{
 });
 
 /* ================= HEADER BUTTONS ================= */
-/* ✅ utiliser pointerdown évite aussi les histoires de mouseup */
 $("connectBtn").addEventListener("pointerdown", (e)=>{
   e.preventDefault();
   e.stopPropagation();
