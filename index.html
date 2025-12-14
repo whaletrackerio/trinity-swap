@@ -1,454 +1,446 @@
 <!doctype html>
 <html lang="fr">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>TRINITY Swap — PulseChain</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>TRINITY Swap — PulseChain</title>
+<script src="https://cdn.jsdelivr.net/npm/ethers@6.13.2/dist/ethers.umd.min.js"></script>
 
-  <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.2/dist/ethers.umd.min.js"></script>
+<style>
+:root{
+  --bg:#050816;
+  --card:#0f172a;
+  --border:#1f2937;
+  --text:#e5e7eb;
+  --muted:#9ca3af;
+  --accent:#a855f7;
+  --accent2:#ec4899;
+  --good:#22c55e;
+  --bad:#ef4444;
+  --warn:#f59e0b;
+  --radius:18px;
+  --shadow:0 18px 45px rgba(0,0,0,.55);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+html{scroll-padding-top:140px}
+body{
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  color:var(--text);
+  background: radial-gradient(1200px 700px at 20% 0%, #0b102a 0%, var(--bg) 55%, #020617 100%);
+  overflow-x:hidden;
+}
+body::before{
+  content:"";
+  position:fixed;
+  inset:0;
+  background:
+    radial-gradient(1200px 700px at 20% 0%, rgba(11,16,42,.78) 0%, rgba(5,8,22,.86) 55%, rgba(2,6,23,.92) 100%),
+    url("./bg.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat:no-repeat;
+  filter: saturate(1.15) contrast(1.05);
+  opacity:.40;
+  z-index:-2;
+}
+body::after{
+  content:"";
+  position:fixed;
+  inset:0;
+  background: linear-gradient(180deg, rgba(0,0,0,.25), rgba(0,0,0,.70));
+  z-index:-1;
+  pointer-events:none;
+}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:1200px;margin:0 auto;padding:22px 14px 90px}
 
-  <style>
-    :root{
-      --bg:#050816;
-      --card:#0f172a;
-      --border:#1f2937;
-      --text:#e5e7eb;
-      --muted:#9ca3af;
-      --accent:#a855f7;
-      --accent2:#ec4899;
-      --good:#22c55e;
-      --bad:#ef4444;
-      --warn:#f59e0b;
-      --radius:18px;
-      --shadow:0 18px 45px rgba(0,0,0,.55);
-    }
-    *{box-sizing:border-box;margin:0;padding:0}
-    html,body{height:100%}
-    html{ scroll-padding-top: 140px; }
-    body{
-      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
-      color:var(--text);
-      background: radial-gradient(1200px 700px at 20% 0%, #0b102a 0%, var(--bg) 55%, #020617 100%);
-      overflow-x:hidden;
-    }
-    body::before{
-      content:"";
-      position:fixed;
-      inset:0;
-      background:
-        radial-gradient(1200px 700px at 20% 0%, rgba(11,16,42,.78) 0%, rgba(5,8,22,.86) 55%, rgba(2,6,23,.92) 100%),
-        url("./bg.png");
-      background-size: cover;
-      background-position: center;
-      background-repeat:no-repeat;
-      filter: saturate(1.15) contrast(1.05);
-      opacity:.40;
-      z-index:-2;
-    }
-    body::after{
-      content:"";
-      position:fixed;
-      inset:0;
-      background: linear-gradient(180deg, rgba(0,0,0,.25), rgba(0,0,0,.70));
-      z-index:-1;
-      pointer-events:none;
-    }
-    a{color:inherit;text-decoration:none}
-    .wrap{max-width:1200px;margin:0 auto;padding:22px 14px 90px}
+/* HEADER STICKY */
+header{
+  display:flex;align-items:center;justify-content:space-between;gap:14px;
+  position:sticky;top:0;z-index:50;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  background:linear-gradient(180deg, rgba(5,8,22,.92), rgba(5,8,22,.55));
+  border-bottom:1px solid rgba(31,41,55,.6);
+  padding:14px 10px;
+  margin:-22px -14px 18px;
+  box-shadow: 0 18px 45px rgba(0,0,0,.35);
+  flex-wrap:nowrap;
+  overflow:visible; /* ✅ important: évite le "coupé" */
+}
+.brand{display:flex;align-items:center;gap:12px;flex:0 0 auto}
+.brand-logo{
+  height:110px;width:auto;display:block;
+  filter: drop-shadow(0 14px 26px rgba(168,85,247,.22));
+  user-select:none;
+}
+.header-rect{
+  flex:1 1 auto;
+  min-width:420px;
+  max-width:760px;
+  height:110px;
+  border-radius:18px;
+  border:1px solid rgba(31,41,55,.80);
+  background-color: rgba(2,6,23,.55);
+  background-image: url("./header-art.png");
+  background-size: cover;
+  background-repeat:no-repeat;
+  background-position: 72% 62%;
+  filter: saturate(1.20) contrast(1.12) brightness(1.10);
+  box-shadow: 0 18px 45px rgba(0,0,0,.45);
+  overflow:hidden;
+}
+.top-right{
+  display:flex;align-items:center;gap:10px;
+  justify-content:flex-end;
+  flex:0 0 auto;
+  overflow:visible;            /* ✅ */
+  flex-wrap:nowrap;            /* ✅ */
+  max-width:100%;
+  min-width:0;
+}
+@media (max-width:980px){
+  header{flex-wrap:wrap; align-items:flex-start}
+  html{scroll-padding-top:120px}
+  .brand-logo{height:80px}
+  .header-rect{
+    order:3;width:100%;max-width:none;min-width:0;height:170px;margin-top:10px;
+    background-position: 70% 70%;
+  }
+  .top-right{order:2;width:100%;flex-wrap:wrap}
+}
+.pill{
+  font-size:12px;color:var(--muted);
+  border:1px solid rgba(31,41,55,.9);
+  background:rgba(2,6,23,.60);
+  padding:8px 10px;border-radius:999px;
+  white-space:nowrap;
+}
+.btn{
+  cursor:pointer;border:none;
+  padding:10px 14px;border-radius:999px;
+  background:linear-gradient(120deg,var(--accent),var(--accent2));
+  color:#fff;font-weight:900;
+  box-shadow:0 12px 30px rgba(236,72,153,.15);
+}
+.btn:disabled{opacity:.55;cursor:not-allowed}
+.btn2{
+  cursor:pointer;border:1px solid rgba(31,41,55,.9);
+  padding:10px 14px;border-radius:999px;
+  background:rgba(2,6,23,.60);
+  color:var(--text);font-weight:900;
+}
+.btn2:disabled{opacity:.55;cursor:not-allowed}
 
-    /* HEADER STICKY */
-    header{
-      display:flex;align-items:center;justify-content:space-between;gap:14px;
-      position:sticky;top:0;z-index:50;
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      background:linear-gradient(180deg, rgba(5,8,22,.92), rgba(5,8,22,.55));
-      border-bottom:1px solid rgba(31,41,55,.6);
-      padding:14px 10px;
-      margin:-22px -14px 18px;
-      box-shadow: 0 18px 45px rgba(0,0,0,.35);
-      flex-wrap:nowrap;
-    }
+/* ✅ bouton connecté jamais coupé */
+#connectBtn{
+  max-width: none;
+  white-space: nowrap;
+  padding: 10px 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+  flex:0 0 auto;
+}
 
-    .brand{display:flex;align-items:center;gap:12px;flex:0 0 auto}
-    .brand-logo{
-      height:110px;
-      width:auto;
-      display:block;
-      filter: drop-shadow(0 14px 26px rgba(168,85,247,.22));
-      user-select:none;
-    }
+.grid2{display:grid;grid-template-columns:1.25fr .75fr;gap:14px;align-items:stretch}
+@media(max-width:980px){.grid2{grid-template-columns:1fr}}
+.card{
+  background:linear-gradient(180deg, rgba(15,23,42,.92), rgba(15,23,42,.72));
+  border:1px solid rgba(31,41,55,.9);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  padding:16px;
+}
+h1{font-size:34px;line-height:1.05}
+.sub{margin-top:10px;color:var(--muted);font-size:13px;line-height:1.55}
+.hr{height:1px;background:rgba(31,41,55,.7);margin:14px 0}
+.chips{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.chip{
+  font-size:12px;color:var(--text);
+  border:1px solid rgba(31,41,55,.9);
+  background:rgba(2,6,23,.60);
+  padding:7px 10px;border-radius:999px;
+  display:flex;align-items:center;gap:8px;
+}
+.okdot{width:10px;height:10px;border-radius:999px;background:var(--good);box-shadow:0 0 0 3px rgba(34,197,94,.15)}
+.warnbox{
+  border:1px solid rgba(245,158,11,.35);
+  background:rgba(245,158,11,.08);
+  padding:10px 12px;border-radius:14px;
+  font-size:12px;color:var(--muted);
+}
+.ctaRow{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.ctaRow .btn2, .ctaRow .btn{display:inline-flex;align-items:center;gap:8px}
+.sectionTitle{
+  margin-top:18px;font-weight:900;font-size:14px;letter-spacing:.35px;color:var(--text);
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+}
+.sectionTitle small{color:var(--muted);font-weight:800}
+.swaps{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:12px;padding-bottom:30px}
+@media(max-width:980px){.swaps{grid-template-columns:1fr}}
+label{font-size:12px;color:var(--muted)}
+input,select{
+  width:100%;margin-top:6px;
+  padding:10px 11px;border-radius:14px;
+  background:rgba(2,6,23,.70);
+  border:1px solid rgba(31,41,55,.9);
+  color:var(--text);outline:none;
+}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.swap-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.swap-title b{font-size:13px}
+.swap-title span{font-size:12px;color:var(--muted)}
+.switch{display:flex;justify-content:center;margin:10px 0;}
+.switch button{
+  border:1px solid rgba(31,41,55,.9);
+  background:rgba(2,6,23,.60);
+  color:var(--text);border-radius:12px;
+  padding:7px 10px;cursor:pointer;
+}
+.balRow{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:8px}
+.balText{font-size:12px;color:var(--muted)}
+.maxBtn,.pctBtn{
+  border:1px solid rgba(31,41,55,.9);
+  background:rgba(2,6,23,.60);
+  color:var(--text);
+  border-radius:999px;
+  padding:6px 10px;
+  cursor:pointer;
+  font-weight:900;
+  font-size:12px;
+}
+.maxBtn:disabled,.pctBtn:disabled{opacity:.55;cursor:not-allowed}
+.pctRow{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.status{margin-top:10px;font-size:12px;color:var(--muted)}
+.status.good{color:var(--good)}
+.status.bad{color:var(--bad)}
+.status.warn{color:var(--warn)}
+.quoteLine{margin-top:8px;font-size:12px;color:var(--muted);display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.txlink{font-weight:900;text-decoration:none;border-bottom:1px dotted rgba(229,231,235,.35)}
+.bottomGrid{display:grid;grid-template-columns:1fr .9fr;gap:14px;margin-top:14px}
+@media(max-width:980px){.bottomGrid{grid-template-columns:1fr}}
+.linkItem{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:12px;border-radius:16px;
+  border:1px solid rgba(31,41,55,.9);
+  background:rgba(2,6,23,.50);
+  margin-top:10px;
+}
+.linkItem b{font-size:13px}
+.linkItem span{display:block;color:var(--muted);font-size:12px;margin-top:2px}
+.linkBtn{padding:8px 12px;border-radius:999px}
+footer{margin-top:26px;text-align:center;color:var(--muted);font-size:11px;line-height:1.6}
 
-    .header-rect{
-      flex:1 1 auto;
-      min-width:420px;
-      max-width:760px;
-      height:110px;
-      border-radius:18px;
-      border:1px solid rgba(31,41,55,.80);
-      background-color: rgba(2,6,23,.55);
-      background-image: url("./header-art.png");
-      background-size: cover;
-      background-repeat:no-repeat;
-      background-position: 72% 62%;
-      filter: saturate(1.20) contrast(1.12) brightness(1.10);
-      box-shadow: 0 18px 45px rgba(0,0,0,.45);
-      overflow:hidden;
-    }
-
-    .top-right{
-      display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:flex-end;
-      flex:0 0 auto;
-    }
-
-    @media (max-width:980px){
-      header{flex-wrap:wrap; align-items:flex-start}
-      html{ scroll-padding-top: 120px; }
-      .brand-logo{ height:80px; }
-      .header-rect{
-        order:3;
-        width:100%;
-        max-width:none;
-        min-width:0;
-        height:170px;
-        margin-top:10px;
-        background-position: 70% 70%;
-      }
-      .top-right{order:2; width:100%;}
-    }
-
-    .pill{
-      font-size:12px;color:var(--muted);
-      border:1px solid rgba(31,41,55,.9);
-      background:rgba(2,6,23,.60);
-      padding:8px 10px;border-radius:999px;
-      white-space:nowrap;
-    }
-    .btn{
-      cursor:pointer;border:none;
-      padding:10px 14px;border-radius:999px;
-      background:linear-gradient(120deg,var(--accent),var(--accent2));
-      color:#fff;font-weight:900;
-      box-shadow:0 12px 30px rgba(236,72,153,.15);
-    }
-    .btn:disabled{opacity:.55;cursor:not-allowed}
-    .btn2{
-      cursor:pointer;border:1px solid rgba(31,41,55,.9);
-      padding:10px 14px;border-radius:999px;
-      background:rgba(2,6,23,.60);
-      color:var(--text);font-weight:900;
-    }
-    .btn2:disabled{opacity:.55;cursor:not-allowed}
-
-    .grid2{display:grid;grid-template-columns:1.25fr .75fr;gap:14px;align-items:stretch}
-    @media(max-width:980px){.grid2{grid-template-columns:1fr}}
-
-    .card{
-      background:linear-gradient(180deg, rgba(15,23,42,.92), rgba(15,23,42,.72));
-      border:1px solid rgba(31,41,55,.9);
-      border-radius:var(--radius);
-      box-shadow:var(--shadow);
-      padding:16px;
-    }
-    h1{font-size:34px;line-height:1.05}
-    .sub{margin-top:10px;color:var(--muted);font-size:13px;line-height:1.55}
-    .hr{height:1px;background:rgba(31,41,55,.7);margin:14px 0}
-    .chips{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
-    .chip{
-      font-size:12px;color:var(--text);
-      border:1px solid rgba(31,41,55,.9);
-      background:rgba(2,6,23,.60);
-      padding:7px 10px;border-radius:999px;
-      display:flex;align-items:center;gap:8px;
-    }
-    .okdot{width:10px;height:10px;border-radius:999px;background:var(--good);box-shadow:0 0 0 3px rgba(34,197,94,.15)}
-    .warnbox{
-      border:1px solid rgba(245,158,11,.35);
-      background:rgba(245,158,11,.08);
-      padding:10px 12px;border-radius:14px;
-      font-size:12px;color:var(--muted);
-    }
-    .ctaRow{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
-    .ctaRow .btn2, .ctaRow .btn{display:inline-flex;align-items:center;gap:8px}
-
-    .sectionTitle{
-      margin-top:18px;font-weight:900;font-size:14px;letter-spacing:.35px;color:var(--text);
-      display:flex;align-items:center;justify-content:space-between;gap:10px;
-    }
-    .sectionTitle small{color:var(--muted);font-weight:800}
-
-    .swaps{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:12px;padding-bottom:30px}
-    @media(max-width:980px){.swaps{grid-template-columns:1fr}}
-
-    label{font-size:12px;color:var(--muted)}
-    input,select{
-      width:100%;margin-top:6px;
-      padding:10px 11px;border-radius:14px;
-      background:rgba(2,6,23,.70);
-      border:1px solid rgba(31,41,55,.9);
-      color:var(--text);outline:none;
-    }
-    .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-    .swap-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
-    .swap-title b{font-size:13px}
-    .swap-title span{font-size:12px;color:var(--muted)}
-    .switch{display:flex;justify-content:center;margin:10px 0;}
-    .switch button{
-      border:1px solid rgba(31,41,55,.9);
-      background:rgba(2,6,23,.60);
-      color:var(--text);border-radius:12px;
-      padding:7px 10px;cursor:pointer;
-    }
-    .balRow{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:8px}
-    .balText{font-size:12px;color:var(--muted)}
-    .maxBtn,.pctBtn{
-      border:1px solid rgba(31,41,55,.9);
-      background:rgba(2,6,23,.60);
-      color:var(--text);
-      border-radius:999px;
-      padding:6px 10px;
-      cursor:pointer;
-      font-weight:900;
-      font-size:12px;
-    }
-    .maxBtn:disabled,.pctBtn:disabled{opacity:.55;cursor:not-allowed}
-    .pctRow{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
-    .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
-    .status{margin-top:10px;font-size:12px;color:var(--muted)}
-    .status.good{color:var(--good)}
-    .status.bad{color:var(--bad)}
-    .status.warn{color:var(--warn)}
-    .quoteLine{margin-top:8px;font-size:12px;color:var(--muted);display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-    .txlink{font-weight:900;text-decoration:none;border-bottom:1px dotted rgba(229,231,235,.35)}
-    .bottomGrid{display:grid;grid-template-columns:1fr .9fr;gap:14px;margin-top:14px}
-    @media(max-width:980px){.bottomGrid{grid-template-columns:1fr}}
-    .linkItem{
-      display:flex;align-items:center;justify-content:space-between;gap:10px;
-      padding:12px;border-radius:16px;
-      border:1px solid rgba(31,41,55,.9);
-      background:rgba(2,6,23,.50);
-      margin-top:10px;
-    }
-    .linkItem b{font-size:13px}
-    .linkItem span{display:block;color:var(--muted);font-size:12px;margin-top:2px}
-    .linkBtn{padding:8px 12px;border-radius:999px}
-    footer{margin-top:26px;text-align:center;color:var(--muted);font-size:11px;line-height:1.6}
-
-    /* TOKEN MODAL */
-    #tokenModal{display:none; position:fixed; inset:0; z-index:9999;}
-    #tmBackdrop{position:absolute; inset:0; background:rgba(0,0,0,.65);}
-    .tmBox{
-      position:relative; max-width:820px; width:calc(100% - 24px);
-      margin:6vh auto;
-      background:rgba(15,23,42,.96);
-      border:1px solid rgba(31,41,55,.9);
-      border-radius:18px; box-shadow:0 18px 45px rgba(0,0,0,.55);
-      padding:14px;
-      overflow:hidden;
-    }
-    .tmTop{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px;}
-    .tmClose{cursor:pointer; border:none; background:transparent; color:#22c55e; font-size:26px; font-weight:900; line-height:1;}
-    .tmSearch{
-      width:100%; padding:12px 12px; border-radius:14px; outline:none;
-      background:rgba(2,6,23,.70); border:1px solid rgba(34,197,94,.35); color:#e5e7eb;
-    }
-    .tmList{margin-top:10px; max-height:520px; overflow:auto; padding-right:6px;}
-
-    .tmRow{
-      display:grid;
-      grid-template-columns: 44px 1fr 140px 140px;
-      gap:10px;
-      align-items:center;
-      padding:12px; border-radius:16px; margin-bottom:10px;
-      border:1px solid rgba(31,41,55,.9); background:rgba(2,6,23,.50);
-      cursor:pointer;
-    }
-    @media(max-width:650px){
-      .tmRow{grid-template-columns: 44px 1fr 120px; }
-      .tmActions{display:none;}
-    }
-    .tmIcon{
-      width:40px;height:40px;border-radius:14px;
-      border:1px solid rgba(31,41,55,.9);
-      background:rgba(2,6,23,.55);
-      overflow:hidden;
-      display:flex;align-items:center;justify-content:center;
-      font-weight:900;
-      color:#cbd5e1;
-      user-select:none;
-    }
-    .tmIcon img{width:100%;height:100%;object-fit:cover;display:block}
-    .tmSym{font-weight:900;font-size:16px}
-    .tmMeta{color:var(--muted);font-size:12px;margin-top:2px}
-    .tmBal{
-      text-align:right;
-      font-size:12px;
-      color:var(--muted);
-      line-height:1.3;
-    }
-    .tmBal b{display:block;color:#e5e7eb;font-size:13px}
-    .tmActions{display:flex; gap:8px; align-items:center; justify-content:flex-end;}
-    .tmIconBtn{
-      border:1px solid rgba(31,41,55,.9); background:rgba(2,6,23,.60);
-      color:#e5e7eb; border-radius:12px; padding:8px 10px; cursor:pointer;
-    }
-    .tmBottom{
-      display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:space-between;
-      margin-top:10px; color:#9ca3af; font-size:12px;
-    }
-    .tmBottom .btn2{padding:8px 12px}
-    .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;}
-
-    .tmImport{
-      border:1px solid rgba(168,85,247,.45) !important;
-      background: rgba(168,85,247,.08) !important;
-      cursor:default;
-    }
-  </style>
+/* TOKEN MODAL */
+#tokenModal{display:none; position:fixed; inset:0; z-index:9999;}
+#tmBackdrop{position:absolute; inset:0; background:rgba(0,0,0,.65);}
+.tmBox{
+  position:relative; max-width:820px; width:calc(100% - 24px);
+  margin:6vh auto;
+  background:rgba(15,23,42,.96);
+  border:1px solid rgba(31,41,55,.9);
+  border-radius:18px; box-shadow:0 18px 45px rgba(0,0,0,.55);
+  padding:14px;
+  overflow:hidden;
+}
+.tmTop{display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px;}
+.tmClose{cursor:pointer; border:none; background:transparent; color:#22c55e; font-size:26px; font-weight:900; line-height:1;}
+.tmSearch{
+  width:100%; padding:12px 12px; border-radius:14px; outline:none;
+  background:rgba(2,6,23,.70); border:1px solid rgba(34,197,94,.35); color:#e5e7eb;
+}
+.tmList{margin-top:10px; max-height:520px; overflow:auto; padding-right:6px;}
+.tmRow{
+  display:grid;
+  grid-template-columns: 44px 1fr 140px 140px;
+  gap:10px;
+  align-items:center;
+  padding:12px; border-radius:16px; margin-bottom:10px;
+  border:1px solid rgba(31,41,55,.9); background:rgba(2,6,23,.50);
+  cursor:pointer;
+}
+@media(max-width:650px){
+  .tmRow{grid-template-columns: 44px 1fr 120px; }
+  .tmActions{display:none;}
+}
+.tmIcon{
+  width:40px;height:40px;border-radius:14px;
+  border:1px solid rgba(31,41,55,.9);
+  background:rgba(2,6,23,.55);
+  overflow:hidden;
+  display:flex;align-items:center;justify-content:center;
+  font-weight:900;
+  color:#cbd5e1;
+  user-select:none;
+}
+.tmIcon img{width:100%;height:100%;object-fit:cover;display:block}
+.tmSym{font-weight:900;font-size:16px}
+.tmMeta{color:var(--muted);font-size:12px;margin-top:2px}
+.tmBal{
+  text-align:right;
+  font-size:12px;
+  color:var(--muted);
+  line-height:1.3;
+}
+.tmBal b{display:block;color:#e5e7eb;font-size:13px}
+.tmActions{display:flex; gap:8px; align-items:center; justify-content:flex-end;}
+.tmIconBtn{
+  border:1px solid rgba(31,41,55,.9); background:rgba(2,6,23,.60);
+  color:#e5e7eb; border-radius:12px; padding:8px 10px; cursor:pointer;
+}
+.tmBottom{
+  display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:space-between;
+  margin-top:10px; color:#9ca3af; font-size:12px;
+}
+.tmBottom .btn2{padding:8px 12px}
+.mono{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;}
+.tmImport{
+  border:1px solid rgba(168,85,247,.45) !important;
+  background: rgba(168,85,247,.08) !important;
+  cursor:default;
+}
+</style>
 </head>
 
 <body>
 <div class="wrap">
 
-  <header>
-    <div class="brand">
-      <img src="./trinity-logo-full.png" alt="TRINITY Swap" class="brand-logo">
-    </div>
-
-    <div class="header-rect" aria-label="Header art"></div>
-
-    <div class="top-right">
-      <div class="pill" id="rpcPill">RPC : connexion…</div>
-      <div class="pill" id="netPill">Réseau : —</div>
-      <div class="pill" id="walletPill">Wallet : non connecté</div>
-      <div class="pill" id="plsPill">PLS : —</div>
-      <button class="btn" id="connectBtn">Connect Wallet</button>
-    </div>
-  </header>
-
-  <section class="grid2">
-    <div class="card">
-      <h1>Swap 3 tokens en parallèle.<br/>Une interface, trois actions.</h1>
-      <p class="sub">
-        TRINITY = MultiSwap : tu prépares 3 swaps différents et tu lances chaque swap avec son propre bouton.<br/>
-        Mode 1 (PulseX-like) : UI au-dessus du router PulseX • non-custodial • 0 fee TRINITY.
-      </p>
-
-      <div class="chips">
-        <div class="chip"><span class="okdot"></span>3 swaps indépendants</div>
-        <div class="chip"><span class="okdot"></span>Quotes live (sans wallet)</div>
-        <div class="chip"><span class="okdot"></span>Approve auto (avec wallet)</div>
-        <div class="chip"><span class="okdot"></span>MAX + balances (avec wallet)</div>
-      </div>
-
-      <div class="ctaRow">
-        <button class="btn" id="openMultiBtn">🚀 Ouvrir le MultiSwap</button>
-        <button class="btn2" id="execTrinityBtn" disabled>⚡ Exécuter TRINITY (A→B→C)</button>
-        <a class="btn2" href="https://whaletrackerio.github.io/autopilot-pulsechain/" target="_blank" rel="noreferrer">⚡ AutoPilot</a>
-        <a class="btn2" href="https://whaletrackerio.github.io/dca-pulsechain/" target="_blank" rel="noreferrer">📈 DCA</a>
-        <a class="btn2" href="#support">💜 Soutenir</a>
-      </div>
-
-      <div class="hr"></div>
-      <div class="warnbox">⚠️ Teste avec de petits montants. TRINITY ne garde pas tes fonds : c’est ton wallet qui signe.</div>
-    </div>
-
-    <div class="card">
-      <div style="font-weight:900;font-size:14px">Réglages</div>
-      <p class="sub">Slippage + deadline pour calculer le minOut sur chaque swap.</p>
-
-      <div class="hr"></div>
-
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-        <div>
-          <label>Slippage (%)</label>
-          <input id="slippage" type="number" min="0" step="0.1" value="2.0" />
-        </div>
-        <div>
-          <label>Deadline (minutes)</label>
-          <input id="deadlineM" type="number" min="1" step="1" value="10" />
-        </div>
-      </div>
-
-      <div class="hr"></div>
-
-      <div class="warnbox">
-        Explorer : <a class="txlink" target="_blank" rel="noreferrer" href="https://otter.pulsechain.com/">otter.pulsechain.com</a>
-      </div>
-
-      <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap">
-        <button class="btn2" id="refreshBtn">↻ Refresh balances/quotes</button>
-        <button class="btn2" id="openTokensBtn">🪙 Ouvrir la liste tokens</button>
-      </div>
-    </div>
-  </section>
-
-  <div class="sectionTitle" id="multiswap">
-    <div>MULTISWAP</div>
-    <small>Prépare 3 swaps puis clique sur le bouton de celui que tu veux exécuter.</small>
+<header>
+  <div class="brand">
+    <img src="./trinity-logo-full.png" alt="TRINITY Swap" class="brand-logo">
   </div>
 
-  <section class="swaps" id="swaps"></section>
+  <div class="header-rect" aria-label="Header art"></div>
 
-  <section class="bottomGrid">
-    <div class="card" id="support">
-      <div style="font-weight:900;font-size:14px">💜 Soutenir TRINITY</div>
+  <div class="top-right">
+    <div class="pill" id="rpcPill">RPC : connexion…</div>
+    <div class="pill" id="netPill">Réseau : —</div>
+    <div class="pill" id="walletPill">Wallet : non connecté</div>
+    <div class="pill" id="plsPill">PLS : —</div>
 
-      <p class="sub" style="margin-top:10px">
-        TRINITY Swap est gratuit, non-custodial et sans frais TRINITY.<br/>
-        Si l’outil t’aide et que tu souhaites soutenir le développement, tu peux faire un don.
-      </p>
+    <button class="btn" id="connectBtn">Connect Wallet</button>
+    <button class="btn2" id="disconnectBtn" style="display:none">Disconnect</button>
+  </div>
+</header>
 
-      <div class="hr"></div>
+<section class="grid2">
+  <div class="card">
+    <h1>Swap 3 tokens en parallèle.<br/>Une interface, trois actions.</h1>
+    <p class="sub">
+      TRINITY = MultiSwap : tu prépares 3 swaps différents et tu lances chaque swap avec son propre bouton.<br/>
+      Mode 1 (PulseX-like) : UI au-dessus du router PulseX • non-custodial • 0 fee TRINITY.
+    </p>
 
-      <div class="warnbox" style="display:grid; gap:10px">
-        <div style="font-weight:900;color:#e5e7eb">Adresse PulseChain :</div>
+    <div class="chips">
+      <div class="chip"><span class="okdot"></span>3 swaps indépendants</div>
+      <div class="chip"><span class="okdot"></span>Quotes live (sans wallet)</div>
+      <div class="chip"><span class="okdot"></span>Approve auto (avec wallet)</div>
+      <div class="chip"><span class="okdot"></span>MAX + balances (avec wallet)</div>
+    </div>
 
-        <div class="mono" id="donAddr"
-          style="padding:12px;border-radius:14px;border:1px solid rgba(31,41,55,.9);background:rgba(2,6,23,.70);word-break:break-all">
-          0x7a23b75434942ddd7d9fe19aa0ed2fea08ed57a1
-        </div>
+    <div class="ctaRow">
+      <button class="btn" id="openMultiBtn">🚀 Ouvrir le MultiSwap</button>
+      <button class="btn2" id="execTrinityBtn" disabled>⚡ Exécuter TRINITY (A→B→C)</button>
+      <a class="btn2" href="https://whaletrackerio.github.io/autopilot-pulsechain/" target="_blank" rel="noreferrer">⚡ AutoPilot</a>
+      <a class="btn2" href="https://whaletrackerio.github.io/dca-pulsechain/" target="_blank" rel="noreferrer">📈 DCA</a>
+      <a class="btn2" href="#support">💜 Soutenir</a>
+    </div>
 
-        <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center">
-          <button class="btn2" id="copyDonBtn">📋 Copier l’adresse</button>
-          <span id="copyDonMsg" style="color:var(--muted);font-size:12px"></span>
-        </div>
+    <div class="hr"></div>
+    <div class="warnbox">⚠️ Teste avec de petits montants. TRINITY ne garde pas tes fonds : c’est ton wallet qui signe.</div>
+  </div>
 
-        <div style="color:var(--muted);font-size:12px">
-          Merci à tous ceux qui soutiennent le projet 🙏
-        </div>
+  <div class="card">
+    <div style="font-weight:900;font-size:14px">Réglages</div>
+    <p class="sub">Slippage + deadline pour calculer le minOut sur chaque swap.</p>
+    <div class="hr"></div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div>
+        <label>Slippage (%)</label>
+        <input id="slippage" type="number" min="0" step="0.1" value="2.0" />
+      </div>
+      <div>
+        <label>Deadline (minutes)</label>
+        <input id="deadlineM" type="number" min="1" step="1" value="10" />
       </div>
     </div>
 
-    <div class="card">
-      <div style="font-weight:900;font-size:14px">LIENS RAPIDES</div>
-
-      <div class="linkItem">
-        <div><b>PulseX</b><span>Swap officiel PulseChain.</span></div>
-        <a class="btn2 linkBtn" href="https://pulsex.com" target="_blank" rel="noreferrer">Ouvrir</a>
-      </div>
-
-      <div class="linkItem">
-        <div><b>Otter</b><span>Explorer / tx / contrats.</span></div>
-        <a class="btn2 linkBtn" href="https://otter.pulsechain.com/" target="_blank" rel="noreferrer">Explorer</a>
-      </div>
-
-      <div class="linkItem">
-        <div><b>AutoPilot</b><span>Tes bots HEX/ATROPA.</span></div>
-        <a class="btn2 linkBtn" href="https://whaletrackerio.github.io/autopilot-pulsechain/" target="_blank" rel="noreferrer">Aller</a>
-      </div>
-
-      <div class="linkItem">
-        <div><b>DCA PulseChain</b><span>8 bots DCA (achat à l’unité).</span></div>
-        <a class="btn2 linkBtn" href="https://whaletrackerio.github.io/dca-pulsechain/" target="_blank" rel="noreferrer">Aller</a>
-      </div>
+    <div class="hr"></div>
+    <div class="warnbox">
+      Explorer : <a class="txlink" target="_blank" rel="noreferrer" href="https://otter.pulsechain.com/">otter.pulsechain.com</a>
     </div>
-  </section>
 
-  <footer>
-    TRINITY Swap — PulseChain • Mode 1 (PulseX-like) • Aucun frais TRINITY<br/>
-    Utilise à tes risques. Vérifie les adresses et teste petit.
-  </footer>
+    <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn2" id="refreshBtn">↻ Refresh balances/quotes</button>
+      <button class="btn2" id="openTokensBtn">🪙 Ouvrir la liste tokens</button>
+    </div>
+  </div>
+</section>
+
+<div class="sectionTitle" id="multiswap">
+  <div>MULTISWAP</div>
+  <small>Prépare 3 swaps puis clique sur le bouton de celui que tu veux exécuter.</small>
+</div>
+
+<section class="swaps" id="swaps"></section>
+
+<section class="bottomGrid">
+  <div class="card" id="support">
+    <div style="font-weight:900;font-size:14px">💜 Soutenir TRINITY</div>
+    <p class="sub" style="margin-top:10px">
+      TRINITY Swap est gratuit, non-custodial et sans frais TRINITY.<br/>
+      Si l’outil t’aide et que tu souhaites soutenir le développement, tu peux faire un don.
+    </p>
+    <div class="hr"></div>
+
+    <div class="warnbox" style="display:grid; gap:10px">
+      <div style="font-weight:900;color:#e5e7eb">Adresse PulseChain :</div>
+      <div class="mono" id="donAddr"
+        style="padding:12px;border-radius:14px;border:1px solid rgba(31,41,55,.9);background:rgba(2,6,23,.70);word-break:break-all">
+        0x7a23b75434942ddd7d9fe19aa0ed2fea08ed57a1
+      </div>
+      <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center">
+        <button class="btn2" id="copyDonBtn">📋 Copier l’adresse</button>
+        <span id="copyDonMsg" style="color:var(--muted);font-size:12px"></span>
+      </div>
+      <div style="color:var(--muted);font-size:12px">Merci à tous ceux qui soutiennent le projet 🙏</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div style="font-weight:900;font-size:14px">LIENS RAPIDES</div>
+
+    <div class="linkItem">
+      <div><b>PulseX</b><span>Swap officiel PulseChain.</span></div>
+      <a class="btn2 linkBtn" href="https://pulsex.com" target="_blank" rel="noreferrer">Ouvrir</a>
+    </div>
+
+    <div class="linkItem">
+      <div><b>Otter</b><span>Explorer / tx / contrats.</span></div>
+      <a class="btn2 linkBtn" href="https://otter.pulsechain.com/" target="_blank" rel="noreferrer">Explorer</a>
+    </div>
+
+    <div class="linkItem">
+      <div><b>AutoPilot</b><span>Tes bots HEX/ATROPA.</span></div>
+      <a class="btn2 linkBtn" href="https://whaletrackerio.github.io/autopilot-pulsechain/" target="_blank" rel="noreferrer">Aller</a>
+    </div>
+
+    <div class="linkItem">
+      <div><b>DCA PulseChain</b><span>8 bots DCA (achat à l’unité).</span></div>
+      <a class="btn2 linkBtn" href="https://whaletrackerio.github.io/dca-pulsechain/" target="_blank" rel="noreferrer">Aller</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  TRINITY Swap — PulseChain • Mode 1 (PulseX-like) • Aucun frais TRINITY<br/>
+  Utilise à tes risques. Vérifie les adresses et teste petit.
+</footer>
 
 </div>
 
@@ -462,7 +454,6 @@
     </div>
 
     <input class="tmSearch" id="tmSearch" placeholder="Search name or paste address (0x...)" />
-
     <div class="tmList" id="tmList"></div>
 
     <div class="tmBottom">
@@ -479,11 +470,8 @@ const PULSECHAIN_HEX = "0x171";
 const PULSEX_ROUTER = "0x98bf93ebf5c380C0e6Ae8e192A7e2AE08edAcc02";
 const WPLS_ADDR = "0xA1077a294dDE1B09bB078844df40758a5D0f9a27";
 const PLS_GAS_RESERVE = ethers.parseUnits("0.05", 18);
-
 const PULSEX_TOKENLIST_URL = "https://tokens.app.pulsex.com/pulsex-extended-v0.1.2.tokenlist.json";
 const PITEAS_LOGO_BASE = "https://raw.githubusercontent.com/piteasio/app-tokens/main/token-logo/";
-
-/* ✅ RPC read-only = quotes sans wallet */
 const RPCS = [
   "https://rpc.pulsechain.com",
   "https://pulsechain.publicnode.com",
@@ -496,7 +484,6 @@ function isAddr(x){ return /^0x[a-fA-F0-9]{40}$/.test((x||"").trim()); }
 function shortAddr(a){ return a ? (a.slice(0,6)+"…"+a.slice(-4)) : ""; }
 function safeGetAddress(a){ try{ return ethers.getAddress(a); }catch{ return null; } }
 function txUrl(hash){ return `https://otter.pulsechain.com/tx/${hash}`; }
-
 function formatAmountWithDec(decimals, raw){
   const s = ethers.formatUnits(raw, decimals);
   const num = Number(s);
@@ -505,13 +492,11 @@ function formatAmountWithDec(decimals, raw){
   if(num < 0.0001) return num.toExponential(3);
   return num.toLocaleString(undefined, { maximumFractionDigits: 6 });
 }
-
 function setStatus(card, txt, cls=""){
   const el = card.querySelector(".status");
   el.className = "status" + (cls ? " "+cls : "");
   el.textContent = txt;
 }
-
 function getSettings(){
   const sl = parseFloat($("slippage").value || "2");
   const dl = parseInt($("deadlineM").value || "10", 10);
@@ -534,12 +519,31 @@ function pickReadProvider(){
 readProvider = pickReadProvider();
 
 function getReadProvider(){
-  // si wallet connecté, on peut lire via provider; sinon readProvider
   return provider || readProvider;
 }
-function rpcReady(){
-  return !!getReadProvider();
+function rpcReady(){ return !!getReadProvider(); }
+
+/* ✅ Déconnexion UX (MetaMask ne "déconnecte" pas côté wallet, mais on reset l'app) */
+function disconnectWallet(){
+  provider = null;
+  signer = null;
+  userAddress = null;
+  walletOnPulse = false;
+
+  $("walletPill").textContent = "Wallet : non connecté";
+  $("netPill").textContent = "Réseau : (quotes RPC)";
+  $("plsPill").textContent = "PLS : —";
+
+  const btn = $("connectBtn");
+  btn.textContent = "Connect Wallet";
+  btn.onclick = null;
+
+  $("disconnectBtn").style.display = "none";
+
+  setConnectedUI(false);
+  refreshAll().catch(()=>{});
 }
+$("disconnectBtn").addEventListener("click", disconnectWallet);
 
 /* ================= TOKENS ================= */
 const BASE_FIXED = {
@@ -556,11 +560,8 @@ const BASE_FIXED = {
   WETH: { symbol:"WETH", address:"0x02DcdD04e3F455D838cd1249292C58f3B79e3C3C", decimals:18, name:"WETH", logoURI:null },
   WBTC: { symbol:"WBTC", address:"0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599", decimals:8,  name:"WBTC", logoURI:null },
 };
-
 let TOKENS = { ...BASE_FIXED };
 let TOKENS_BY_ADDR = {};
-let BAL_CACHE = new Map();
-
 function rebuildTOKENS_BY_ADDR(){
   TOKENS_BY_ADDR = {};
   for(const t of Object.values(TOKENS)){
@@ -612,7 +613,6 @@ const ERC20_ABI = [
   "function symbol() external view returns (string)",
   "function name() external view returns (string)"
 ];
-
 const ROUTER_ABI = [
   "function getAmountsOut(uint256 amountIn, address[] calldata path) external view returns (uint256[] memory amounts)",
   "function swapExactTokensForTokens(uint256 amountIn,uint256 amountOutMin,address[] calldata path,address to,uint256 deadline) external returns (uint256[] memory amounts)",
@@ -620,20 +620,10 @@ const ROUTER_ABI = [
   "function swapExactTokensForETH(uint256 amountIn,uint256 amountOutMin,address[] calldata path,address to,uint256 deadline) external returns (uint256[] memory amounts)"
 ];
 
-function getRouterRead(){
-  return new ethers.Contract(PULSEX_ROUTER, ROUTER_ABI, getReadProvider());
-}
-function getRouterWrite(){
-  if(!signer) throw new Error("No signer");
-  return new ethers.Contract(PULSEX_ROUTER, ROUTER_ABI, signer);
-}
-function getErc20Read(tokenAddr){
-  return new ethers.Contract(ethers.getAddress(tokenAddr), ERC20_ABI, getReadProvider());
-}
-function getErc20Write(tokenAddr){
-  if(!signer) throw new Error("No signer");
-  return new ethers.Contract(ethers.getAddress(tokenAddr), ERC20_ABI, signer);
-}
+function getRouterRead(){ return new ethers.Contract(PULSEX_ROUTER, ROUTER_ABI, getReadProvider()); }
+function getRouterWrite(){ if(!signer) throw new Error("No signer"); return new ethers.Contract(PULSEX_ROUTER, ROUTER_ABI, signer); }
+function getErc20Read(tokenAddr){ return new ethers.Contract(ethers.getAddress(tokenAddr), ERC20_ABI, getReadProvider()); }
+function getErc20Write(tokenAddr){ if(!signer) throw new Error("No signer"); return new ethers.Contract(ethers.getAddress(tokenAddr), ERC20_ABI, signer); }
 
 /* ================= LOGOS ================= */
 function normalizeLogoUri(uri){
@@ -647,7 +637,6 @@ function buildLogoCandidates(t){
   const out = [];
   const u = normalizeLogoUri(t.logoURI);
   if(u && (u.startsWith("http://") || u.startsWith("https://"))) out.push(u);
-
   if(t.address){
     try{
       out.push(PITEAS_LOGO_BASE + ethers.getAddress(t.address) + ".png");
@@ -659,7 +648,6 @@ function buildLogoCandidates(t){
   return out;
 }
 function fallbackIconText(sym){ return (sym||"?").slice(0,1).toUpperCase(); }
-
 function renderIconHTML(t){
   const candidates = buildLogoCandidates(t);
   if(!candidates.length){
@@ -679,11 +667,7 @@ function renderIconHTML(t){
           try{
             const c=JSON.parse(decodeURIComponent(this.dataset.cands));
             let i=parseInt(this.dataset.idx||'0',10)+1;
-            if(i<c.length){
-              this.dataset.idx=String(i);
-              this.src=c[i];
-              return;
-            }
+            if(i<c.length){ this.dataset.idx=String(i); this.src=c[i]; return; }
           }catch(e){}
           this.parentElement.textContent='${fallbackIconText(sym)}';
         "
@@ -691,7 +675,6 @@ function renderIconHTML(t){
     </div>
   `;
 }
-
 function tokenMetaLine(t){
   const addr = t.address ? shortAddr(t.address) : "Native";
   const name = t.name ? ` • ${t.name}` : "";
@@ -703,8 +686,7 @@ async function loadPulseXTokenList(){
   try{
     const r = await fetch(PULSEX_TOKENLIST_URL, { cache: "no-store" });
     const j = await r.json();
-    const list = Array.isArray(j.tokens) ? j.tokens : [];
-    return list;
+    return Array.isArray(j.tokens) ? j.tokens : [];
   }catch(e){
     console.warn("Tokenlist fetch failed:", e);
     return [];
@@ -716,11 +698,9 @@ function mergeTokenDataFromList(list){
     if(!isAddr(t.address)) continue;
     const addr = safeGetAddress(t.address);
     if(!addr) continue;
-
     const sym = String(t.symbol||"").toUpperCase().trim();
     const dec = Number(t.decimals ?? 18);
 
-    // si on a déjà le token par adresse, enrichir logo/nom
     const known = TOKENS_BY_ADDR[norm(addr)];
     if(known){
       if(!known.logoURI && t.logoURI) known.logoURI = t.logoURI;
@@ -728,9 +708,6 @@ function mergeTokenDataFromList(list){
       if(!known.decimals && dec) known.decimals = dec;
       continue;
     }
-
-    // sinon, on évite de polluer la liste avec 2000 tokens :
-    // on ajoute seulement si symbole déjà connu dans TOKENS (par défaut) ou si importé.
     if(TOKENS[sym] && TOKENS[sym].address && norm(TOKENS[sym].address) === norm(addr)){
       if(!TOKENS[sym].logoURI && t.logoURI) TOKENS[sym].logoURI = t.logoURI;
       if(!TOKENS[sym].name && t.name) TOKENS[sym].name = t.name;
@@ -739,7 +716,6 @@ function mergeTokenDataFromList(list){
   }
   rebuildTOKENS_BY_ADDR();
 
-  // réinjecter imported
   const imported = loadImportedTokens();
   for(const t of imported){
     const sym = (t.symbol||"").toUpperCase();
@@ -754,55 +730,55 @@ function mergeTokenDataFromList(list){
 const swapsEl = $("swaps");
 function swapCardTemplate(i, label){
   return `
-    <div class="card swapbox" id="swap${i}">
-      <div class="swap-title">
-        <b>${label}</b>
-        <span>TX #${i}</span>
-      </div>
-
-      <label>Tu payes</label>
-      <div class="row2">
-        <select class="from"></select>
-        <input class="amount" inputmode="decimal" placeholder="Montant" />
-      </div>
-
-      <div class="balRow">
-        <div class="balText">Balance: <span class="balIn">—</span></div>
-        <button class="maxBtn" type="button" disabled>MAX</button>
-      </div>
-
-      <div class="pctRow">
-        <button class="pctBtn" type="button" data-p="25" disabled>25%</button>
-        <button class="pctBtn" type="button" data-p="50" disabled>50%</button>
-        <button class="pctBtn" type="button" data-p="75" disabled>75%</button>
-      </div>
-
-      <div class="switch"><button class="invert" title="Inverser">↕</button></div>
-
-      <label>Tu reçois</label>
-      <div class="row2">
-        <select class="to"></select>
-        <input class="out" placeholder="Estimation" readonly />
-      </div>
-
-      <div class="quoteLine">
-        <span>Quote:</span>
-        <span class="quoteText">—</span>
-      </div>
-
-      <div class="actions">
-        <button class="btn2 approveBtn" style="display:none" disabled>Approve</button>
-        <button class="btn swapBtn" disabled>Exécuter ${label}</button>
-      </div>
-
-      <div class="status">Quotes dispo sans wallet ✅ (connecte pour swap)</div>
-      <div class="quoteLine" style="margin-top:10px">
-        <a class="txlink txA" target="_blank" rel="noreferrer" style="display:none">Voir TX</a>
-      </div>
+  <div class="card swapbox" id="swap${i}">
+    <div class="swap-title">
+      <b>${label}</b>
+      <span>TX #${i}</span>
     </div>
+
+    <label>Tu payes</label>
+    <div class="row2">
+      <select class="from"></select>
+      <input class="amount" inputmode="decimal" placeholder="Montant" />
+    </div>
+
+    <div class="balRow">
+      <div class="balText">Balance: <span class="balIn">—</span></div>
+      <button class="maxBtn" type="button" disabled>MAX</button>
+    </div>
+
+    <div class="pctRow">
+      <button class="pctBtn" type="button" data-p="25" disabled>25%</button>
+      <button class="pctBtn" type="button" data-p="50" disabled>50%</button>
+      <button class="pctBtn" type="button" data-p="75" disabled>75%</button>
+    </div>
+
+    <div class="switch"><button class="invert" title="Inverser">↕</button></div>
+
+    <label>Tu reçois</label>
+    <div class="row2">
+      <select class="to"></select>
+      <input class="out" placeholder="Estimation" readonly />
+    </div>
+
+    <div class="quoteLine">
+      <span>Quote:</span>
+      <span class="quoteText">—</span>
+    </div>
+
+    <div class="actions">
+      <button class="btn2 approveBtn" style="display:none" disabled>Approve</button>
+      <button class="btn swapBtn" disabled>Exécuter ${label}</button>
+    </div>
+
+    <div class="status">Quotes dispo sans wallet ✅ (connecte pour swap)</div>
+
+    <div class="quoteLine" style="margin-top:10px">
+      <a class="txlink txA" target="_blank" rel="noreferrer" style="display:none">Voir TX</a>
+    </div>
+  </div>
   `;
 }
-
 function buildCards(){
   swapsEl.innerHTML = "";
   swapsEl.insertAdjacentHTML("beforeend", swapCardTemplate(1,"Swap A"));
@@ -831,7 +807,6 @@ function fillSelect(sel, selected){
   }
   sel.value = selected && TOKENS[selected] ? selected : syms[0];
 }
-
 function initCardsDefaults(){
   const defaults = [
     {from:"PLS",  to:"PHEX"},
@@ -864,7 +839,6 @@ function initCardsDefaults(){
 /* ================= PATH / AMOUNTS ================= */
 function buildPath(symIn, symOut){
   if(symIn === symOut) return null;
-
   const inT = TOKENS[symIn];
   const outT = TOKENS[symOut];
   if(!inT || !outT) return null;
@@ -877,11 +851,9 @@ function buildPath(symIn, symOut){
     if(!inT.address) return null;
     return [ethers.getAddress(inT.address), WPLS_ADDR];
   }
-
   if(!inT.address || !outT.address) return null;
   return [ethers.getAddress(inT.address), ethers.getAddress(outT.address)];
 }
-
 function parseAmount(sym, human){
   const t = TOKENS[sym];
   const dec = t?.decimals ?? 18;
@@ -892,7 +864,6 @@ function formatAmount(sym, raw){
   const dec = t?.decimals ?? 18;
   return formatAmountWithDec(dec, raw);
 }
-
 function validatePair(card){
   const from = card.querySelector(".from").value;
   const to = card.querySelector(".to").value;
@@ -911,37 +882,28 @@ async function getBalance(sym){
   if(!t?.address) return 0n;
   return await getErc20Read(t.address).balanceOf(userAddress);
 }
-
 async function refreshHeaderPLS(){
   if(!provider || !userAddress) return;
   const b = await provider.getBalance(userAddress);
   $("plsPill").textContent = "PLS : " + formatAmountWithDec(18, b);
 }
-
 async function refreshCardBalance(card){
   const balEl = card.querySelector(".balIn");
   const from = card.querySelector(".from").value;
-
   if(!provider || !userAddress || !walletOnPulse){
     balEl.textContent = "Connect wallet";
     return;
   }
-
   const bal = await getBalance(from);
   if(bal == null) { balEl.textContent = "—"; return; }
   balEl.textContent = formatAmount(from, bal);
 }
-
 async function refreshAll(){
-  // Quotes: toujours possible si RPC ok
   const cards = document.querySelectorAll(".swapbox");
   for(const card of cards){
     await updateQuote(card);
   }
-
-  // Balances: seulement si wallet connecté
   if(provider && userAddress && walletOnPulse){
-    BAL_CACHE.clear();
     await refreshHeaderPLS();
     for(const card of cards){
       await refreshCardBalance(card);
@@ -961,11 +923,9 @@ async function refreshAll(){
 async function setAmountFromPercent(card, pct){
   if(!provider || !userAddress || !walletOnPulse) return alert("Connecte ton wallet sur PulseChain d’abord");
   if(!validatePair(card)) return;
-
   const from = card.querySelector(".from").value;
   let bal = await getBalance(from);
   if(bal == null) return;
-
   if(from === "PLS"){
     if(bal <= PLS_GAS_RESERVE){
       alert("Balance PLS insuffisante pour le gas");
@@ -973,13 +933,11 @@ async function setAmountFromPercent(card, pct){
     }
     bal = bal - PLS_GAS_RESERVE;
   }
-
   const amount = bal * BigInt(pct) / 100n;
   const dec = TOKENS[from]?.decimals ?? 18;
   card.querySelector(".amount").value = ethers.formatUnits(amount, dec);
   await updateQuote(card);
 }
-
 function wireMaxPctButtons(){
   document.querySelectorAll(".swapbox").forEach(card=>{
     card.querySelector(".maxBtn").addEventListener("click", ()=> setAmountFromPercent(card, 100).catch(console.error));
@@ -996,12 +954,10 @@ function triggerQuote(card){
   if(quoteTimer) clearTimeout(quoteTimer);
   quoteTimer = setTimeout(()=> updateQuote(card).catch(()=>{}), 250);
 }
-
 async function updateQuote(card){
   const outInp = card.querySelector(".out");
   const quoteText = card.querySelector(".quoteText");
   const approveBtn = card.querySelector(".approveBtn");
-
   const from = card.querySelector(".from").value;
   const to = card.querySelector(".to").value;
   const amt = (card.querySelector(".amount").value || "").trim();
@@ -1016,7 +972,6 @@ async function updateQuote(card){
     return;
   }
   if(!validatePair(card)) return;
-
   if(!amt || Number(amt) <= 0){
     setStatus(card, "Quotes dispo ✅ (mets un montant)", "good");
     return;
@@ -1050,14 +1005,11 @@ async function updateQuote(card){
 async function checkAllowance(symIn, amountRaw){
   if(symIn === "PLS") return true;
   if(!provider || !userAddress || !walletOnPulse) return false;
-
   const t = TOKENS[symIn];
   if(!t?.address) return true;
-
   const allowance = await getErc20Read(t.address).allowance(userAddress, PULSEX_ROUTER);
   return allowance >= amountRaw;
 }
-
 async function doApprove(symIn, card){
   const t = TOKENS[symIn];
   const erc = getErc20Write(t.address);
@@ -1067,7 +1019,6 @@ async function doApprove(symIn, card){
   await tx.wait();
   setStatus(card, "Approve OK ✅", "good");
 }
-
 async function executeSwap(card){
   if(!provider || !userAddress || !walletOnPulse) return alert("Connecte ton wallet sur PulseChain");
   if(!validatePair(card)) return;
@@ -1075,7 +1026,6 @@ async function executeSwap(card){
   const from = card.querySelector(".from").value;
   const to   = card.querySelector(".to").value;
   const amt  = (card.querySelector(".amount").value || "").trim();
-
   const txLink = card.querySelector(".txA");
   txLink.style.display = "none";
 
@@ -1101,7 +1051,6 @@ async function executeSwap(card){
     setStatus(card, "Calcul minOut…", "warn");
     const amounts = await routerRead.getAmountsOut(amountIn, path);
     const outRaw  = amounts[amounts.length - 1];
-
     const bps = Math.round(slippage * 100);
     const minOut = outRaw * BigInt(10000 - bps) / 10000n;
     const deadline = Math.floor(Date.now()/1000) + (deadlineMin * 60);
@@ -1125,7 +1074,6 @@ async function executeSwap(card){
     await tx.wait();
     setStatus(card, "Success ✅", "good");
     await refreshAll();
-
   }catch(e){
     console.error(e);
     setStatus(card, "Swap error (cancel ? liquidité ?)", "bad");
@@ -1137,7 +1085,6 @@ function setConnectedUI(isConnected){
   document.querySelectorAll(".maxBtn").forEach(b => b.disabled = !isConnected);
   document.querySelectorAll(".pctBtn").forEach(b => b.disabled = !isConnected);
   $("execTrinityBtn").disabled = !isConnected;
-
   document.querySelectorAll(".swapbox").forEach(card=>{
     const approveBtn = card.querySelector(".approveBtn");
     approveBtn.style.display = "none";
@@ -1156,7 +1103,6 @@ wireSwapButtons();
 $("execTrinityBtn").addEventListener("click", async ()=>{
   if(!provider || !userAddress || !walletOnPulse) return alert("Connecte ton wallet sur PulseChain");
   const cards = [ $("swap1"), $("swap2"), $("swap3") ];
-
   $("multiswap").scrollIntoView({behavior:"smooth", block:"start"});
   window.scrollBy(0, -90);
 
@@ -1175,7 +1121,6 @@ $("execTrinityBtn").addEventListener("click", async ()=>{
     }
 
     await executeSwap(card);
-
     const st = (card.querySelector(".status").textContent || "").toLowerCase();
     if(st.includes("error")){
       alert("TRINITY stoppé (erreur sur un swap).");
@@ -1186,7 +1131,6 @@ $("execTrinityBtn").addEventListener("click", async ()=>{
 
 /* ================= TOKEN MODAL ================= */
 let tokenModalTarget = null;
-
 function openTokenModal(card, side){
   tokenModalTarget = { card, side };
   $("tokenModal").style.display = "block";
@@ -1200,7 +1144,6 @@ function closeTokenModal(){
 }
 $("tmClose").onclick = closeTokenModal;
 $("tmBackdrop").onclick = closeTokenModal;
-
 $("tmSearch").addEventListener("input", (e)=> renderTokenList((e.target.value||"").trim(), false));
 $("tmRefresh").addEventListener("click", ()=> refreshAll());
 
@@ -1214,40 +1157,50 @@ async function copyText(txt){
   }
 }
 
+/* ✅ Import MetaMask: ajoute "image" + fallback copie */
 async function addTokenToMetaMask(sym){
   const t = TOKENS[sym];
   if(!window.ethereum) return alert("MetaMask requis");
   if(!t.address) return alert("PLS = token natif (pas ERC20)");
-
   try{
     const wasAdded = await window.ethereum.request({
       method: "wallet_watchAsset",
       params: {
         type: "ERC20",
-        options: { address: t.address, symbol: sym, decimals: t.decimals }
+        options: {
+          address: t.address,
+          symbol: sym,
+          decimals: t.decimals,
+          image: normalizeLogoUri(t.logoURI) || undefined
+        }
       }
     });
-    alert(wasAdded ? "Token ajouté ✅" : "Ajout refusé (cancel)");
+    if(wasAdded){
+      alert("Token ajouté à MetaMask ✅");
+    }else{
+      throw new Error("Refus MetaMask");
+    }
   }catch(e){
-    console.error(e);
-    try{ await copyText(t.address); }catch(_){}
-    alert("Impossible d’ajouter automatiquement.\n✅ Adresse copiée.\n➡️ Ajoute-la via Import token dans MetaMask.");
+    console.warn("Import auto impossible, fallback manuel", e);
+    await copyText(t.address);
+    alert(
+      "Import automatique refusé par MetaMask.\n\n" +
+      "✅ Adresse copiée.\n" +
+      "➡️ Colle-la dans MetaMask > Import token."
+    );
     window.open("https://otter.pulsechain.com/address/" + t.address, "_blank");
   }
 }
 
-/* ✅ Import par adresse (RPC read-only) */
+/* Import par adresse (RPC read-only) */
 async function resolveTokenByAddress(addr){
   const a = safeGetAddress(addr);
   if(!a) throw new Error("Bad address");
   const known = TOKENS_BY_ADDR[norm(a)];
   if(known) return known;
-
   if(!rpcReady()) throw new Error("No RPC");
   const c = new ethers.Contract(a, ERC20_ABI, getReadProvider());
-
   const [sym, name, dec] = await Promise.all([ c.symbol(), c.name(), c.decimals() ]);
-
   return {
     symbol: String(sym).toUpperCase().slice(0,11),
     address: a,
@@ -1260,7 +1213,6 @@ async function resolveTokenByAddress(addr){
 async function renderTokenList(q, withBalances){
   const listEl = $("tmList");
   const nq = norm(q);
-
   const tokensArr = [];
   for(const sym of listSymbolsForUI()){
     const t = TOKENS[sym];
@@ -1268,7 +1220,6 @@ async function renderTokenList(q, withBalances){
   }
 
   const wantAddr = isAddr(q) ? safeGetAddress(q) : null;
-
   const filtered = tokensArr.filter(t=>{
     if(!q) return true;
     if(wantAddr) return t.address && norm(t.address) === norm(wantAddr);
@@ -1276,7 +1227,6 @@ async function renderTokenList(q, withBalances){
   });
 
   let html = "";
-
   if(wantAddr){
     html += `
       <div class="tmRow tmImport" id="tmImportRow">
@@ -1319,10 +1269,8 @@ async function renderTokenList(q, withBalances){
       if(!tokenModalTarget) return;
       const { card, side } = tokenModalTarget;
       const sel = card.querySelector(side === "from" ? ".from" : ".to");
-
       fillSelect(sel, sym);
       sel.value = sym;
-
       closeTokenModal();
       await refreshCardBalance(card).catch(()=>{});
       await updateQuote(card).catch(()=>{});
@@ -1350,14 +1298,11 @@ async function renderTokenList(q, withBalances){
   if(wantAddr){
     const metaEl = $("tmImportMeta");
     const btn = $("tmImportBtn");
-
     btn.disabled = true;
     metaEl.innerHTML = `<b>Lecture…</b>Token`;
-
     try{
       const t = await resolveTokenByAddress(wantAddr);
       const already = TOKENS_BY_ADDR[norm(t.address)];
-
       if(already){
         metaEl.innerHTML = `<b>${already.symbol}</b>${already.name ? " "+already.name : ""}`;
         btn.textContent = "Déjà";
@@ -1366,12 +1311,9 @@ async function renderTokenList(q, withBalances){
         metaEl.innerHTML = `<b>${t.symbol}</b>${t.name ? " "+t.name : ""} • ${t.decimals} dec`;
         btn.textContent = "Import";
         btn.disabled = false;
-
         btn.onclick = async ()=>{
           addTokenToRuntime(t);
           addImportedToken(t);
-
-          // refresh selects
           document.querySelectorAll(".swapbox").forEach(card=>{
             const fromSel = card.querySelector(".from");
             const toSel = card.querySelector(".to");
@@ -1380,7 +1322,6 @@ async function renderTokenList(q, withBalances){
             fillSelect(fromSel, curFrom);
             fillSelect(toSel, curTo);
           });
-
           metaEl.innerHTML = `<b>Importé ✅</b>Token`;
           btn.textContent = "OK";
           btn.disabled = true;
@@ -1395,19 +1336,17 @@ async function renderTokenList(q, withBalances){
     }
   }
 
-  // Balances dans la liste token = seulement si wallet connecté
   if(withBalances && provider && userAddress && walletOnPulse){
     for(const row of listEl.querySelectorAll(".tmRow[data-sym]")){
       const sym = row.dataset.sym;
       const t = TOKENS[sym];
       const balBox = row.querySelector(".tmBal");
       try{
-        let bal;
         if(!t.address){
-          bal = await provider.getBalance(userAddress);
+          const bal = await provider.getBalance(userAddress);
           balBox.innerHTML = `<b>${formatAmountWithDec(18, bal)}</b>Balance`;
         }else{
-          bal = await getErc20Read(t.address).balanceOf(userAddress);
+          const bal = await getErc20Read(t.address).balanceOf(userAddress);
           const dec = t.decimals ?? 18;
           balBox.innerHTML = `<b>${formatAmountWithDec(dec, bal)}</b>Balance`;
         }
@@ -1418,19 +1357,17 @@ async function renderTokenList(q, withBalances){
   }
 }
 
+/* ouvrir modal au clic sur selects */
 document.querySelectorAll(".swapbox").forEach(card=>{
   const fromSel = card.querySelector(".from");
   const toSel   = card.querySelector(".to");
-
   const openFrom = (e)=>{ e.preventDefault(); openTokenModal(card,"from"); };
   const openTo   = (e)=>{ e.preventDefault(); openTokenModal(card,"to"); };
-
   fromSel.addEventListener("mousedown", openFrom);
   toSel.addEventListener("mousedown", openTo);
   fromSel.addEventListener("touchstart", openFrom, {passive:false});
   toSel.addEventListener("touchstart", openTo, {passive:false});
 });
-
 $("openTokensBtn").addEventListener("click", ()=> openTokenModal($("swap1"), "from"));
 $("openMultiBtn").addEventListener("click", ()=>{
   $("multiswap").scrollIntoView({behavior:"smooth", block:"start"});
@@ -1451,7 +1388,6 @@ async function connectWallet(){
 
   const net = await provider.getNetwork();
   let ok = (Number(net.chainId) === PULSECHAIN_ID);
-
   if(!ok){
     try{
       await window.ethereum.request({
@@ -1466,15 +1402,19 @@ async function connectWallet(){
   }
 
   walletOnPulse = ok;
+
   $("walletPill").textContent = "Wallet : " + shortAddr(userAddress);
   $("netPill").textContent = "Réseau : " + (ok ? "PulseChain ✅" : "Mauvais réseau ❌");
 
   const btn = $("connectBtn");
   btn.textContent = shortAddr(userAddress);
   btn.onclick = async () => {
-    await navigator.clipboard.writeText(userAddress);
+    await copyText(userAddress);
     alert("Adresse copiée ✅");
   };
+
+  $("disconnectBtn").style.display = "inline-flex";  // ✅
+  $("disconnectBtn").onclick = disconnectWallet;      // ✅
 
   setConnectedUI(ok);
 
@@ -1497,17 +1437,8 @@ $("refreshBtn").addEventListener("click", ()=> refreshAll());
   const msg = $("copyDonMsg");
   const addr = "0x7a23b75434942ddd7d9fe19aa0ed2fea08ed57a1";
   if(!btn) return;
-
   async function copyDonation(){
-    try{ await navigator.clipboard.writeText(addr); }
-    catch{
-      const ta = document.createElement("textarea");
-      ta.value = addr;
-      document.body.appendChild(ta);
-      ta.select();
-      document.execCommand("copy");
-      document.body.removeChild(ta);
-    }
+    await copyText(addr);
     msg.textContent = "Copié ✅";
     btn.textContent = "✅ Copié";
     setTimeout(()=>{
@@ -1520,44 +1451,24 @@ $("refreshBtn").addEventListener("click", ()=> refreshAll());
 
 /* ================= INIT ================= */
 (async function boot(){
-  // RPC pill
+  $("disconnectBtn").style.display = "none"; // ✅ caché au départ
+
   if(readProvider){
     $("rpcPill").textContent = "RPC : OK ✅ (quotes sans wallet)";
   }else{
     $("rpcPill").textContent = "RPC : indisponible ❌";
   }
 
-  // wallet UI
   setConnectedUI(false);
   $("netPill").textContent = "Réseau : (quotes RPC)";
   $("plsPill").textContent = "PLS : —";
 
-  // tokenlist (logos)
   const tokenlist = await loadPulseXTokenList();
   mergeTokenDataFromList(tokenlist);
 
-  // defaults
   initCardsDefaults();
-
-  // Quotes immédiates (sans wallet)
   document.querySelectorAll(".swapbox").forEach(card => updateQuote(card).catch(()=>{}));
 })();
-
-/* ================= WIRE SWAP BUTTONS AFTER BUILD ================= */
-document.querySelectorAll(".swapbox").forEach(card=>{
-  card.querySelector(".swapBtn").disabled = true;
-});
-
-/* (re-enable swap buttons when connected in setConnectedUI) */
-function enableSwapButtons(){
-  document.querySelectorAll(".swapbox").forEach(card=>{
-    const btn = card.querySelector(".swapBtn");
-    btn.disabled = !(provider && userAddress && walletOnPulse);
-  });
-}
-setInterval(()=>{ // ultra simple, sans risques de bug UI
-  enableSwapButtons();
-}, 600);
 </script>
 </body>
 </html>
